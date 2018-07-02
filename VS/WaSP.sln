@@ -1,0 +1,41 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 15
+VisualStudioVersion = 15.0.27004.2006
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "wasp-encoder", "wasp-encoder\wasp-encoder.vcxproj", "{CCBE6CFD-15DA-449B-9BBC-A08CDE56F250}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "wasp-decoder", "wasp-decoder\wasp-decoder.vcxproj", "{28E44228-FC67-4D1F-AF0E-0B881F538A35}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|x64 = Debug|x64
+		Debug|x86 = Debug|x86
+		Release|x64 = Release|x64
+		Release|x86 = Release|x86
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{CCBE6CFD-15DA-449B-9BBC-A08CDE56F250}.Debug|x64.ActiveCfg = Debug|x64
+		{CCBE6CFD-15DA-449B-9BBC-A08CDE56F250}.Debug|x64.Build.0 = Debug|x64
+		{CCBE6CFD-15DA-449B-9BBC-A08CDE56F250}.Debug|x86.ActiveCfg = Debug|x64
+		{CCBE6CFD-15DA-449B-9BBC-A08CDE56F250}.Debug|x86.Build.0 = Debug|x64
+		{CCBE6CFD-15DA-449B-9BBC-A08CDE56F250}.Release|x64.ActiveCfg = Release|x64
+		{CCBE6CFD-15DA-449B-9BBC-A08CDE56F250}.Release|x64.Build.0 = Release|x64
+		{CCBE6CFD-15DA-449B-9BBC-A08CDE56F250}.Release|x86.ActiveCfg = Release|x64
+		{CCBE6CFD-15DA-449B-9BBC-A08CDE56F250}.Release|x86.Build.0 = Release|x64
+		{28E44228-FC67-4D1F-AF0E-0B881F538A35}.Debug|x64.ActiveCfg = Debug|x64
+		{28E44228-FC67-4D1F-AF0E-0B881F538A35}.Debug|x64.Build.0 = Debug|x64
+		{28E44228-FC67-4D1F-AF0E-0B881F538A35}.Debug|x86.ActiveCfg = Debug|x64
+		{28E44228-FC67-4D1F-AF0E-0B881F538A35}.Debug|x86.Build.0 = Debug|x64
+		{28E44228-FC67-4D1F-AF0E-0B881F538A35}.Release|x64.ActiveCfg = Release|x64
+		{28E44228-FC67-4D1F-AF0E-0B881F538A35}.Release|x64.Build.0 = Release|x64
+		{28E44228-FC67-4D1F-AF0E-0B881F538A35}.Release|x86.ActiveCfg = Release|x64
+		{28E44228-FC67-4D1F-AF0E-0B881F538A35}.Release|x86.Build.0 = Release|x64
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {15772818-42DC-4F1B-B053-BDA787F085EB}
+	EndGlobalSection
+EndGlobal
