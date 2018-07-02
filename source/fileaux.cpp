@@ -5,11 +5,6 @@
 
 #define SYSTEM_VERBOSE_QUIET true
 
-#ifdef __unix__
-#define _popen popen
-#define _pclose pclose
-#endif
-
 int system_1(char *str) {
 
 	std::string sys_call_str(str);
