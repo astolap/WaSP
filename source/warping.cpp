@@ -1,6 +1,7 @@
 #include "warping.hh"
 #include "bitdepth.hh"
-#include <cmath>
+
+#include <math.h>
 
 void warpView0_to_View1(view *view0, view *view1, unsigned short *&warpedColor, unsigned short *&warpedDepth, float *&DispTarg)
 {

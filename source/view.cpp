@@ -1,5 +1,7 @@
 #include "view.hh"
 
+#define NULL 0
+
 void initView(view* view)
 {
 

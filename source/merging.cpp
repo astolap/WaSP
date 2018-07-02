@@ -3,6 +3,8 @@
 #include "fastols.hh"
 #include "bitdepth.hh"
 
+#include <cstring>
+
 void setBMask(view *view0) 
 {
 

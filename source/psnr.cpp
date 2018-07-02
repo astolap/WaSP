@@ -1,5 +1,6 @@
 #include "psnr.hh"
 #include "ycbcr.hh"
+#include "fileaux.hh"
 
 #include <stdio.h>
 #include <cmath>

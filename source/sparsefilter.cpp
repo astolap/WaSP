@@ -4,6 +4,8 @@
 
 #include <cmath>
 
+#define NULL 0
+
 void applyGlobalSparseFilter(view *view0){
 
 	unsigned char *Regr0 = view0->sparse_mask;
