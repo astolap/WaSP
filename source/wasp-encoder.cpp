@@ -1,11 +1,10 @@
 #include <cstdio>
 #include <cstdint>
 #include <ctime>
+#include <cstring>
 #include <iostream>
 #include <vector>
-#include <string>
 #include <algorithm>
-
 
 #include "bitdepth.hh"
 #include "merging.hh"
@@ -35,6 +34,10 @@
 #define STD_SEARCH_STEP 10
 
 #define SAVE_PARTIAL_WARPED_VIEWS false
+
+#ifndef FLT_MAX
+#define FLT_MAX          3.402823466e+38F        // max value
+#endif
 
 int main(int argc, char** argv) {
 

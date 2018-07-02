@@ -16,7 +16,7 @@ to build both encoder and decoder.
 
 Some of the encoding is currently done by JPEG2000 and for that we use the Kakadu Software
 
-[Download Kakadu for Linux] (http://kakadusoftware.com/downloads/) and see Kakadu's README.txt for instructions regarding **LD\_LIBRARY\_PATH**. 
+[Download Kakadu for Linux](http://kakadusoftware.com/downloads/) and see Kakadu's README.txt for instructions regarding **LD\_LIBRARY\_PATH**. 
 
 If you encounter the error *"kakadu/kdu_compress: /usr/lib/x86_64-linux-gnu/libstdc++.so.6: version `GLIBCXX_3.4.21'* not found" do the following,
 

@@ -1,12 +1,10 @@
 #include <iostream>
 #include <stdio.h>
 #include <vector>
-#include <string>
-#include <algorithm>
-
+#include <cstring>
 #include <cstdint>
-
 #include <ctime>
+#include <algorithm>
 
 #include "bitdepth.hh"
 #include "merging.hh"
