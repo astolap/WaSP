@@ -7,13 +7,13 @@ OBJ_DECODER = source/wasp-decoder.o source/fastols.cpp source/fileaux.cpp source
 %.o: %.cpp $(HH_DEPS)
 	$(CC) -c -o $@ $< $(CFLAGS)
 
-wasp-encoder: $(OBJ_ENCODER)
+wasp-encoder-bin: $(OBJ_ENCODER)
 	$(CC) -o $@ $^ $(CFLAGS)
 
-wasp-decoder: $(OBJ_DECODER)
+wasp-decoder-bin: $(OBJ_DECODER)
 	$(CC) -o $@ $^ $(CFLAGS)
 
-all: wasp-encoder wasp-decoder
+all: wasp-encoder-bin wasp-decoder-bin
  
 clean:
 	rm source/*.o
