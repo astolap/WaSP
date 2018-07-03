@@ -32,7 +32,7 @@ An [encoding of the I01_Bikes at rate 0.75 bpp](http://www.cs.tut.fi/~astolap/Wa
 
 >./wasp-decoder-bin /path/to/I01_Bikes-169_41.9343_0.74902.LF /path/to/output /path/to/Kakadu/
 
-For encoding a [sample configuration file](http://www.cs.tut.fi/~astolap/WaSP/github_demo/I01_Bikes-169_41.9343_0.74902.conf) is provided for the same I01_Bikes encoding. You can run that with,
+For encoding a [sample configuration file](http://www.cs.tut.fi/~astolap/WaSP/github_demo/I01_Bikes-169_41.9343_0.74902.conf) is provided for the same I01_Bikes encoding. Download [inverse depth for Lytro dataset](http://www.cs.tut.fi/~astolap/WaSP/Lytro_inverse_depth.zip) before attempting to run the encoder. Place the inverse depth .pgm files in the directory containing the original .ppm files. You can run the encoder with,
 
 >./wasp-encoder-bin /path/to/original_images/ /path/to/output/directory /path/to/Kakadu/ /path/to/I01_Bikes-169_41.9343_0.74902.conf
 
