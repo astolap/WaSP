@@ -14,7 +14,7 @@ to build both encoder and decoder.
 
 ### Kakadu installation on Linux
 
-Some of the encoding is currently done by JPEG2000 and for that we use the Kakadu Software
+Residual encoding is currently done by JPEG2000 and for that we use the Kakadu Software.
 
 [Download Kakadu for Linux](http://kakadusoftware.com/downloads/) and see Kakadu's README.txt for instructions regarding **LD\_LIBRARY\_PATH**. 
 
@@ -24,19 +24,17 @@ If you encounter the error *"kakadu/kdu_compress: /usr/lib/x86_64-linux-gnu/libs
  
 >sudo apt-get update
 
->sudo apt-get install
-
 >sudo apt-get install libstdc++6
 
 ## Demo
 
-An encoding of the Bikes_01 at rate 0.75 bpp is provided as an example for the decoder. You can run the decoder with,
+An {encoding of the Bikes_01 at rate 0.75 bpp](http://www.cs.tut.fi/~astolap/WaSP/github_demo/I01_Bikes-169_41.9343_0.74902.LF) is provided as an example for the decoder. You can run the decoder with,
 
->./wasp-decoder /path/to/Bikes\_01_0.75.LF /path/to/output /path/to/Kakadu/
+>./wasp-decoder-bin /path/to/I01_Bikes-169_41.9343_0.74902.LF /path/to/output /path/to/Kakadu/
 
-For encoding a sample configuration file is provided for the same Bikes_01 encoding. You can run that by,
+For encoding a [sample configuration file](http://www.cs.tut.fi/~astolap/WaSP/github_demo/I01_Bikes-169_41.9343_0.74902.conf) is provided for the same Bikes_01 encoding. You can run that with,
 
->./wasp-encoder /path/to/original_images/ /path/to/output/directory /path/to/Kakadu/ /path/to/Bikes\_01\_0.75.conf
+>./wasp-encoder-bin /path/to/original_images/ /path/to/output/directory /path/to/Kakadu/ /path/to/I01_Bikes-169_41.9343_0.74902.conf
 
 ## Running the encoder
 
@@ -104,7 +102,7 @@ The decoder takes three arguments: path to input file (for example path to the o
 
 ## References
 
-This work is based on academic research and any research based on this software should cite the following papers:
+This work is based on academic research and any research based on this software should cite at least the first of the following papers:
 
 **P. Astola, I. Tabus, *Light Field Compression of HDCA Images Combining Linear Prediction and JPEG 2000*, EUSIPCO 2018**
 

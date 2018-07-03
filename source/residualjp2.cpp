@@ -156,8 +156,6 @@ void encodeResidualJP2_YUV(const int nr, const int nc, unsigned short *original_
 
 	unsigned short *tmp_im = new unsigned short[nr*nc]();
 
-	
-
 	for (int icomp = 0; icomp < ncomp; icomp++) {
 
 		float rateR = residual_rate;

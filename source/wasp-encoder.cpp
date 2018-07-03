@@ -615,7 +615,7 @@ int main(int argc, char** argv) {
 				/* merge color with median */
 				int startt = clock();
 				mergeMedian_N(warped_color_views, DispTargs, SAI, 3);
-				std::cout << "time elapsed in color median merging\t" << (int)clock() - startt << "\n";
+				std::cout << "time elapsed in color median merging\t" << (float)( (int)clock() - startt ) / CLOCKS_PER_SEC << "\n";
 				holefilling(SAI->color, 3, SAI->nr, SAI->nc, 0);
 
 				//double psnr_med = getYCbCr_422_PSNR(SAI->color, original_color_view, SAI->nr, SAI->nc, 3, 10);
@@ -710,7 +710,7 @@ int main(int argc, char** argv) {
 
 			getGlobalSparseFilter(SAI, original_color_view);
 
-			std::cout << "time elapsed in getGlobalSparseFilter()\t" << (int)clock() - startt << "\n";
+			std::cout << "time elapsed in getGlobalSparseFilter()\t" << (float)( (int)clock() - startt ) / CLOCKS_PER_SEC << "\n";
 
 			applyGlobalSparseFilter(SAI);
 
@@ -875,7 +875,7 @@ int main(int argc, char** argv) {
 			unsigned short *tmp_depth = new unsigned short[SAI->nr*SAI->nc]();
 			int startt = clock();
 			medfilt2D(SAI->depth, tmp_depth, 3, SAI->nr, SAI->nc);
-			std::cout << "time elapsed in depth median filtering\t" << (int)clock() - startt << "\n";
+			std::cout << "time elapsed in depth median filtering\t" << (float)( (int)clock() - startt )/CLOCKS_PER_SEC << "\n";
 			memcpy(SAI->depth, tmp_depth, sizeof(unsigned short)*SAI->nr*SAI->nc);
 			delete[](tmp_depth);
 		}
@@ -1046,7 +1046,7 @@ int main(int argc, char** argv) {
 	for (int ii = 0; ii < n_views_total; ii++)
 	{
 
-		printf("ii=%d\n", ii);
+		//printf("ii=%d\n", ii);
 
 		view *SAI = LF + ii;
 
