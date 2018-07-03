@@ -28,7 +28,7 @@ If you encounter the error *"kakadu/kdu_compress: /usr/lib/x86_64-linux-gnu/libs
 
 ## Demo
 
-An {encoding of the Bikes_01 at rate 0.75 bpp](http://www.cs.tut.fi/~astolap/WaSP/github_demo/I01_Bikes-169_41.9343_0.74902.LF) is provided as an example for the decoder. You can run the decoder with,
+An [encoding of the Bikes_01 at rate 0.75 bpp](http://www.cs.tut.fi/~astolap/WaSP/github_demo/I01_Bikes-169_41.9343_0.74902.LF) is provided as an example for the decoder. You can run the decoder with,
 
 >./wasp-decoder-bin /path/to/I01_Bikes-169_41.9343_0.74902.LF /path/to/output /path/to/Kakadu/
 
