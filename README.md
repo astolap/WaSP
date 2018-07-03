@@ -28,11 +28,11 @@ If you encounter the error *"kakadu/kdu_compress: /usr/lib/x86_64-linux-gnu/libs
 
 ## Demo
 
-An [encoding of the Bikes_01 at rate 0.75 bpp](http://www.cs.tut.fi/~astolap/WaSP/github_demo/I01_Bikes-169_41.9343_0.74902.LF) is provided as an example for the decoder. You can run the decoder with,
+An [encoding of the I01_Bikes at rate 0.75 bpp](http://www.cs.tut.fi/~astolap/WaSP/github_demo/I01_Bikes-169_41.9343_0.74902.LF) is provided as an example for the decoder. You can run the decoder with,
 
 >./wasp-decoder-bin /path/to/I01_Bikes-169_41.9343_0.74902.LF /path/to/output /path/to/Kakadu/
 
-For encoding a [sample configuration file](http://www.cs.tut.fi/~astolap/WaSP/github_demo/I01_Bikes-169_41.9343_0.74902.conf) is provided for the same Bikes_01 encoding. You can run that with,
+For encoding a [sample configuration file](http://www.cs.tut.fi/~astolap/WaSP/github_demo/I01_Bikes-169_41.9343_0.74902.conf) is provided for the same I01_Bikes encoding. You can run that with,
 
 >./wasp-encoder-bin /path/to/original_images/ /path/to/output/directory /path/to/Kakadu/ /path/to/I01_Bikes-169_41.9343_0.74902.conf
 
