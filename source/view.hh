@@ -68,6 +68,8 @@ struct view{
 
 	bool yuv_transform;
 
+	bool has_color_residual, has_depth_residual;
+
 };
 
 void initView(view* view);

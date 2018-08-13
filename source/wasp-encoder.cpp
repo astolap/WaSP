@@ -20,6 +20,7 @@
 #include "psnr.hh"
 #include "inpainting.hh"
 #include "predictdepth.hh"
+#include "codestream.hh"
 
 
 #define USE_difftest_ng false
@@ -114,6 +115,9 @@ int main(int argc, char** argv) {
 
 		SAI->residual_rate_color = ((float)rate_color) / 100000;
 		SAI->residual_rate_depth = ((float)rate_depth) / 100000;
+
+		SAI->has_color_residual = SAI->residual_rate_color > 0.0 ? true : false;
+		SAI->has_depth_residual = SAI->residual_rate_depth > 0.0 ? true : false;
 
 		fread(&SAI->Ms, sizeof(int), 1, filept); /*reading*/
 		fread(&SAI->NNt, sizeof(int), 1, filept); /*reading*/
@@ -490,6 +494,13 @@ int main(int argc, char** argv) {
 
 	char path_out_LF_data[1024];
 	sprintf(path_out_LF_data, "%s%c%s", output_dir, '/', "output.LF");
+
+	/* debugging codestream overhead reduction */
+	char path_codestream[1024];
+	sprintf(path_codestream, "%s%c%s", output_dir, '/', "LF.codestream");
+	FILE *tmp_codestream;
+	tmp_codestream = fopen(path_codestream, "wb");
+	fclose(tmp_codestream);
 
 	/* our bitstream starts here */
 	FILE *output_LF_file;
@@ -905,57 +916,63 @@ int main(int argc, char** argv) {
 
 		/* write view configuration data to bitstream */
 
-		int n_bytes_prediction = 0;
+		int n_bytes_prediction = 0, tmp_pred_bytes = 0;
 		int n_bytes_residual = 0;
 
 		output_LF_file = fopen(path_out_LF_data, "ab");
 
-		if ( !size_written ) {
-			n_bytes_prediction += (int)fwrite(&SAI->nr, sizeof(int), 1, output_LF_file)* sizeof(int); // needed only once per LF
-			n_bytes_prediction += (int)fwrite(&SAI->nc, sizeof(int), 1, output_LF_file)* sizeof(int); // 
-			n_bytes_prediction += (int)fwrite(&yuv_transform_s, sizeof(int), 1, output_LF_file)* sizeof(int);
-			size_written = true;
-		}
+		viewHeaderToCodestream(size_written, n_bytes_prediction, SAI, output_LF_file, yuv_transform_s);
 
-		minimal_config mconf = makeMinimalConfig(SAI);
+		tmp_codestream = fopen(path_codestream, "ab");
+		viewHeaderToCodestream(size_written, tmp_pred_bytes, SAI, tmp_codestream, yuv_transform_s);
+		fclose(tmp_codestream);
 
-		printf("size of minimal_config %i bytes\n", (int)sizeof(minimal_config));
+		//if ( !size_written ) {
+		//	n_bytes_prediction += (int)fwrite(&SAI->nr, sizeof(int), 1, output_LF_file)* sizeof(int); // needed only once per LF
+		//	n_bytes_prediction += (int)fwrite(&SAI->nc, sizeof(int), 1, output_LF_file)* sizeof(int); // 
+		//	n_bytes_prediction += (int)fwrite(&yuv_transform_s, sizeof(int), 1, output_LF_file)* sizeof(int);
+		//	size_written = true;
+		//}
 
-		n_bytes_prediction += (int)fwrite(&mconf, sizeof(minimal_config), 1, output_LF_file)* sizeof(minimal_config);
+		//minimal_config mconf = makeMinimalConfig(SAI);
 
-		/* lets see what else needs to be written to bitstream */
+		//printf("size of minimal_config %i bytes\n", (int)sizeof(minimal_config));
 
-		if (mconf.n_references > 0) {
-			for (int ij = 0; ij < mconf.n_references; ij++) {
-				unsigned short nid = (unsigned short) *(SAI->references + ij);
-				n_bytes_prediction += (int)fwrite(&nid, sizeof(unsigned short), 1, output_LF_file)* sizeof(unsigned short);
-			}
-		}
+		//n_bytes_prediction += (int)fwrite(&mconf, sizeof(minimal_config), 1, output_LF_file)* sizeof(minimal_config);
 
-		if (mconf.n_depth_references > 0) {
-			for (int ij = 0; ij < mconf.n_depth_references; ij++) {
-				unsigned short nid = (unsigned short) *(SAI->depth_references + ij);
-				n_bytes_prediction += (int)fwrite(&nid, sizeof(unsigned short), 1, output_LF_file) * sizeof(unsigned short);
-			}
-		}
+		///* lets see what else needs to be written to bitstream */
 
-		if (mconf.Ms > 0 && mconf.NNt > 0) {
-			n_bytes_prediction += (int)fwrite(SAI->sparse_mask, sizeof(unsigned char), SAI->Ms, output_LF_file)* sizeof(unsigned char);
-			n_bytes_prediction += (int)fwrite(SAI->sparse_weights, sizeof(int32_t), SAI->Ms, output_LF_file)* sizeof(int32_t);
-		}
+		//if (mconf.n_references > 0) {
+		//	for (int ij = 0; ij < mconf.n_references; ij++) {
+		//		unsigned short nid = (unsigned short) *(SAI->references + ij);
+		//		n_bytes_prediction += (int)fwrite(&nid, sizeof(unsigned short), 1, output_LF_file)* sizeof(unsigned short);
+		//	}
+		//}
 
-		if (mconf.use_median < 1) {
-			if (mconf.use_std < 1) {
-				if (mconf.n_references>0) {
-					/* use LS merging weights */
-					n_bytes_prediction += (int)fwrite(SAI->merge_weights, sizeof(signed short), SAI->NB / 2, output_LF_file)* sizeof(signed short);
-				}
-			}
-			else {
-				/* use standard deviation */
-				n_bytes_prediction += (int)fwrite(&SAI->stdd, sizeof(float), 1, output_LF_file) * sizeof(signed short);
-			}
-		}
+		//if (mconf.n_depth_references > 0) {
+		//	for (int ij = 0; ij < mconf.n_depth_references; ij++) {
+		//		unsigned short nid = (unsigned short) *(SAI->depth_references + ij);
+		//		n_bytes_prediction += (int)fwrite(&nid, sizeof(unsigned short), 1, output_LF_file) * sizeof(unsigned short);
+		//	}
+		//}
+
+		//if (mconf.Ms > 0 && mconf.NNt > 0) {
+		//	n_bytes_prediction += (int)fwrite(SAI->sparse_mask, sizeof(unsigned char), SAI->Ms, output_LF_file)* sizeof(unsigned char);
+		//	n_bytes_prediction += (int)fwrite(SAI->sparse_weights, sizeof(int32_t), SAI->Ms, output_LF_file)* sizeof(int32_t);
+		//}
+
+		//if (mconf.use_median < 1) {
+		//	if (mconf.use_std < 1) {
+		//		if (mconf.n_references>0) {
+		//			/* use LS merging weights */
+		//			n_bytes_prediction += (int)fwrite(SAI->merge_weights, sizeof(signed short), SAI->NB / 2, output_LF_file)* sizeof(signed short);
+		//		}
+		//	}
+		//	else {
+		//		/* use standard deviation */
+		//		n_bytes_prediction += (int)fwrite(&SAI->stdd, sizeof(float), 1, output_LF_file) * sizeof(signed short);
+		//	}
+		//}
 
 		if (SAI->residual_rate_color > 0) {
 
@@ -969,7 +986,9 @@ int main(int argc, char** argv) {
 					fclose(jp2_color_residual_file);
 
 					n_bytes_residual += (int)fwrite(&n_bytes_color_residual, sizeof(int), 1, output_LF_file)* sizeof(int);
-					n_bytes_residual += (int)fwrite(jp2_residual, sizeof(unsigned char), n_bytes_color_residual, output_LF_file)* sizeof(unsigned char);
+					//n_bytes_residual += (int)fwrite(jp2_residual, sizeof(unsigned char), n_bytes_color_residual, output_LF_file)* sizeof(unsigned char);
+
+					n_bytes_residual += (int)fwrite(jp2_residual+jp2_headersize, sizeof(unsigned char), n_bytes_color_residual-jp2_headersize, output_LF_file) * sizeof(unsigned char);
 
 					delete[](jp2_residual);
 				}
@@ -983,14 +1002,14 @@ int main(int argc, char** argv) {
 				fclose(jp2_color_residual_file);
 
 				n_bytes_residual += (int)fwrite(&n_bytes_color_residual, sizeof(int), 1, output_LF_file)* sizeof(int);
-				n_bytes_residual += (int)fwrite(jp2_residual, sizeof(unsigned char), n_bytes_color_residual, output_LF_file)* sizeof(unsigned char);
+				n_bytes_residual += (int)fwrite(jp2_residual+jp2_headersize, sizeof(unsigned char), n_bytes_color_residual-jp2_headersize, output_LF_file)* sizeof(unsigned char);
 
 				delete[](jp2_residual);
 			}
 		}
 		else {
-			int n_bytes_color_residual = 0;
-			n_bytes_residual += (int)fwrite(&n_bytes_color_residual, sizeof(int), 1, output_LF_file)* sizeof(int);
+			//int n_bytes_color_residual = 0;
+			//n_bytes_residual += (int)fwrite(&n_bytes_color_residual, sizeof(int), 1, output_LF_file)* sizeof(int);
 		}
 
 		if (SAI->residual_rate_depth > 0 && depth_file_exist) {
@@ -1002,13 +1021,13 @@ int main(int argc, char** argv) {
 			fclose(jp2_depth_residual_file);
 
 			n_bytes_residual += (int)fwrite(&n_bytes_depth_residual, sizeof(int), 1, output_LF_file)* sizeof(int);
-			n_bytes_residual += (int)fwrite(jp2_depth_residual, sizeof(unsigned char), n_bytes_depth_residual, output_LF_file)* sizeof(unsigned char);
+			n_bytes_residual += (int)fwrite(jp2_depth_residual+ jp2_headersize, sizeof(unsigned char), n_bytes_depth_residual- jp2_headersize, output_LF_file)* sizeof(unsigned char);
 
 			delete[](jp2_depth_residual);
 		}
 		else {
-			int n_bytes_depth_residual = 0;
-			n_bytes_residual += (int)fwrite(&n_bytes_depth_residual, sizeof(int), 1, output_LF_file)* sizeof(int);
+			//int n_bytes_depth_residual = 0;
+			//n_bytes_residual += (int)fwrite(&n_bytes_depth_residual, sizeof(int), 1, output_LF_file)* sizeof(int);
 		}
 
 		fclose(output_LF_file);

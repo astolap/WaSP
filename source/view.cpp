@@ -44,4 +44,7 @@ void initView(view* view)
 
 	view->yuv_transform = true;
 
+	view->has_color_residual = false;
+	view->has_depth_residual = false;
+
 }

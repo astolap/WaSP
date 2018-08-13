@@ -119,6 +119,7 @@
   <ItemGroup>
     <ClInclude Include="..\..\source\bitdepth.hh" />
     <ClInclude Include="..\..\source\clip.hh" />
+    <ClInclude Include="..\..\source\codestream.hh" />
     <ClInclude Include="..\..\source\fastols.hh" />
     <ClInclude Include="..\..\source\fileaux.hh" />
     <ClInclude Include="..\..\source\inpainting.hh" />
@@ -135,6 +136,7 @@
     <ClInclude Include="..\..\source\ycbcr.hh" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="..\..\source\codestream.cpp" />
     <ClCompile Include="..\..\source\fastols.cpp" />
     <ClCompile Include="..\..\source\fileaux.cpp" />
     <ClCompile Include="..\..\source\inpainting.cpp" />

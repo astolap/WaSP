@@ -12,13 +12,15 @@ struct minimal_config { /* this goes to bitstream */
 
 	unsigned char n_references, n_depth_references;
 
-	unsigned char use_std;
+	//unsigned char use_std;
 
 	unsigned char NNt, Ms; //for global sparse, NNt defines the neighborhood size [ -NNt:NNt,-NNt:NNt ], Ms is the filter order
 
-	unsigned char use_median; //use median merging or not
+	//unsigned char use_median; //use median merging or not
 
-	unsigned char yuv_transform;
+	//unsigned char yuv_transform;
+
+	unsigned char encoding_flags;
 
 };
 
