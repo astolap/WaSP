@@ -116,9 +116,6 @@ int main(int argc, char** argv) {
 		SAI->residual_rate_color = ((float)rate_color) / 100000;
 		SAI->residual_rate_depth = ((float)rate_depth) / 100000;
 
-		SAI->has_color_residual = SAI->residual_rate_color > 0.0 ? true : false;
-		SAI->has_depth_residual = SAI->residual_rate_depth > 0.0 ? true : false;
-
 		fread(&SAI->Ms, sizeof(int), 1, filept); /*reading*/
 		fread(&SAI->NNt, sizeof(int), 1, filept); /*reading*/
 
@@ -614,7 +611,7 @@ int main(int argc, char** argv) {
 			initViewW(SAI, DispTargs);
 
 			/* get LS weights */
-			if (SAI->stdd == 0) {
+			if (SAI->stdd < 0.0001) {
 				getViewMergingLSWeights_N(SAI, warped_color_views, DispTargs, original_color_view);
 				/* merge color with prediction */
 				mergeWarped_N(warped_color_views, DispTargs, SAI, 3);
@@ -641,7 +638,6 @@ int main(int argc, char** argv) {
 
 					float stdi = 0;
 
-					//double stds[] = { 5,10,15,20,25,30,35,40,45,50,55,60,65,70,75,80,85 };
 					for (float stds = STD_SEARCH_LOW; stds < STD_SEARCH_HIGH; stds += STD_SEARCH_STEP) {
 						SAI->stdd = stds;
 						/* we don't use LS weights but something derived on geometric distance in view array*/
@@ -864,8 +860,10 @@ int main(int argc, char** argv) {
 					kdu_compress_path, jp2_residual_path_jp2, SAI->residual_rate_color, 3, offset_v, RESIDUAL_16BIT_bool);
 
 				decodeResidualJP2(SAI->color, kdu_expand_path, jp2_residual_path_jp2, ppm_residual_path, ncomp1, offset_v, offset_v, RESIDUAL_16BIT_bool);
+
 			}
 
+			SAI->has_color_residual = true;
 		}
 
 		if (SAI->residual_rate_depth > 0 && depth_file_exist) { /* residual depth if needed */
@@ -879,6 +877,7 @@ int main(int argc, char** argv) {
 
 			decodeResidualJP2(SAI->depth, kdu_expand_path, jp2_residual_depth_path_jp2, pgm_residual_depth_path, ncomp1, 0, (1<<16) - 1, 1);
 
+			SAI->has_depth_residual = true;
 		}
 
 		/* median filter depth */
@@ -921,58 +920,19 @@ int main(int argc, char** argv) {
 
 		output_LF_file = fopen(path_out_LF_data, "ab");
 
-		viewHeaderToCodestream(size_written, n_bytes_prediction, SAI, output_LF_file, yuv_transform_s);
+		if (!size_written) { //these are global
+			n_bytes_prediction += (int)fwrite(&SAI->nr, sizeof(int), 1, output_LF_file) * sizeof(int); // needed only once per LF
+			n_bytes_prediction += (int)fwrite(&SAI->nc, sizeof(int), 1, output_LF_file) * sizeof(int); // 
+			n_bytes_prediction += (int)fwrite(&yuv_transform_s, sizeof(int), 1, output_LF_file) * sizeof(int);
+			size_written = true;
+		}
 
+		viewHeaderToCodestream(n_bytes_prediction, SAI, output_LF_file, yuv_transform_s);
+
+		/* debugging */
 		tmp_codestream = fopen(path_codestream, "ab");
-		viewHeaderToCodestream(size_written, tmp_pred_bytes, SAI, tmp_codestream, yuv_transform_s);
+		viewHeaderToCodestream(tmp_pred_bytes, SAI, tmp_codestream, yuv_transform_s);
 		fclose(tmp_codestream);
-
-		//if ( !size_written ) {
-		//	n_bytes_prediction += (int)fwrite(&SAI->nr, sizeof(int), 1, output_LF_file)* sizeof(int); // needed only once per LF
-		//	n_bytes_prediction += (int)fwrite(&SAI->nc, sizeof(int), 1, output_LF_file)* sizeof(int); // 
-		//	n_bytes_prediction += (int)fwrite(&yuv_transform_s, sizeof(int), 1, output_LF_file)* sizeof(int);
-		//	size_written = true;
-		//}
-
-		//minimal_config mconf = makeMinimalConfig(SAI);
-
-		//printf("size of minimal_config %i bytes\n", (int)sizeof(minimal_config));
-
-		//n_bytes_prediction += (int)fwrite(&mconf, sizeof(minimal_config), 1, output_LF_file)* sizeof(minimal_config);
-
-		///* lets see what else needs to be written to bitstream */
-
-		//if (mconf.n_references > 0) {
-		//	for (int ij = 0; ij < mconf.n_references; ij++) {
-		//		unsigned short nid = (unsigned short) *(SAI->references + ij);
-		//		n_bytes_prediction += (int)fwrite(&nid, sizeof(unsigned short), 1, output_LF_file)* sizeof(unsigned short);
-		//	}
-		//}
-
-		//if (mconf.n_depth_references > 0) {
-		//	for (int ij = 0; ij < mconf.n_depth_references; ij++) {
-		//		unsigned short nid = (unsigned short) *(SAI->depth_references + ij);
-		//		n_bytes_prediction += (int)fwrite(&nid, sizeof(unsigned short), 1, output_LF_file) * sizeof(unsigned short);
-		//	}
-		//}
-
-		//if (mconf.Ms > 0 && mconf.NNt > 0) {
-		//	n_bytes_prediction += (int)fwrite(SAI->sparse_mask, sizeof(unsigned char), SAI->Ms, output_LF_file)* sizeof(unsigned char);
-		//	n_bytes_prediction += (int)fwrite(SAI->sparse_weights, sizeof(int32_t), SAI->Ms, output_LF_file)* sizeof(int32_t);
-		//}
-
-		//if (mconf.use_median < 1) {
-		//	if (mconf.use_std < 1) {
-		//		if (mconf.n_references>0) {
-		//			/* use LS merging weights */
-		//			n_bytes_prediction += (int)fwrite(SAI->merge_weights, sizeof(signed short), SAI->NB / 2, output_LF_file)* sizeof(signed short);
-		//		}
-		//	}
-		//	else {
-		//		/* use standard deviation */
-		//		n_bytes_prediction += (int)fwrite(&SAI->stdd, sizeof(float), 1, output_LF_file) * sizeof(signed short);
-		//	}
-		//}
 
 		if (SAI->residual_rate_color > 0) {
 
@@ -985,10 +945,11 @@ int main(int argc, char** argv) {
 					fread(jp2_residual, sizeof(unsigned char), n_bytes_color_residual, jp2_color_residual_file);
 					fclose(jp2_color_residual_file);
 
-					n_bytes_residual += (int)fwrite(&n_bytes_color_residual, sizeof(int), 1, output_LF_file)* sizeof(int);
-					//n_bytes_residual += (int)fwrite(jp2_residual, sizeof(unsigned char), n_bytes_color_residual, output_LF_file)* sizeof(unsigned char);
+					n_bytes_color_residual = n_bytes_color_residual - jp2_headersize;
 
-					n_bytes_residual += (int)fwrite(jp2_residual+jp2_headersize, sizeof(unsigned char), n_bytes_color_residual-jp2_headersize, output_LF_file) * sizeof(unsigned char);
+					n_bytes_residual += (int)fwrite(&n_bytes_color_residual, sizeof(int), 1, output_LF_file)* sizeof(int);
+
+					n_bytes_residual += (int)fwrite(jp2_residual+jp2_headersize, sizeof(unsigned char), n_bytes_color_residual, output_LF_file) * sizeof(unsigned char);
 
 					delete[](jp2_residual);
 				}
@@ -1001,15 +962,13 @@ int main(int argc, char** argv) {
 				fread(jp2_residual, sizeof(unsigned char), n_bytes_color_residual, jp2_color_residual_file);
 				fclose(jp2_color_residual_file);
 
+				n_bytes_color_residual = n_bytes_color_residual - jp2_headersize;
+
 				n_bytes_residual += (int)fwrite(&n_bytes_color_residual, sizeof(int), 1, output_LF_file)* sizeof(int);
-				n_bytes_residual += (int)fwrite(jp2_residual+jp2_headersize, sizeof(unsigned char), n_bytes_color_residual-jp2_headersize, output_LF_file)* sizeof(unsigned char);
+				n_bytes_residual += (int)fwrite(jp2_residual+jp2_headersize, sizeof(unsigned char), n_bytes_color_residual, output_LF_file)* sizeof(unsigned char);
 
 				delete[](jp2_residual);
 			}
-		}
-		else {
-			//int n_bytes_color_residual = 0;
-			//n_bytes_residual += (int)fwrite(&n_bytes_color_residual, sizeof(int), 1, output_LF_file)* sizeof(int);
 		}
 
 		if (SAI->residual_rate_depth > 0 && depth_file_exist) {
@@ -1020,14 +979,12 @@ int main(int argc, char** argv) {
 			fread(jp2_depth_residual, sizeof(unsigned char), n_bytes_depth_residual, jp2_depth_residual_file);
 			fclose(jp2_depth_residual_file);
 
+			n_bytes_depth_residual = n_bytes_depth_residual - jp2_headersize;
+
 			n_bytes_residual += (int)fwrite(&n_bytes_depth_residual, sizeof(int), 1, output_LF_file)* sizeof(int);
-			n_bytes_residual += (int)fwrite(jp2_depth_residual+ jp2_headersize, sizeof(unsigned char), n_bytes_depth_residual- jp2_headersize, output_LF_file)* sizeof(unsigned char);
+			n_bytes_residual += (int)fwrite(jp2_depth_residual+ jp2_headersize, sizeof(unsigned char), n_bytes_depth_residual, output_LF_file)* sizeof(unsigned char);
 
 			delete[](jp2_depth_residual);
-		}
-		else {
-			//int n_bytes_depth_residual = 0;
-			//n_bytes_residual += (int)fwrite(&n_bytes_depth_residual, sizeof(int), 1, output_LF_file)* sizeof(int);
 		}
 
 		fclose(output_LF_file);

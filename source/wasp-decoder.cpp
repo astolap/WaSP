@@ -20,6 +20,7 @@
 #include "psnr.hh"
 #include "inpainting.hh"
 #include "predictdepth.hh"
+#include "codestream.hh"
 
 #define SAVE_PARTIAL_WARPED_VIEWS false
 
@@ -38,19 +39,19 @@ int main(int argc, char** argv) {
 
 	int n_views_total;
 
-	size_t f_status;
+	int n_bytes_prediction = 0, n_bytes_residual = 0;
 
-	f_status = fread(&n_views_total, sizeof(int), 1,input_LF);
+	n_bytes_prediction += (int)fread(&n_views_total, sizeof(int), 1,input_LF)* sizeof(int);
 
 	int _NR, _NC;
 
-	f_status = fread(&_NR, sizeof(int), 1, input_LF);
-	f_status = fread(&_NC, sizeof(int), 1, input_LF);
+	n_bytes_prediction += (int)fread(&_NR, sizeof(int), 1, input_LF)* sizeof(int);
+	n_bytes_prediction += (int)fread(&_NC, sizeof(int), 1, input_LF)* sizeof(int);
 
 	bool YUV_TRANSFORM = false;
 
 	int yuv_transform_s;
-	f_status = fread(&yuv_transform_s, sizeof(int), 1, input_LF);
+	n_bytes_prediction += (int)fread(&yuv_transform_s, sizeof(int), 1, input_LF)* sizeof(int);
 
 	YUV_TRANSFORM = yuv_transform_s > 0 ? true : false;
 
@@ -71,52 +72,55 @@ int main(int argc, char** argv) {
 		SAI->nc = _NC;
 
 		minimal_config mconf;
-		f_status = fread(&mconf, sizeof(minimal_config), 1, input_LF);
 
-		printf("size of minimal_config %i bytes\n", (int)sizeof(minimal_config));
+		codestreamToViewHeader(n_bytes_prediction, SAI, input_LF, mconf);
 
-		setup_form_minimal_config(&mconf, SAI);
+		//f_status = fread(&mconf, sizeof(minimal_config), 1, input_LF);
 
-		if (SAI->n_references > 0) {
-			SAI->references = new int[SAI->n_references]();
-			for (int ij = 0; ij < SAI->n_references; ij++) {
-				unsigned short nid;
-				f_status = fread(&nid, sizeof(unsigned short), 1, input_LF);
-				*(SAI->references + ij) = (int)nid;
-			}
-		}
+		//printf("size of minimal_config %i bytes\n", (int)sizeof(minimal_config));
 
-		if (SAI->n_depth_references > 0) {
-			SAI->depth_references = new int[SAI->n_depth_references]();
-			for (int ij = 0; ij < SAI->n_depth_references; ij++) {
-				unsigned short nid;
-				f_status = fread(&nid, sizeof(unsigned short), 1, input_LF);
-				*(SAI->depth_references + ij) = (int)nid;
-			}
-		}
+		//setup_form_minimal_config(&mconf, SAI);
 
-		if (SAI->Ms > 0 && SAI->NNt > 0) {
-			SAI->sparse_mask = new unsigned char[SAI->Ms]();
-			f_status = fread(SAI->sparse_mask, sizeof(unsigned char), SAI->Ms, input_LF);
-			SAI->sparse_weights = new int32_t[SAI->Ms]();
-			f_status = fread(SAI->sparse_weights, sizeof(int32_t), SAI->Ms, input_LF);
-		}
+		//if (SAI->n_references > 0) {
+		//	SAI->references = new int[SAI->n_references]();
+		//	for (int ij = 0; ij < SAI->n_references; ij++) {
+		//		unsigned short nid;
+		//		f_status = fread(&nid, sizeof(unsigned short), 1, input_LF);
+		//		*(SAI->references + ij) = (int)nid;
+		//	}
+		//}
 
-		SAI->NB = (1 << SAI->n_references)*SAI->n_references;// (pow(2, SAI->n_references)*SAI->n_references);
+		//if (SAI->n_depth_references > 0) {
+		//	SAI->depth_references = new int[SAI->n_depth_references]();
+		//	for (int ij = 0; ij < SAI->n_depth_references; ij++) {
+		//		unsigned short nid;
+		//		f_status = fread(&nid, sizeof(unsigned short), 1, input_LF);
+		//		*(SAI->depth_references + ij) = (int)nid;
+		//	}
+		//}
 
-		if ( !SAI->use_median ) {
-			if (SAI->stdd < 0.001) {
-				if (SAI->n_references > 0) {
-					SAI->merge_weights = new signed short[SAI->NB / 2]();
-					f_status = fread(SAI->merge_weights, sizeof(signed short), SAI->NB / 2, input_LF);
-				}
-			}
-			else {
-				f_status = fread(&SAI->stdd, sizeof(float), 1, input_LF);
-			}
-		}
+		//if (SAI->Ms > 0 && SAI->NNt > 0) {
+		//	SAI->sparse_mask = new unsigned char[SAI->Ms]();
+		//	f_status = fread(SAI->sparse_mask, sizeof(unsigned char), SAI->Ms, input_LF);
+		//	SAI->sparse_weights = new int32_t[SAI->Ms]();
+		//	f_status = fread(SAI->sparse_weights, sizeof(int32_t), SAI->Ms, input_LF);
+		//}
 
-		if (!(f_status > 0)) {
+		//SAI->NB = (1 << SAI->n_references)*SAI->n_references;// (pow(2, SAI->n_references)*SAI->n_references);
+
+		//if ( !SAI->use_median ) {
+		//	if (SAI->stdd < 0.001) {
+		//		if (SAI->n_references > 0) {
+		//			SAI->merge_weights = new signed short[SAI->NB / 2]();
+		//			f_status = fread(SAI->merge_weights, sizeof(signed short), SAI->NB / 2, input_LF);
+		//		}
+		//	}
+		//	else {
+		//		f_status = fread(&SAI->stdd, sizeof(float), 1, input_LF);
+		//	}
+		//}
+
+		if ( feof( input_LF ) ) {
 			printf("File reading error. Terminating\t...\n");
 			exit(0);
 		}
@@ -144,8 +148,6 @@ int main(int argc, char** argv) {
 				aux_read16PGMPPM(ref_view->path_out_pgm, tmp_w, tmp_r, tmp_ncomp, ref_view->depth);
 				aux_read16PGMPPM(ref_view->path_out_ppm, tmp_w, tmp_r, tmp_ncomp, ref_view->color);
 
-				//int uu = SAI->references[ij];
-
 				/* FORWARD warp color AND depth */
 				warpView0_to_View1(ref_view, SAI, warped_color_views[ij], warped_depth_views[ij], DispTargs[ij]);
 
@@ -171,17 +173,18 @@ int main(int argc, char** argv) {
 
 			initViewW(SAI, DispTargs);
 
-			if (SAI->stdd < 0.01) {
-				/* merge color with prediction */
-				mergeWarped_N(warped_color_views, DispTargs, SAI, 3);
-				/* hole filling for color*/
+			/* check if we use median filter merging. if not, then check if we use fixed weights (std>0 basically) or LS weights. */
+			if (SAI->use_median) {
+				//int startt = clock();
+				mergeMedian_N(warped_color_views, DispTargs, SAI, 3);
+				//std::cout << "time elapsed in color median merging\t" << (int)clock() - startt << "\n";
 				holefilling(SAI->color, 3, SAI->nr, SAI->nc, 0);
 			}
 			else {
-				if (SAI->use_median) {
-					int startt = clock();
-					mergeMedian_N(warped_color_views, DispTargs, SAI, 3);
-					std::cout << "time elapsed in color median merging\t" << (int)clock() - startt << "\n";
+				if (SAI->stdd < 0.001) {
+					/* merge color with prediction */
+					mergeWarped_N(warped_color_views, DispTargs, SAI, 3);
+					/* hole filling for color*/
 					holefilling(SAI->color, 3, SAI->nr, SAI->nc, 0);
 				}
 				else {
@@ -216,12 +219,10 @@ int main(int argc, char** argv) {
 
 		int n_bytes_color_residual = 0, n_bytes_depth_residual = 0;
 
-		f_status = fread(&n_bytes_color_residual, sizeof(int), 1,  input_LF);
-
 		/* get residual */
-		if (n_bytes_color_residual > 0)
+		if ( SAI->has_color_residual )
 		{
-
+			n_bytes_residual += (int)fread(&n_bytes_color_residual, sizeof(int), 1, input_LF)* sizeof(int);
 			if (SAI->yuv_transform && YUV_TRANSFORM) {
 
 				char pgm_residual_Y_path[1024];
@@ -254,11 +255,11 @@ int main(int argc, char** argv) {
 				for (int icomp = 0; icomp < 3; icomp++) {
 
 					if (icomp > 0) {
-						f_status = fread(&n_bytes_color_residual, sizeof(int), 1, input_LF);
+						n_bytes_residual += (int)fread(&n_bytes_color_residual, sizeof(int), 1, input_LF)* sizeof(int);
 					}
 
 					unsigned char *jp2_residual = new unsigned char[n_bytes_color_residual]();
-					f_status = fread(jp2_residual, sizeof(unsigned char), n_bytes_color_residual, input_LF);
+					n_bytes_residual += (int)fread(jp2_residual, sizeof(unsigned char), n_bytes_color_residual, input_LF);
 
 					FILE *jp2_res_file;
 					jp2_res_file = fopen(ycbcr_jp2_names[icomp], "wb");
@@ -293,7 +294,7 @@ int main(int argc, char** argv) {
 				sprintf(jp2_residual_path_jp2, "%s%c%03d_%03d%s", output_dir, '/', SAI->c, SAI->r, "_residual.jp2");
 
 				unsigned char *jp2_residual = new unsigned char[n_bytes_color_residual]();
-				f_status = fread(jp2_residual, sizeof(unsigned char), n_bytes_color_residual, input_LF);
+				n_bytes_residual += (int)fread(jp2_residual, sizeof(unsigned char), n_bytes_color_residual, input_LF);
 
 				FILE *jp2_res_file;
 				jp2_res_file = fopen(jp2_residual_path_jp2, "wb");
@@ -307,9 +308,10 @@ int main(int argc, char** argv) {
 			
 		}
 
-		f_status = fread(&n_bytes_depth_residual, sizeof(int), 1, input_LF);
 
-		if (n_bytes_depth_residual>0) { /* residual depth if needed */
+		if (SAI->has_depth_residual) { /* residual depth if needed */
+
+			n_bytes_residual =+ (int)fread(&n_bytes_depth_residual, sizeof(int), 1, input_LF)* sizeof(int);
 
 			int ncomp1 = 0; /* temporary to hold the number of components */
 
@@ -322,7 +324,7 @@ int main(int argc, char** argv) {
 			sprintf(jp2_residual_depth_path_jp2, "%s%c%03d_%03d%s", output_dir, '/', SAI->c, SAI->r, "_depth_residual.jp2");
 
 			unsigned char *jp2_depth_residual = new unsigned char[n_bytes_depth_residual]();
-			f_status = fread(jp2_depth_residual, sizeof(unsigned char), n_bytes_depth_residual, input_LF);
+			n_bytes_residual += (int)fread(jp2_depth_residual, sizeof(unsigned char), n_bytes_depth_residual, input_LF);
 
 			FILE *jp2_depth_res_file;
 			jp2_depth_res_file = fopen(jp2_residual_depth_path_jp2, "wb");

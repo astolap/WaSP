@@ -26,7 +26,7 @@ minimal_config makeMinimalConfig(view *view0)
 	min_conf.encoding_flags = 0;
 
 	min_conf.encoding_flags = view0->use_median ? min_conf.encoding_flags | (1 << 0) : min_conf.encoding_flags;
-	min_conf.encoding_flags = view0->stdd>0 ? min_conf.encoding_flags | (1 << 1) : min_conf.encoding_flags;
+	min_conf.encoding_flags = view0->stdd>0.001 ? min_conf.encoding_flags | (1 << 1) : min_conf.encoding_flags;
 	min_conf.encoding_flags = view0->yuv_transform ? min_conf.encoding_flags | (1 << 2) : min_conf.encoding_flags;
 
 	min_conf.encoding_flags = view0->has_color_residual ? min_conf.encoding_flags | (1 << 3) : min_conf.encoding_flags;
@@ -52,12 +52,12 @@ void setup_form_minimal_config(minimal_config *mconf, view *view0) {
 	view0->NNt = (int)mconf->NNt;
 	view0->Ms = (int)mconf->Ms;
 
-	view0->stdd = mconf->encoding_flags & (1 << 0) ? (float)1.0 : (float)0.0;
-	view0->use_median = mconf->encoding_flags & (1 << 1) ? 1 : 0;
-	view0->yuv_transform = mconf->encoding_flags & (1 << 2) ? 1 : 0;
+	view0->stdd = ( mconf->encoding_flags & (1 << 0) )>0 ? (float)1.0 : (float)0.0;
+	view0->use_median = (mconf->encoding_flags & (1 << 1))>0 ? 1 : 0;
+	view0->yuv_transform = (mconf->encoding_flags & (1 << 2))>0 ? 1 : 0;
 
-	view0->has_color_residual = mconf->encoding_flags & (1 << 3) ? 1 : 0;
-	view0->has_depth_residual = mconf->encoding_flags & (1 << 4) ? 1 : 0;
+	view0->has_color_residual = (mconf->encoding_flags & (1 << 3))>0 ? 1 : 0;
+	view0->has_depth_residual = (mconf->encoding_flags & (1 << 4))>0 ? 1 : 0;
 
 	//view0->stdd = (float)mconf->use_std;
 	//view0->use_median = mconf->use_median > 0 ? true : false;
