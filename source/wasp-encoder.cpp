@@ -132,6 +132,8 @@ int main(int argc, char** argv) {
 
 		if (SAI->n_references > 0) {
 
+			SAI->has_color_references = true;
+
 			SAI->references = new int[SAI->n_references]();
 
 			fread(SAI->references, sizeof(int), SAI->n_references, filept); /*reading*/
@@ -139,7 +141,10 @@ int main(int argc, char** argv) {
 		}
 
 		fread(&(SAI->n_depth_references), sizeof(int), 1, filept); /*reading*/
+
 		if (SAI->n_depth_references > 0) {
+
+			SAI->has_depth_references = true;
 
 			SAI->depth_references = new int[SAI->n_depth_references]();
 
@@ -695,7 +700,7 @@ int main(int argc, char** argv) {
 		}
 
 
-		//float psnr_result;
+		double psnr_without_sparse = 0;
 
 		if (SAI->n_references > 0) {
 
@@ -703,15 +708,24 @@ int main(int argc, char** argv) {
 
 			//psnr_result = USE_difftest_ng ? getPSNR(NULL, SAI->path_out_ppm, SAI->path_input_ppm, difftest_call) : 0;
 		
-			output_buffer_length += sprintf(output_results + output_buffer_length, "\t%f", getYCbCr_422_PSNR(SAI->color, original_color_view, SAI->nr, SAI->nc, 3, BIT_DEPTH) );
+			psnr_without_sparse = getYCbCr_422_PSNR(SAI->color, original_color_view, SAI->nr, SAI->nc, 3, BIT_DEPTH);
+
+			output_buffer_length += sprintf(output_results + output_buffer_length, "\t%f", psnr_without_sparse);
 
 		}
 		else {
 			output_buffer_length += sprintf(output_results + output_buffer_length, "\t%f", 0.0);
 		}
 
+		unsigned short *colorview_temp = new unsigned short[SAI->nr*SAI->nc * 3]();
+		memcpy(colorview_temp, SAI->color, sizeof(unsigned short)*SAI->nr*SAI->nc * 3);
+
+		double psnr_with_sparse = 0;
+
 		if (SAI->NNt > 0 && SAI->Ms > 0)
 		{
+
+			SAI->use_global_sparse = true;
 
 			int startt = clock();
 
@@ -721,15 +735,29 @@ int main(int argc, char** argv) {
 
 			applyGlobalSparseFilter(SAI);
 
+			psnr_with_sparse = getYCbCr_422_PSNR(SAI->color, original_color_view, SAI->nr, SAI->nc, 3, BIT_DEPTH);
+
 			//aux_write16PGMPPM(SAI->path_out_ppm, SAI->nc, SAI->nr, 3, SAI->color);
 			//psnr_result = USE_difftest_ng ? getPSNR(NULL, SAI->path_out_ppm, SAI->path_input_ppm, difftest_call) : 0;
-			output_buffer_length += sprintf(output_results + output_buffer_length, "\t%f", getYCbCr_422_PSNR(SAI->color, original_color_view, SAI->nr, SAI->nc, 3, BIT_DEPTH) );
-
+			
 		}
-		else
-		{
+
+		if (SAI->use_global_sparse) { /* check validity of sparse filter */
+			if ( psnr_with_sparse<psnr_without_sparse ) //<0.1
+			{
+				SAI->use_global_sparse = false;
+				memcpy(SAI->color, colorview_temp, sizeof(unsigned short)*SAI->nr*SAI->nc * 3);
+			}
+		}
+
+		if (SAI->use_global_sparse) {
+			output_buffer_length += sprintf(output_results + output_buffer_length, "\t%f", psnr_with_sparse);
+		}
+		else {
 			output_buffer_length += sprintf(output_results + output_buffer_length, "\t%f", 0.0);
 		}
+
+		delete[](colorview_temp);
 
 		char ppm_residual_path[1024];
 
@@ -1053,6 +1081,7 @@ int main(int argc, char** argv) {
 	for (int ii = 0; ii < maxR; ii++) {
 		delete[](LF_mat[ii]);
 	}
+
 	delete[](LF_mat);
 
 	delete[](LF);

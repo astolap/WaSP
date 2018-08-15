@@ -46,5 +46,10 @@ void initView(view* view)
 
 	view->has_color_residual = false;
 	view->has_depth_residual = false;
+	view->use_global_sparse = false;
+
+	view->has_color_references = false;
+	view->has_depth_references = false;
+	view->has_min_inv_depth = false;
 
 }

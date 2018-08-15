@@ -75,51 +75,6 @@ int main(int argc, char** argv) {
 
 		codestreamToViewHeader(n_bytes_prediction, SAI, input_LF, mconf);
 
-		//f_status = fread(&mconf, sizeof(minimal_config), 1, input_LF);
-
-		//printf("size of minimal_config %i bytes\n", (int)sizeof(minimal_config));
-
-		//setup_form_minimal_config(&mconf, SAI);
-
-		//if (SAI->n_references > 0) {
-		//	SAI->references = new int[SAI->n_references]();
-		//	for (int ij = 0; ij < SAI->n_references; ij++) {
-		//		unsigned short nid;
-		//		f_status = fread(&nid, sizeof(unsigned short), 1, input_LF);
-		//		*(SAI->references + ij) = (int)nid;
-		//	}
-		//}
-
-		//if (SAI->n_depth_references > 0) {
-		//	SAI->depth_references = new int[SAI->n_depth_references]();
-		//	for (int ij = 0; ij < SAI->n_depth_references; ij++) {
-		//		unsigned short nid;
-		//		f_status = fread(&nid, sizeof(unsigned short), 1, input_LF);
-		//		*(SAI->depth_references + ij) = (int)nid;
-		//	}
-		//}
-
-		//if (SAI->Ms > 0 && SAI->NNt > 0) {
-		//	SAI->sparse_mask = new unsigned char[SAI->Ms]();
-		//	f_status = fread(SAI->sparse_mask, sizeof(unsigned char), SAI->Ms, input_LF);
-		//	SAI->sparse_weights = new int32_t[SAI->Ms]();
-		//	f_status = fread(SAI->sparse_weights, sizeof(int32_t), SAI->Ms, input_LF);
-		//}
-
-		//SAI->NB = (1 << SAI->n_references)*SAI->n_references;// (pow(2, SAI->n_references)*SAI->n_references);
-
-		//if ( !SAI->use_median ) {
-		//	if (SAI->stdd < 0.001) {
-		//		if (SAI->n_references > 0) {
-		//			SAI->merge_weights = new signed short[SAI->NB / 2]();
-		//			f_status = fread(SAI->merge_weights, sizeof(signed short), SAI->NB / 2, input_LF);
-		//		}
-		//	}
-		//	else {
-		//		f_status = fread(&SAI->stdd, sizeof(float), 1, input_LF);
-		//	}
-		//}
-
 		if ( feof( input_LF ) ) {
 			printf("File reading error. Terminating\t...\n");
 			exit(0);
@@ -210,7 +165,7 @@ int main(int argc, char** argv) {
 			delete[](DispTargs);
 		}
 
-		if (SAI->NNt > 0 && SAI->Ms > 0)
+		if ( SAI->use_global_sparse )
 		{
 			applyGlobalSparseFilter(SAI);
 		}

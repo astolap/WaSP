@@ -14,23 +14,32 @@ void viewHeaderToCodestream(int &n_bytes_prediction, view *SAI, FILE *output_LF_
 
 	/* lets see what else needs to be written to bitstream */
 
-	if (mconf.n_references > 0) {
-		for (int ij = 0; ij < mconf.n_references; ij++) {
+	if (SAI->has_color_references) {
+		unsigned char tmpNREF = (unsigned char)SAI->n_references;
+		n_bytes_prediction += (int)fwrite(&tmpNREF, sizeof(unsigned char), 1, output_LF_file) * sizeof(unsigned char);
+		for (int ij = 0; ij < SAI->n_references; ij++) {
 			unsigned short nid = (unsigned short) *(SAI->references + ij);
 			n_bytes_prediction += (int)fwrite(&nid, sizeof(unsigned short), 1, output_LF_file) * sizeof(unsigned short);
 		}
 	}
 
-	if (mconf.n_depth_references > 0) {
-		for (int ij = 0; ij < mconf.n_depth_references; ij++) {
+	if (SAI->has_depth_references) {
+		unsigned char tmpNDREF = (unsigned char)SAI->n_depth_references;
+		n_bytes_prediction += (int)fwrite(&tmpNDREF, sizeof(unsigned char), 1, output_LF_file) * sizeof(unsigned char);
+		for (int ij = 0; ij < SAI->n_depth_references; ij++) {
 			unsigned short nid = (unsigned short) *(SAI->depth_references + ij);
 			n_bytes_prediction += (int)fwrite(&nid, sizeof(unsigned short), 1, output_LF_file) * sizeof(unsigned short);
 		}
 	}
 
+	if (SAI->has_min_inv_depth) {
+		unsigned short tmpminv = (unsigned short)SAI->min_inv_d;
+		n_bytes_prediction += (int)fwrite(&tmpminv, sizeof(unsigned short), 1, output_LF_file) * sizeof(unsigned short);
+	}
+
 	if (!SAI->use_median) {
 		if (SAI->stdd < 0.001) {
-			if (mconf.n_references > 0) {
+			if (SAI->has_color_references) {
 				/* use LS merging weights */
 				n_bytes_prediction += (int)fwrite(SAI->merge_weights, sizeof(signed short), SAI->NB / 2, output_LF_file) * sizeof(signed short);
 			}
@@ -41,7 +50,7 @@ void viewHeaderToCodestream(int &n_bytes_prediction, view *SAI, FILE *output_LF_
 		}
 	}
 
-	if (mconf.Ms > 0 && mconf.NNt > 0) {
+	if ( SAI->use_global_sparse ) {
 
 		int32_t sparse_mask_binary_p1 = 0;
 		int32_t sparse_mask_binary_p2 = 0;
@@ -50,16 +59,22 @@ void viewHeaderToCodestream(int &n_bytes_prediction, view *SAI, FILE *output_LF_
 
 			if (SAI->sparse_mask[ij] > 0) {
 
-				if (SAI->sparse_mask[ij]  < 32) {
+				if (SAI->sparse_mask[ij]  <= 30) {
 					sparse_mask_binary_p1 = sparse_mask_binary_p1 | 1 << ((int32_t)SAI->sparse_mask[ij]); // note: regressor indexing starts from 1
 				}
 				else {
-					sparse_mask_binary_p2 = sparse_mask_binary_p2 | 1 << ((int32_t)SAI->sparse_mask[ij] - 32);
+					sparse_mask_binary_p2 = sparse_mask_binary_p2 | 1 << ((int32_t)SAI->sparse_mask[ij] - 31);
 				}
 
 			}
 
 		}
+
+		unsigned char tmpNNt = (unsigned char)SAI->NNt;
+		unsigned char tmpMs = (unsigned char)SAI->Ms;
+
+		n_bytes_prediction += (int)fwrite(&tmpNNt, sizeof(unsigned char), 1, output_LF_file) * sizeof(unsigned char);
+		n_bytes_prediction += (int)fwrite(&tmpMs, sizeof(unsigned char), 1, output_LF_file) * sizeof(unsigned char);
 
 		n_bytes_prediction += (int)fwrite(SAI->sparse_weights, sizeof(int32_t), SAI->Ms, output_LF_file) * sizeof(int32_t);
 		n_bytes_prediction += (int)fwrite(&sparse_mask_binary_p1, sizeof(int32_t), 1, output_LF_file) * sizeof(int32_t);
@@ -81,7 +96,14 @@ void codestreamToViewHeader( int &n_bytes_prediction, view *SAI, FILE *input_LF,
 
 	setup_form_minimal_config(&mconf, SAI);
 
-	if (SAI->n_references > 0) {
+	if (SAI->has_color_references) {
+
+		unsigned char tmpNREF = 0;
+
+		n_bytes_prediction += (int)fread(&tmpNREF, sizeof(unsigned char), 1, input_LF) * sizeof(unsigned char);
+
+		SAI->n_references = tmpNREF;
+
 		SAI->references = new int[SAI->n_references]();
 		for (int ij = 0; ij < SAI->n_references; ij++) {
 			unsigned short nid;
@@ -90,13 +112,27 @@ void codestreamToViewHeader( int &n_bytes_prediction, view *SAI, FILE *input_LF,
 		}
 	}
 
-	if (SAI->n_depth_references > 0) {
+	if (SAI->has_depth_references) {
+
+		unsigned char tmpNDREF = 0;
+
+		n_bytes_prediction += (int)fread(&tmpNDREF, sizeof(unsigned char), 1, input_LF) * sizeof(unsigned char);
+
+		SAI->n_depth_references = tmpNDREF;
+
+
 		SAI->depth_references = new int[SAI->n_depth_references]();
 		for (int ij = 0; ij < SAI->n_depth_references; ij++) {
 			unsigned short nid;
 			n_bytes_prediction += (int)fread(&nid, sizeof(unsigned short), 1, input_LF)* sizeof(unsigned short);
 			*(SAI->depth_references + ij) = (int)nid;
 		}
+	}
+
+	if (SAI->has_min_inv_depth) {
+		unsigned short tmpminv = (unsigned short)SAI->min_inv_d;
+		n_bytes_prediction += (int)fread(&tmpminv, sizeof(unsigned short), 1, input_LF) * sizeof(unsigned short);
+		SAI->min_inv_d = tmpminv;
 	}
 
 	SAI->NB = (1 << SAI->n_references)*SAI->n_references;
@@ -116,7 +152,16 @@ void codestreamToViewHeader( int &n_bytes_prediction, view *SAI, FILE *input_LF,
 	int32_t sparse_mask_binary_p1 = 0;
 	int32_t sparse_mask_binary_p2 = 0;
 
-	if (SAI->Ms > 0 && SAI->NNt > 0) {
+	if ( SAI->use_global_sparse ) {
+
+		unsigned char tmpNNt = (unsigned char)SAI->NNt;
+		unsigned char tmpMs = (unsigned char)SAI->Ms;
+
+		n_bytes_prediction += (int)fread(&tmpNNt, sizeof(unsigned char), 1, input_LF) * sizeof(unsigned char);
+		n_bytes_prediction += (int)fread(&tmpMs, sizeof(unsigned char), 1, input_LF) * sizeof(unsigned char);
+
+		SAI->NNt = tmpNNt;
+		SAI->Ms = tmpMs;
 
 		SAI->sparse_weights = new int32_t[SAI->Ms]();
 		n_bytes_prediction += (int)fread(SAI->sparse_weights, sizeof(int32_t), SAI->Ms, input_LF)* sizeof(int32_t);
@@ -129,13 +174,13 @@ void codestreamToViewHeader( int &n_bytes_prediction, view *SAI, FILE *input_LF,
 		int ik = 0;
 
 		for (int ij = 0; ij < 64; ij++) {
-			if (ij < 32) {
+			if (ij <= 30) {
 				if ( ( sparse_mask_binary_p1 & (1 << ij) )>0 ) {
 					SAI->sparse_mask[ik] = ij; ik++;
 				}
 			}
 			else {
-				if ( (sparse_mask_binary_p2 & (1 << (ij-32)))>0 ) {
+				if ( (sparse_mask_binary_p2 & (1 << (ij-31)))>0 ) {
 					SAI->sparse_mask[ik] = ij; ik++;
 				}
 			}

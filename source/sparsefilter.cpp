@@ -49,7 +49,7 @@ void applyGlobalSparseFilter(view *view0){
 			for (int dy = -NNt; dy <= NNt; dy++){
 				for (int dx = -NNt; dx <= NNt; dx++){
 					for (int icomp = 0; icomp < 3; icomp++){
-						final_view[rr + cc*nr + icomp*nr*nc] = final_view[rr + cc*nr + icomp*nr*nc] + theta[ee] * ((float)pshort[rr + dy + (cc + dx)*nr + icomp*nr*nc]);
+						final_view[rr + cc*nr + icomp*nr*nc] += theta[ee] * ((float)pshort[rr + dy + (cc + dx)*nr + icomp*nr*nc]);
 					}
 					ee++;
 				}
@@ -57,7 +57,7 @@ void applyGlobalSparseFilter(view *view0){
 
 			/* bias term */
 			for (int icomp = 0; icomp < 3; icomp++){
-				final_view[rr + cc*nr + icomp*nr*nc] = final_view[rr + cc*nr + icomp*nr*nc] + theta[(2 * NNt + 1)*(2 * NNt + 1)];
+				final_view[rr + cc*nr + icomp*nr*nc] += theta[(2 * NNt + 1)*(2 * NNt + 1)];
 			}
 
 		}
@@ -178,7 +178,7 @@ void getGlobalSparseFilter(view *view0, unsigned short *original_color_view)
 	delete[](PredRegr0);
 	delete[](PredTheta0);
 
-	/* sorting of filter coeffs and sparsity mask as increasing order of regressor index */
+	/* sorting of filter coeffs and sparsity mask as increasing order of regressor index, new for ES2.4 */
 
 	std::vector<std::pair<unsigned char, int32_t>> sparsefilter;
 
