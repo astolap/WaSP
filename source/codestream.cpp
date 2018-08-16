@@ -4,6 +4,50 @@
 
 #include <iostream>
 
+//void packSparseMask(const int Ms, const int NNt, unsigned char *sparse_mask, int32_t *packed) {
+//
+//	int N = floor( (float)((2*NNt+1)*(2*NNt+1)+1) / 32.0 + 0.5);
+//
+//	packed = new int32_t[N]();
+//
+//	for (int ij = 0; ij < Ms; ij++) {
+//
+//		unsigned char value = sparse_mask[ij];
+//
+//		if ( value > 0) {
+//
+//			int offset = (value-1) / 30;
+//
+//			packed[offset] = packed[offset] | 1 << ((int32_t)sparse_mask[ij]- offset*31 );
+//
+//		}
+//	}
+//
+//}
+//
+//void unpackSparseMask(const int Ms, const int NNt, unsigned char *sparse_mask, int32_t *packed) {
+//
+//	int N = floor((float)((2 * NNt + 1)*(2 * NNt + 1) + 1) / 32.0 + 0.5);
+//
+//	packed = new int32_t[N]();
+//
+//	int ik = 0;
+//
+//	for (int M = 0; M < N; M++) {
+//
+//		int32_t p32 = packed[N];
+//
+//		for (int ij = 0; ij < 32; ij++) {
+//
+//			if ((p32 & (1 << ij - 31 * N)) > 0) {
+//				sparse_mask[ik++] = ij + 32*N;
+//
+//			}
+//		}
+//	}
+//
+//}
+
 void viewHeaderToCodestream(int &n_bytes_prediction, view *SAI, FILE *output_LF_file, const int yuv_transform_s) {
 
 	minimal_config mconf = makeMinimalConfig(SAI);
@@ -13,6 +57,14 @@ void viewHeaderToCodestream(int &n_bytes_prediction, view *SAI, FILE *output_LF_
 	n_bytes_prediction += (int)fwrite(&mconf, sizeof(minimal_config), 1, output_LF_file) * sizeof(minimal_config);
 
 	/* lets see what else needs to be written to bitstream */
+
+	if (SAI->has_x_displacement) {
+		n_bytes_prediction += (int)fwrite(&SAI->x, sizeof(float), 1, output_LF_file) * sizeof(float);
+	}
+
+	if (SAI->has_y_displacement) {
+		n_bytes_prediction += (int)fwrite(&SAI->y, sizeof(float), 1, output_LF_file) * sizeof(float);
+	}
 
 	if (SAI->has_color_references) {
 		unsigned char tmpNREF = (unsigned char)SAI->n_references;
@@ -30,11 +82,6 @@ void viewHeaderToCodestream(int &n_bytes_prediction, view *SAI, FILE *output_LF_
 			unsigned short nid = (unsigned short) *(SAI->depth_references + ij);
 			n_bytes_prediction += (int)fwrite(&nid, sizeof(unsigned short), 1, output_LF_file) * sizeof(unsigned short);
 		}
-	}
-
-	if (SAI->has_min_inv_depth) {
-		unsigned short tmpminv = (unsigned short)SAI->min_inv_d;
-		n_bytes_prediction += (int)fwrite(&tmpminv, sizeof(unsigned short), 1, output_LF_file) * sizeof(unsigned short);
 	}
 
 	if (!SAI->use_median) {
@@ -96,6 +143,15 @@ void codestreamToViewHeader( int &n_bytes_prediction, view *SAI, FILE *input_LF,
 
 	setup_form_minimal_config(&mconf, SAI);
 
+	if (SAI->has_x_displacement) {
+		n_bytes_prediction += (int)fread(&SAI->x, sizeof(float), 1, input_LF) * sizeof(float);
+	}
+
+	if (SAI->has_y_displacement) {
+		n_bytes_prediction += (int)fread(&SAI->y, sizeof(float), 1, input_LF) * sizeof(float);
+	}
+
+
 	if (SAI->has_color_references) {
 
 		unsigned char tmpNREF = 0;
@@ -129,12 +185,6 @@ void codestreamToViewHeader( int &n_bytes_prediction, view *SAI, FILE *input_LF,
 		}
 	}
 
-	if (SAI->has_min_inv_depth) {
-		unsigned short tmpminv = (unsigned short)SAI->min_inv_d;
-		n_bytes_prediction += (int)fread(&tmpminv, sizeof(unsigned short), 1, input_LF) * sizeof(unsigned short);
-		SAI->min_inv_d = tmpminv;
-	}
-
 	SAI->NB = (1 << SAI->n_references)*SAI->n_references;
 
 	if (!SAI->use_median) {
@@ -154,14 +204,14 @@ void codestreamToViewHeader( int &n_bytes_prediction, view *SAI, FILE *input_LF,
 
 	if ( SAI->use_global_sparse ) {
 
-		unsigned char tmpNNt = (unsigned char)SAI->NNt;
-		unsigned char tmpMs = (unsigned char)SAI->Ms;
+		unsigned char tmpNNt = 0;
+		unsigned char tmpMs = 0;
 
 		n_bytes_prediction += (int)fread(&tmpNNt, sizeof(unsigned char), 1, input_LF) * sizeof(unsigned char);
 		n_bytes_prediction += (int)fread(&tmpMs, sizeof(unsigned char), 1, input_LF) * sizeof(unsigned char);
 
-		SAI->NNt = tmpNNt;
-		SAI->Ms = tmpMs;
+		SAI->NNt = (int)tmpNNt;
+		SAI->Ms = (int)tmpMs;
 
 		SAI->sparse_weights = new int32_t[SAI->Ms]();
 		n_bytes_prediction += (int)fread(SAI->sparse_weights, sizeof(int32_t), SAI->Ms, input_LF)* sizeof(int32_t);

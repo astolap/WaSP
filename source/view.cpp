@@ -50,6 +50,9 @@ void initView(view* view)
 
 	view->has_color_references = false;
 	view->has_depth_references = false;
-	view->has_min_inv_depth = false;
+	//view->has_min_inv_depth = false;
+
+	view->has_x_displacement = false;
+	view->has_y_displacement = false;
 
 }

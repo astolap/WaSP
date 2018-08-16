@@ -11,6 +11,41 @@
 
 #define CLEVELS 6
 
+void readResidualFromDisk(const char *jp2_residual_path_jp2, int &n_bytes_residual, FILE *input_LF) {
+
+	int n_bytes_color_residual = 0;
+
+	n_bytes_residual += (int)fread(&n_bytes_color_residual, sizeof(int), 1, input_LF) * sizeof(int);
+
+	unsigned char *jp2_residual = new unsigned char[n_bytes_color_residual]();
+	n_bytes_residual += (int)fread(jp2_residual, sizeof(unsigned char), n_bytes_color_residual, input_LF);
+
+	FILE *jp2_res_file;
+	jp2_res_file = fopen(jp2_residual_path_jp2, "wb");
+	fwrite(jp2_residual, sizeof(unsigned char), n_bytes_color_residual, jp2_res_file);
+	fclose(jp2_res_file);
+
+	delete[](jp2_residual);
+}
+
+void writeResidualToDisk(const char *jp2_residual_path_jp2, FILE *output_LF_file, int &n_bytes_residual) {
+
+	int n_bytes_color_residual = aux_GetFileSize(jp2_residual_path_jp2);
+
+	unsigned char *jp2_residual = new unsigned char[n_bytes_color_residual]();
+	FILE *jp2_color_residual_file = fopen(jp2_residual_path_jp2, "rb");
+	fread(jp2_residual, sizeof(unsigned char), n_bytes_color_residual, jp2_color_residual_file);
+	fclose(jp2_color_residual_file);
+
+	n_bytes_color_residual = n_bytes_color_residual - jp2_headersize;
+
+	n_bytes_residual += (int)fwrite(&n_bytes_color_residual, sizeof(int), 1, output_LF_file) * sizeof(int);
+	n_bytes_residual += (int)fwrite(jp2_residual + jp2_headersize, sizeof(unsigned char), n_bytes_color_residual, output_LF_file) * sizeof(unsigned char);
+
+	delete[](jp2_residual);
+
+}
+
 void decodeResidualJP2(unsigned short *ps, const char *kdu_expand_path, const char *jp2_residual_path_jp2, const char *ppm_residual_path, int ncomp, const int offset, const int maxvali,
 	const bool RESIDUAL_16BIT_bool)
 {

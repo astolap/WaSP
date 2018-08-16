@@ -10,7 +10,7 @@
 void predictDepth(view* SAI, view *LF)
 {
 	/* forward warp depth */
-	if (SAI->n_depth_references > 0) {
+	if (SAI->has_depth_references) {
 		/* currently we forward warp the depth from the N (for HDCA N = 5, lenslet maybe 1?) references */
 		unsigned short **warped_color_views_0_N = new unsigned short*[SAI->n_depth_references]();
 		unsigned short **warped_depth_views_0_N = new unsigned short*[SAI->n_depth_references]();

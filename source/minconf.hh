@@ -5,8 +5,9 @@
 
 struct minimal_config { /* this goes to bitstream */
 
-	unsigned short r , c ; // SAI subscript
-	float y, x; // camera displacement
+	unsigned char r , c ; // SAI subscript
+
+	//float y, x; // camera displacement
 
 	//unsigned short min_inv_d; // needed only if inverse depth has negative values, [0,max]-mind = [-mind,max-mind]
 
