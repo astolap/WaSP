@@ -546,6 +546,13 @@ int main(int argc, char** argv) {
 	//fprintf(output_results_file, "%s\n", output_results);
 	fclose(output_results_file);
 
+
+	/* to get effiency from multiple JP2 files, we remove parts of the files
+	which are repetative over all files. For this we have a minimalistic 
+	dictionary method. */
+
+	std::vector<std::vector<unsigned char>> JP2_dict;
+
 	for (int ii = 0; ii < n_views_total; ii++) {
 
 		view *SAI = LF + ii;
@@ -989,19 +996,19 @@ int main(int argc, char** argv) {
 			if (SAI->yuv_transform && YUV_TRANSFORM) {
 				for (int icomp = 0; icomp < 3; icomp++) {
 
-					writeResidualToDisk(ycbcr_jp2_names[icomp], output_LF_file, n_bytes_residual);
+					writeResidualToDisk(ycbcr_jp2_names[icomp], output_LF_file, n_bytes_residual, JP2_dict);
 
 				}
 			}
 			else {
 
-				writeResidualToDisk(jp2_residual_path_jp2, output_LF_file, n_bytes_residual);
+				writeResidualToDisk(jp2_residual_path_jp2, output_LF_file, n_bytes_residual, JP2_dict);
 			}
 		}
 
 		if (SAI->residual_rate_depth > 0 && depth_file_exist) {
 
-			writeResidualToDisk(jp2_residual_depth_path_jp2, output_LF_file, n_bytes_residual);
+			writeResidualToDisk(jp2_residual_depth_path_jp2, output_LF_file, n_bytes_residual, JP2_dict);
 
 		}
 

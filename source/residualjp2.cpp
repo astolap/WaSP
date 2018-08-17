@@ -9,41 +9,180 @@
 #include <cstdio>
 #include <cstring>
 
+#include <vector>
+#include <algorithm>
+
 #define CLEVELS 6
+#define USE_JP2_DICTIONARY 1
 
-void readResidualFromDisk(const char *jp2_residual_path_jp2, int &n_bytes_residual, FILE *input_LF) {
+void getJP2Header(unsigned char *JP2, unsigned char *&header, int JP2Size, int &headerSize) {
 
-	int n_bytes_color_residual = 0;
+	for (int ii = 0; ii < JP2Size-1; ii++) {
+		if ((unsigned short)(JP2[ii] << 8 | JP2[ii + 1]) == 0xFF90) { /*we have first tile*/
+			headerSize = ii + 1;
+			header = new unsigned char[ii + 1];
+			memcpy(header, JP2, ii + 1);
+			return;
+		}
+	}
 
-	n_bytes_residual += (int)fread(&n_bytes_color_residual, sizeof(int), 1, input_LF) * sizeof(int);
+	return;
+}
 
-	unsigned char *jp2_residual = new unsigned char[n_bytes_color_residual]();
-	n_bytes_residual += (int)fread(jp2_residual, sizeof(unsigned char), n_bytes_color_residual, input_LF);
+int getJP2DictionaryIndex(unsigned char *header, int headerSize, 
+	std::vector< std::vector<unsigned char>> JP2_dict) {
+
+	for (int ii = 0; ii < JP2_dict.size(); ii++) {
+
+		int  L = (int)JP2_dict.at(ii).size();
+
+		if (L == headerSize) {
+			if (memcmp(header, &JP2_dict.at(ii)[0], L) == 0) {
+				return  ii;
+			}
+		}
+
+	}
+
+	return -1;
+}
+
+void updateJP2Dictionary(std::vector< std::vector<unsigned char>> &JP2_dict, unsigned char *JP2header, int headerSize) {
+
+	std::vector< unsigned char > new_dict_element;
+
+	for (int ii = 0; ii < headerSize; ii++) {
+		new_dict_element.push_back(JP2header[ii]);
+	}
+
+	JP2_dict.push_back(new_dict_element);
+
+}
+
+void readResidualFromDisk(const char *jp2_residual_path_jp2, int &n_bytes_residual, FILE *input_LF, 
+	std::vector< std::vector<unsigned char>> &JP2_dict) {
+
+	int n_bytes_JP2 = 0;
+	unsigned char *jp2_residual = 0;
+
+	if (USE_JP2_DICTIONARY) {
+
+		int dict_index = 0, headerSize = 0;
+		unsigned char dict_index_char = 0;
+
+		n_bytes_residual += (int)fread(&dict_index_char, sizeof(unsigned char), 1, input_LF) * sizeof(unsigned char);
+
+		dict_index = (int)dict_index_char;
+
+		if (JP2_dict.size() == 0 || dict_index > (int)JP2_dict.size()-1 ) {
+
+			n_bytes_residual += (int)fread(&headerSize, sizeof(int), 1, input_LF) * sizeof(int);
+
+			unsigned char *JP2header = new unsigned char[headerSize]();
+
+			n_bytes_residual += (int)fread(JP2header, sizeof(unsigned char), headerSize, input_LF) * sizeof(unsigned char);
+
+			updateJP2Dictionary(JP2_dict, JP2header, headerSize);
+
+			delete[](JP2header);
+
+		}
+
+		unsigned char *jp2_residual_tmp;
+
+		n_bytes_residual += (int)fread(&n_bytes_JP2, sizeof(int), 1, input_LF) * sizeof(int);
+		jp2_residual_tmp = new unsigned char[n_bytes_JP2]();
+		n_bytes_residual += (int)fread(jp2_residual_tmp, sizeof(unsigned char), n_bytes_JP2, input_LF);
+
+		headerSize = (int)JP2_dict.at(dict_index).size();
+		jp2_residual = new unsigned char[n_bytes_JP2 + headerSize]();
+
+		memcpy(jp2_residual, &JP2_dict.at(dict_index)[0], headerSize);
+		memcpy(jp2_residual + headerSize, jp2_residual_tmp, n_bytes_JP2);
+
+		n_bytes_JP2 += headerSize;
+
+		delete[](jp2_residual_tmp);
+
+	}
+	else {
+
+		n_bytes_residual += (int)fread(&n_bytes_JP2, sizeof(int), 1, input_LF) * sizeof(int);
+		jp2_residual = new unsigned char[n_bytes_JP2]();
+		n_bytes_residual += (int)fread(jp2_residual, sizeof(unsigned char), n_bytes_JP2, input_LF)* sizeof(unsigned char);
+
+	}
 
 	FILE *jp2_res_file;
 	jp2_res_file = fopen(jp2_residual_path_jp2, "wb");
-	fwrite(jp2_residual, sizeof(unsigned char), n_bytes_color_residual, jp2_res_file);
+	fwrite(jp2_residual, sizeof(unsigned char), n_bytes_JP2, jp2_res_file);
 	fclose(jp2_res_file);
 
 	delete[](jp2_residual);
 }
 
-void writeResidualToDisk(const char *jp2_residual_path_jp2, FILE *output_LF_file, int &n_bytes_residual) {
+void writeResidualToDisk(const char *jp2_residual_path_jp2, FILE *output_LF_file, int &n_bytes_residual, 
+	std::vector< std::vector<unsigned char>> &JP2_dict) {
 
-	int n_bytes_color_residual = aux_GetFileSize(jp2_residual_path_jp2);
+	int n_bytes_JP2 = aux_GetFileSize(jp2_residual_path_jp2);
 
-	unsigned char *jp2_residual = new unsigned char[n_bytes_color_residual]();
+	unsigned char *jp2_residual = new unsigned char[n_bytes_JP2]();
 	FILE *jp2_color_residual_file = fopen(jp2_residual_path_jp2, "rb");
-	fread(jp2_residual, sizeof(unsigned char), n_bytes_color_residual, jp2_color_residual_file);
+	fread(jp2_residual, sizeof(unsigned char), n_bytes_JP2, jp2_color_residual_file);
 	fclose(jp2_color_residual_file);
 
-	n_bytes_color_residual = n_bytes_color_residual - jp2_headersize;
+	if (USE_JP2_DICTIONARY) {
+		bool updateDictionary = false;
+		/* get header */
+		unsigned char *JP2header;
+		int headerSize = 0;
+		getJP2Header(jp2_residual, JP2header, n_bytes_JP2, headerSize);
+		/* get index in dictionary */
+		int dict_index = getJP2DictionaryIndex(JP2header, headerSize, JP2_dict);
+		/* update dictionary if needed */
+		if (dict_index == -1) {
+			updateDictionary = true;
+			updateJP2Dictionary(JP2_dict, JP2header, headerSize);
+			dict_index = (int)JP2_dict.size() - 1;
+			printf("Dictonary update, index=%i\n", dict_index);
+		}
 
-	n_bytes_residual += (int)fwrite(&n_bytes_color_residual, sizeof(int), 1, output_LF_file) * sizeof(int);
-	n_bytes_residual += (int)fwrite(jp2_residual + jp2_headersize, sizeof(unsigned char), n_bytes_color_residual, output_LF_file) * sizeof(unsigned char);
+		printf("Using dictionary index:\t%i\n", dict_index);
+
+		delete[](JP2header);
+
+		/* write index of dictionary to bitstream */
+		unsigned char dict_index_char = (unsigned char)dict_index;
+		n_bytes_residual += (int)fwrite(&dict_index_char, sizeof(unsigned char), 1, output_LF_file) * sizeof(unsigned char);
+
+		if (updateDictionary) { /* add update information if necessary */
+			n_bytes_residual += (int)fwrite(&headerSize, sizeof(int), 1, output_LF_file) * sizeof(int);
+			n_bytes_residual += (int)fwrite(&JP2_dict.at(dict_index)[0], sizeof(unsigned char), headerSize, output_LF_file) * sizeof(unsigned char);
+		}
+
+		/* write to codestream without header */
+
+		n_bytes_JP2 = n_bytes_JP2 - headerSize;
+
+		n_bytes_residual += (int)fwrite(&n_bytes_JP2, sizeof(int), 1, output_LF_file) * sizeof(int);
+		n_bytes_residual += (int)fwrite(jp2_residual+ headerSize, sizeof(unsigned char), n_bytes_JP2, output_LF_file) * sizeof(unsigned char);
+	
+	}
+	else {
+
+		n_bytes_residual += (int)fwrite(&n_bytes_JP2, sizeof(int), 1, output_LF_file) * sizeof(int);
+		n_bytes_residual += (int)fwrite(jp2_residual, sizeof(unsigned char), n_bytes_JP2, output_LF_file) * sizeof(unsigned char);
+
+
+		/*n_bytes_JP2 = n_bytes_JP2 - jp2_headersize;
+
+		n_bytes_residual += (int)fwrite(&n_bytes_JP2, sizeof(int), 1, output_LF_file) * sizeof(int);
+		n_bytes_residual += (int)fwrite(jp2_residual + jp2_headersize, sizeof(unsigned char), n_bytes_JP2, output_LF_file) * sizeof(unsigned char);*/
+
+	}
 
 	delete[](jp2_residual);
-
+	
 }
 
 void decodeResidualJP2(unsigned short *ps, const char *kdu_expand_path, const char *jp2_residual_path_jp2, const char *ppm_residual_path, int ncomp, const int offset, const int maxvali,

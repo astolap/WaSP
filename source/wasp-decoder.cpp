@@ -61,6 +61,8 @@ int main(int argc, char** argv) {
 
 	const bool RESIDUAL_16BIT_bool = RESIDUAL_16BIT ? 1 : 0;
 
+	std::vector<std::vector<unsigned char>> JP2_dict;
+
 	view *LF = new view[n_views_total]();
 
 	int ii = 0; /*view index*/
@@ -217,7 +219,7 @@ int main(int argc, char** argv) {
 
 				for (int icomp = 0; icomp < 3; icomp++) {
 
-					readResidualFromDisk(ycbcr_jp2_names[icomp], n_bytes_residual, input_LF);
+					readResidualFromDisk(ycbcr_jp2_names[icomp], n_bytes_residual, input_LF, JP2_dict);
 
 				}
 
@@ -244,7 +246,7 @@ int main(int argc, char** argv) {
 
 				sprintf(jp2_residual_path_jp2, "%s%c%03d_%03d%s", output_dir, '/', SAI->c, SAI->r, "_residual.jp2");
 
-				readResidualFromDisk(jp2_residual_path_jp2, n_bytes_residual, input_LF);
+				readResidualFromDisk(jp2_residual_path_jp2, n_bytes_residual, input_LF, JP2_dict);
 
 				decodeResidualJP2(SAI->color, kdu_expand_path, jp2_residual_path_jp2, ppm_residual_path, ncomp1, (1 << BIT_DEPTH) - 1, (1 << BIT_DEPTH) - 1, RESIDUAL_16BIT_bool);
 			}
@@ -254,7 +256,7 @@ int main(int argc, char** argv) {
 
 		if (SAI->has_depth_residual) { /* residual depth if needed */
 
-			n_bytes_residual =+ (int)fread(&n_bytes_depth_residual, sizeof(int), 1, input_LF)* sizeof(int);
+			//n_bytes_residual =+ (int)fread(&n_bytes_depth_residual, sizeof(int), 1, input_LF)* sizeof(int);
 
 			int ncomp1 = 0; /* temporary to hold the number of components */
 
@@ -266,7 +268,7 @@ int main(int argc, char** argv) {
 
 			sprintf(jp2_residual_depth_path_jp2, "%s%c%03d_%03d%s", output_dir, '/', SAI->c, SAI->r, "_depth_residual.jp2");
 
-			readResidualFromDisk(jp2_residual_depth_path_jp2, n_bytes_residual, input_LF);
+			readResidualFromDisk(jp2_residual_depth_path_jp2, n_bytes_residual, input_LF, JP2_dict);
 
 			decodeResidualJP2(SAI->depth, kdu_expand_path, jp2_residual_depth_path_jp2, pgm_residual_depth_path, ncomp1, 0, (1 << 16) - 1,1);
 
