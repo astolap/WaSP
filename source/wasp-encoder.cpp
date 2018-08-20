@@ -230,6 +230,8 @@ int main(int argc, char** argv) {
 
 			}
 
+			delete[](temp_segmentation);
+
 			SAI->maxL = maxL;
 
 			/* initialize region displacement table */
@@ -243,8 +245,6 @@ int main(int argc, char** argv) {
 					}
 				}
 			}
-
-			delete[](temp_segmentation);
 
 			/* motion vectors for all regions against all views */
 
@@ -484,7 +484,6 @@ int main(int argc, char** argv) {
 					delete[](DM_ROW_tmp);
 					delete[](DM_COL_tmp);
 
-					//delete[](seg_warped); //!!!!!!!!!!!!!!!!!!!!!!!!!!!!! we need to clean this still
 					delete[](color_seg_warped);
 
 

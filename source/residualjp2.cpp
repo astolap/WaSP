@@ -10,7 +10,6 @@
 #include <cstring>
 
 #include <vector>
-#include <algorithm>
 
 #define CLEVELS 6
 #define USE_JP2_DICTIONARY 1
