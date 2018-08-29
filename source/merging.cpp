@@ -2,6 +2,7 @@
 #include "medianfilter.hh"
 #include "fastols.hh"
 #include "bitdepth.hh"
+#include "warping.hh"
 
 #include <cstring>
 
@@ -236,7 +237,7 @@ void initSegVp(view *view0, float **DispTargs) {
 
 		for (int ik = 0; ik < n_references; ik++) {
 			float *pf = DispTargs[ik];
-			if (*(pf + ii) > -1)
+			if (*(pf + ii) > INIT_DISPARITY_VALUE)
 				ci = ci + (unsigned short)( 1 << ik );// pow(2, ik);
 		}
 
@@ -324,7 +325,7 @@ void mergeMedian_N(unsigned short **warpedColorViews, float **DispTargs, view *v
 				float *pf = DispTargs[ik];
 				unsigned short *ps = warpedColorViews[ik];
 
-				if (*(pf + ii) > -1) {
+				if (*(pf + ii) > INIT_DISPARITY_VALUE) {
 
 					vals.push_back(*(ps + ii + icomp*view0->nr*view0->nc));
 

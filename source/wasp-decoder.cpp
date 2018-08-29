@@ -171,17 +171,12 @@ int main(int argc, char** argv) {
 
 			initViewW(SAI, DispTargs);
 
-			if (SAI->stdd < 0.01) {
-				/* merge color with prediction */
-				mergeWarped_N(warped_color_views, DispTargs, SAI, 3);
-				/* hole filling for color*/
-				holefilling(SAI->color, 3, SAI->nr, SAI->nc, 0);
-			}
-			else {
-				if (SAI->use_median) {
-					int startt = clock();
-					mergeMedian_N(warped_color_views, DispTargs, SAI, 3);
-					std::cout << "time elapsed in color median merging\t" << (int)clock() - startt << "\n";
+			/* Bug fix from VM1.0. The logic for choosing median merging over fixed weight merging was faulty. */
+			if (!SAI->use_median) {
+				if (SAI->stdd < 0.001) {
+					/* merge color with prediction */
+					mergeWarped_N(warped_color_views, DispTargs, SAI, 3);
+					/* hole filling for color*/
 					holefilling(SAI->color, 3, SAI->nr, SAI->nc, 0);
 				}
 				else {
@@ -193,6 +188,35 @@ int main(int argc, char** argv) {
 					holefilling(SAI->color, 3, SAI->nr, SAI->nc, 0);
 				}
 			}
+			else {
+				int startt = clock();
+				mergeMedian_N(warped_color_views, DispTargs, SAI, 3);
+				std::cout << "time elapsed in color median merging\t" << (int)clock() - startt << "\n";
+				holefilling(SAI->color, 3, SAI->nr, SAI->nc, 0);
+			}
+
+			//if (SAI->stdd < 0.01) {
+			//	/* merge color with prediction */
+			//	mergeWarped_N(warped_color_views, DispTargs, SAI, 3);
+			//	/* hole filling for color*/
+			//	holefilling(SAI->color, 3, SAI->nr, SAI->nc, 0);
+			//}
+			//else {
+			//	if (SAI->use_median) {
+			//		int startt = clock();
+			//		mergeMedian_N(warped_color_views, DispTargs, SAI, 3);
+			//		std::cout << "time elapsed in color median merging\t" << (int)clock() - startt << "\n";
+			//		holefilling(SAI->color, 3, SAI->nr, SAI->nc, 0);
+			//	}
+			//	else {
+			//		/* we don't use LS weights but something derived on geometric distance in view array*/
+			//		getGeomWeight(SAI, LF);
+			//		/* merge color with prediction */
+			//		mergeWarped_N(warped_color_views, DispTargs, SAI, 3);
+			//		/* hole filling for color*/
+			//		holefilling(SAI->color, 3, SAI->nr, SAI->nc, 0);
+			//	}
+			//}
 			
 			/* clean */
 			for (int ij = 0; ij < SAI->n_references; ij++)
