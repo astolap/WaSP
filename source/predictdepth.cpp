@@ -3,6 +3,7 @@
 #include "medianfilter.hh"
 #include "ppm.hh"
 #include "inpainting.hh"
+#include "warping.hh"
 
 #include <ctime>
 #include <vector>
@@ -45,7 +46,7 @@ void predictDepth(view* SAI, view *LF)
 				//for (int uu = 0; uu < SAI->n_references; uu++) {
 				unsigned short *pp = warped_depth_views_0_N[uu];
 				float *pf = DispTargs_0_N[uu];
-				if (*(pf + ij) > -1) {
+				if (*(pf + ij) > INIT_DISPARITY_VALUE) {
 					depth_values.push_back(*(pp + ij));
 				}
 			}
