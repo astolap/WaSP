@@ -92,7 +92,7 @@ void getGlobalSparseFilter(view *view0, unsigned short *original_color_view)
 	view0->sparse_weights = theta0;
 	view0->sparse_mask = Regr0;
 
-	int Npp = (nr - NNt * 2)*(nc - NNt * 2) * 3;
+	int Npp = (nr - NNt * 2)*(nc - NNt * 2);
 	int Npp0 = Npp / 3;
 
 	int MT = (NNt * 2 + 1)*(NNt * 2 + 1) + 1; /* number of regressors */
@@ -101,7 +101,7 @@ void getGlobalSparseFilter(view *view0, unsigned short *original_color_view)
 	double *Yd = new double[Npp]();
 
 	for (int ii = 0; ii < Npp; ii++)
-		*(AA + ii + (NNt * 2 + 1)*(NNt * 2 + 1)*Npp) = 1.0;
+		*(AA + ii + (NNt * 2 + 1)*(NNt * 2 + 1)*Npp) = 1.0 / ((double)(1 << BIT_DEPTH) - 1);
 
 	int iiu = 0;
 
@@ -123,13 +123,15 @@ void getGlobalSparseFilter(view *view0, unsigned short *original_color_view)
 
 						/* get the desired Yd*/
 						if (dy == 0 && dx == 0) {
-							*(Yd + iiu + icomp*Npp0) = ((double)*(original_color_view + offset)) / ( (double)(1 << BIT_DEPTH) - 1);// (pow(2, BIT_DEPTH) - 1);
+							*(Yd + iiu + 0*Npp0) += ((double)*(original_color_view + offset)) / ( (double)(1 << BIT_DEPTH) - 1);// (pow(2, BIT_DEPTH) - 1);
 						}
 
 						/* get the regressors */
-						*(AA + iiu + icomp*Npp0 + ai*Npp) = ((double)*(pshort + offset)) / ( (double)(1 << BIT_DEPTH) - 1);// (pow(2, BIT_DEPTH) - 1);
+						*(AA + iiu + 0*Npp0 + ai*Npp) += ((double)*(pshort + offset)) / ( (double)(1 << BIT_DEPTH) - 1);// (pow(2, BIT_DEPTH) - 1);
 
 					}
+					*(AA + iiu + 0 * Npp0 + ai*Npp) = *(AA + iiu + 0 * Npp0 + ai*Npp) / 3;
+
 					ai++;
 
 
@@ -153,6 +155,7 @@ void getGlobalSparseFilter(view *view0, unsigned short *original_color_view)
 					//}
 				}
 			}
+			*(Yd + iiu + 0 * Npp0) = *(Yd + iiu + 0 * Npp0) / 3;
 			iiu++;
 		}
 	}

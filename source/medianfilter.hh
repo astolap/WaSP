@@ -33,8 +33,8 @@ void medfilt2D(T* input, T* output, int SZ, int nr, int nc)
 	for (int y = 0; y < nr; y++) {
 		for (int x = 0; x < nc; x++) {
 			scores.clear();
-			for (int dy = -dsz; dy < dsz; dy++) {
-				for (int dx = -dsz; dx < dsz; dx++) {
+			for (int dy = -dsz; dy <= dsz; dy++) {
+				for (int dx = -dsz; dx <= dsz; dx++) {
 					if ((y + dy) >= 0 && (y + dy) < nr
 						&& (x + dx) >= 0 && (x + dx) < nc)
 						scores.push_back(input[y + dy + (x + dx)*nr]);

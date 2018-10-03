@@ -1,4 +1,5 @@
 #include "minconf.hh"
+#include <cstdio>
 
 minimal_config makeMinimalConfig(view *view0) 
 {
@@ -9,6 +10,9 @@ minimal_config makeMinimalConfig(view *view0)
 	min_conf.c = (unsigned char)view0->c;
 
 	min_conf.encoding_flags = 0;
+
+	printf("%i,%i\t%i\n", view0->r, view0->c, view0->use_median?1:0);
+	printf("%i,%i\t%i,%f\n", view0->r, view0->c, view0->stdd>0.001 ? 1 : 0, view0->stdd);
 
 	min_conf.encoding_flags = view0->use_median ? min_conf.encoding_flags | (1 << 0) : min_conf.encoding_flags;
 	min_conf.encoding_flags = view0->stdd>0.001 ? min_conf.encoding_flags | (1 << 1) : min_conf.encoding_flags;
@@ -36,8 +40,10 @@ void setup_form_minimal_config(minimal_config *mconf, view *view0) {
 	view0->r = (int)mconf->r;
 	view0->c = (int)mconf->c;
 
-	view0->stdd = ( mconf->encoding_flags & (1 << 0) )>0 ? (float)1.0 : (float)0.0;
-	view0->use_median = (mconf->encoding_flags & (1 << 1))>0 ? 1 : 0;
+	printf("%i\t%i\n", mconf->r, mconf->c);
+
+	view0->use_median = (mconf->encoding_flags & (1 << 0))>0 ? 1 : 0;
+	view0->stdd = ( mconf->encoding_flags & (1 << 1) )>0 ? (float)1.0 : (float)0.0;
 	view0->yuv_transform = (mconf->encoding_flags & (1 << 2))>0 ? 1 : 0;
 
 	view0->has_color_residual = (mconf->encoding_flags & (1 << 3))>0 ? 1 : 0;

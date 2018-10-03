@@ -123,7 +123,7 @@ void getViewMergingLSWeights_N(view *view0, unsigned short **warpedColorViews, f
 				M++;
 		}
 
-		int N = number_of_pixels_per_region[ij] * 3; // number of rows in A
+		int N = number_of_pixels_per_region[ij]; // number of rows in A
 
 		double *AA = new double[N*M]();
 		double *Yd = new double[N]();
@@ -136,7 +136,10 @@ void getViewMergingLSWeights_N(view *view0, unsigned short **warpedColorViews, f
 			if (bmask[ij + ik * MMM]){
 				ps = reference_view_pixels_in_classes[ij + ik * MMM];
 				for (int ii = 0; ii < N; ii++){
-					*(AA + ii + ikk*N) = ((double)*(ps + ii)) / (double)((1 << BIT_DEPTH) - 1);// (pow(2, BIT_DEPTH) - 1);
+					for (int icomp = 0; icomp < 3; icomp++) {
+						*(AA + ii + ikk*N) += ((double)*(ps + ii + icomp*N)) / (double)((1 << BIT_DEPTH) - 1);
+					}
+					*(AA + ii + ikk*N) = *(AA + ii + ikk*N) / 3;
 				}
 				ikk++;
 			}
@@ -145,7 +148,10 @@ void getViewMergingLSWeights_N(view *view0, unsigned short **warpedColorViews, f
 		ps = original_view_in_classes[ij];
 
 		for (int ii = 0; ii < N; ii++){
-			*(Yd + ii) = ((double)*(ps + ii)) / (double)((1 << BIT_DEPTH) - 1);// (pow(2, BIT_DEPTH) - 1);
+			for (int icomp = 0; icomp < 3; icomp++) {
+				*(Yd + ii) += ((double)*(ps + ii + icomp*N)) / (double)((1 << BIT_DEPTH) - 1);
+			}
+			*(Yd + ii) = *(Yd + ii) / 3;
 		}
 
 		/* fastols */
