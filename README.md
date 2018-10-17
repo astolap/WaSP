@@ -16,7 +16,7 @@ to build both encoder and decoder.
 
 Residual encoding is currently done by JPEG2000 and for that we use the Kakadu Software.
 
-[Download Kakadu for Linux](http://kakadusoftware.com/downloads/) and see Kakadu's README.txt for instructions regarding **LD\_LIBRARY\_PATH**. 
+[Download Kakadu for Linux or Windows](http://kakadusoftware.com/downloads/) and see Kakadu's README.txt for instructions regarding **LD\_LIBRARY\_PATH**. 
 
 If you encounter the error *"kakadu/kdu_compress: /usr/lib/x86_64-linux-gnu/libstdc++.so.6: version `GLIBCXX_3.4.21'* not found" do the following,
 
@@ -28,13 +28,15 @@ If you encounter the error *"kakadu/kdu_compress: /usr/lib/x86_64-linux-gnu/libs
 
 ## Demo
 
-An [encoding of the I01_Bikes at rate 0.75 bpp](http://www.cs.tut.fi/~astolap/WaSP/github_demo/I01_Bikes-169_41.9343_0.74902.LF) is provided as an example for the decoder. You can run the decoder with,
+An [encoding of the I01_Bikes at rate 0.75 bpp](http://www.cs.tut.fi/~astolap/WaSP/github_demo/I01_Bikes-169_41.8452_0.74854.LF) is provided as an example for the decoder. You can run the decoder with,
 
->./wasp-decoder-bin /path/to/I01_Bikes-169_41.9343_0.74902.LF /path/to/output /path/to/Kakadu/
+>./wasp-decoder-bin /path/to/I01_Bikes-169_41.8452_0.74854.LF /path/to/output /path/to/Kakadu/
 
-For encoding a [sample configuration file](http://www.cs.tut.fi/~astolap/WaSP/github_demo/I01_Bikes-169_41.9343_0.74902.conf) is provided for the same I01_Bikes encoding. Download [inverse depth for Lytro dataset](http://www.cs.tut.fi/~astolap/WaSP/Lytro_inverse_depth.zip) before attempting to run the encoder. Place the inverse depth .pgm files in the directory containing the original .ppm files. You can run the encoder with,
+For encoding a [sample configuration file](http://www.cs.tut.fi/~astolap/WaSP/github_demo/I01_Bikes-169_41.8452_0.74854.conf) is provided for the same I01_Bikes encoding. Download [inverse depth for Lytro dataset](http://www.cs.tut.fi/~astolap/WaSP/Lytro_inverse_depth.zip) before attempting to run the encoder. Place the inverse depth .pgm files in the directory containing the original .ppm files. You can run the encoder with,
 
->./wasp-encoder-bin /path/to/original_images/ /path/to/output/directory /path/to/Kakadu/ /path/to/I01_Bikes-169_41.9343_0.74902.conf
+>./wasp-encoder-bin /path/to/original_images/ /path/to/output/directory /path/to/Kakadu/ /path/to/I01_Bikes-169_41.8452_0.74854.conf
+
+WaSP is experimental software and provides very limited functionality. Support is provided for 10-bit .ppm files only.
 
 ## Running the encoder
 
@@ -103,6 +105,8 @@ The decoder takes three arguments: path to input file (for example path to the o
 ## References
 
 This work is based on academic research and any research based on this software should cite at least the first of the following papers:
+
+**P. Astola, I. Tabus, *WaSP: Hierarchical Warping, Merging, and Sparse Prediction for Light Field Image Compression*, EUVIP 2018**
 
 **P. Astola, I. Tabus, *Light Field Compression of HDCA Images Combining Linear Prediction and JPEG 2000*, EUSIPCO 2018**
 
