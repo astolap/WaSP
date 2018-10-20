@@ -74,6 +74,8 @@ struct view{
 
 	bool has_x_displacement, has_y_displacement;
 
+	bool has_chrominance;
+
 };
 
 void initView(view* view);

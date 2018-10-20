@@ -244,7 +244,7 @@ void decodeResidualJP2_YUV(unsigned short *ps, const char *kdu_expand_path, char
 		if (aux_read16PGMPPM(ycbcr_pgm_names[icomp], nc1, nr1, ncomp1, jp2_residual))
 		{
 			if (ycbcr == NULL) {
-				ycbcr = new unsigned short[nc1*nr1*ncomp]();
+				ycbcr = new unsigned short[nc1*nr1*3]();
 			}
 
 			if (YUV_422) {
@@ -277,7 +277,7 @@ void decodeResidualJP2_YUV(unsigned short *ps, const char *kdu_expand_path, char
 		*(ycbcr + ii) = clip(*(ycbcr + ii), (unsigned short)0, (unsigned short)maxval);
 	}
 
-	unsigned short *rgb = new unsigned short[nr1*nc1*ncomp]();
+	unsigned short *rgb = new unsigned short[nr1*nc1*3]();
 
 
 	if (RESIDUAL_16BIT_bool) {
@@ -306,19 +306,19 @@ void encodeResidualJP2_YUV(const int nr, const int nc, unsigned short *original_
 	const bool RESIDUAL_16BIT_bool)
 {
 	/*establish residual*/
-	unsigned short *residual_image = new unsigned short[nr*nc * ncomp]();
+	unsigned short *residual_image = new unsigned short[nr*nc * 3]();
 
 	signed int dv = RESIDUAL_16BIT_bool ? 1 : 2;
 	signed int BP = RESIDUAL_16BIT_bool ? 16 : 10;
 	signed int maxval = (1 << BP) - 1;// pow(2, BP) - 1;
 
-	for (int iir = 0; iir < nr*nc*ncomp; iir++) {
+	for (int iir = 0; iir < nr*nc*3; iir++) {
 		signed int res_val = ( (((signed int)*(original_intermediate_view + iir)) - ((signed int)*(ps + iir)) + offset) )/dv;
 		res_val = clip(res_val, 0, maxval);
 		*(residual_image + iir) = (unsigned short)(res_val);
 	}
 
-	unsigned short *ycbcr = new unsigned short[nr*nc*ncomp]();
+	unsigned short *ycbcr = new unsigned short[nr*nc*3]();
 
 	if (RESIDUAL_16BIT_bool) {
 		RGB2YCbCr(residual_image, ycbcr, nr, nc, 16);
@@ -359,7 +359,7 @@ void encodeResidualJP2_YUV(const int nr, const int nc, unsigned short *original_
 
 		char kdu_compress_s[1024];
 	
-		sprintf(kdu_compress_s, "\"%s\"%s%s%s%s%s%f%s%d", kdu_compress_path, " -i ", ycbcr_pgm_names[icomp], " -o ", ycbcr_jp2_names[icomp], " -no_weights -no_info -precise -rate ", rateR,
+		sprintf(kdu_compress_s, "\"%s\"%s%s%s%s%s%f%s%d", kdu_compress_path, " -i ", ycbcr_pgm_names[icomp], " -o ", ycbcr_jp2_names[icomp], " -no_weights -full -no_info -precise -rate ", rateR,
 			" Clevels=",CLEVELS);
 
 		int status = system_1(kdu_compress_s);

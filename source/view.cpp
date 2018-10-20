@@ -55,4 +55,6 @@ void initView(view* view)
 	view->has_x_displacement = false;
 	view->has_y_displacement = false;
 
+	view->has_chrominance = false;
+
 }

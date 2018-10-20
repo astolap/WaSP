@@ -217,7 +217,9 @@ int main(int argc, char** argv) {
 				ycbcr_jp2_names[1] = jp2_residual_Cb_path_jp2;
 				ycbcr_jp2_names[2] = jp2_residual_Cr_path_jp2;
 
-				for (int icomp = 0; icomp < 3; icomp++) {
+				int ncomp_r = SAI->has_chrominance ? 3 : 1;
+
+				for (int icomp = 0; icomp < ncomp_r; icomp++) {
 
 					readResidualFromDisk(ycbcr_jp2_names[icomp], n_bytes_residual, input_LF, JP2_dict);
 
@@ -231,7 +233,7 @@ int main(int argc, char** argv) {
 					offset_v = (1 << 10) - 1;// pow(2, 10) - 1;
 				}
 
-				decodeResidualJP2_YUV(SAI->color, kdu_expand_path, ycbcr_jp2_names, ycbcr_pgm_names, 3, offset_v, (1 << 10) - 1, RESIDUAL_16BIT_bool);
+				decodeResidualJP2_YUV(SAI->color, kdu_expand_path, ycbcr_jp2_names, ycbcr_pgm_names, ncomp_r, offset_v, (1 << 10) - 1, RESIDUAL_16BIT_bool);
 
 			}
 			else {
