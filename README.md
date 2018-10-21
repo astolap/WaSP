@@ -42,7 +42,7 @@ WaSP is experimental software and provides very limited functionality. Support i
 
 Encoder takes four arguments: path to input images, path to output directory, path to Kakadu directory and path to the configuration file. 
 
-Encoder assumes that the images are named using col_row.ppm in %03d format, for example view row=7,col=3 should be in a file named **003\_007.ppm**. For the UNSW style inverse depths, the encoder assumes that depth files are named as **003\_007.pgm** and are found in the same folder as the color images.
+Encoder assumes that the images are named using col_row.ppm in %03d format, for example view row=8,col=4 should be in a file named **003\_007.ppm**. Indexing for the file names starts from zero. For the UNSW style inverse depths, the encoder assumes that depth files are named as **003\_007.pgm** and are found in the same folder as the color images.
 
 Encoder also assumes that the directory pointing to Kakadu installation contains **kdu_compress** and **kdu_expand** executables.
 
@@ -60,9 +60,9 @@ Currently, the configuration file is a collection of parameters (as 32-bit signe
 
    continuing for each view to be encoded,
 
-5. row index in light field, 7, (used to fetch .ppm files, the example here is view 003_007.ppm)
+5. row index in light field, for example 8 (used to fetch .ppm files, the example here is view 003_007.ppm)
 
-6. column index in light field, 3
+6. column index in light field, for example 4 (used to fetch .ppm files, the example here is view 003_007.ppm)
 
 7. camera position along the horizontal (e.g. from UNSW camera centers) multiplied with 100000
 
