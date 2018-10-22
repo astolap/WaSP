@@ -94,6 +94,10 @@ Currently, the configuration file is a collection of parameters (as 32-bit signe
 	
 17. (or 15+Nc+Nd+2) whether the view uses a segmentation, true (1) or false (0)
 
+### Reading or modifying configuration files
+
+You can use the Matlab functions in the Matlab directory to modify and write your own configuration files.
+
 ### Output of the encoder
 
 The encoder outputs to the bitstream **output.LF** in the output directory. Additionally, it also decodes the views to the output directory.
