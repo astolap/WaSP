@@ -24,8 +24,14 @@ int system_1(char *str) {
 
 }
 
-
 long aux_GetFileSize(char* filename)
+{
+	struct stat stat_buf;
+	int rc = stat(filename, &stat_buf);
+	return rc == 0 ? stat_buf.st_size : -1;
+}
+
+long aux_GetFileSize(const char* filename)
 {
 	struct stat stat_buf;
 	int rc = stat(filename, &stat_buf);

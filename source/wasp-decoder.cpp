@@ -20,6 +20,7 @@
 #include "psnr.hh"
 #include "inpainting.hh"
 #include "predictdepth.hh"
+#include "codestream.hh"
 
 #define SAVE_PARTIAL_WARPED_VIEWS false
 
@@ -38,23 +39,29 @@ int main(int argc, char** argv) {
 
 	int n_views_total;
 
-	size_t f_status;
+	int n_bytes_prediction = 0, n_bytes_residual = 0;
 
-	f_status = fread(&n_views_total, sizeof(int), 1,input_LF);
+	n_bytes_prediction += (int)fread(&n_views_total, sizeof(int), 1,input_LF)* sizeof(int);
 
 	int _NR, _NC;
 
-	f_status = fread(&_NR, sizeof(int), 1, input_LF);
-	f_status = fread(&_NC, sizeof(int), 1, input_LF);
+	n_bytes_prediction += (int)fread(&_NR, sizeof(int), 1, input_LF)* sizeof(int);
+	n_bytes_prediction += (int)fread(&_NC, sizeof(int), 1, input_LF)* sizeof(int);
 
 	bool YUV_TRANSFORM = false;
 
 	int yuv_transform_s;
-	f_status = fread(&yuv_transform_s, sizeof(int), 1, input_LF);
+	n_bytes_prediction += (int)fread(&yuv_transform_s, sizeof(int), 1, input_LF)* sizeof(int);
 
 	YUV_TRANSFORM = yuv_transform_s > 0 ? true : false;
 
+	unsigned short MINIMUM_DEPTH = 0;
+	n_bytes_prediction += (int)fread(&MINIMUM_DEPTH, sizeof(unsigned short), 1, input_LF) * sizeof(unsigned short);
+
+
 	const bool RESIDUAL_16BIT_bool = RESIDUAL_16BIT ? 1 : 0;
+
+	std::vector<std::vector<unsigned char>> JP2_dict;
 
 	view *LF = new view[n_views_total]();
 
@@ -70,56 +77,20 @@ int main(int argc, char** argv) {
 		SAI->nr = _NR;
 		SAI->nc = _NC;
 
+		if (MINIMUM_DEPTH > 0) {
+			SAI->min_inv_d = (int)MINIMUM_DEPTH;
+		}
+
 		minimal_config mconf;
-		f_status = fread(&mconf, sizeof(minimal_config), 1, input_LF);
 
-		printf("size of minimal_config %i bytes\n", (int)sizeof(minimal_config));
+		codestreamToViewHeader(n_bytes_prediction, SAI, input_LF, mconf);
 
-		setup_form_minimal_config(&mconf, SAI);
-
-		if (SAI->n_references > 0) {
-			SAI->references = new int[SAI->n_references]();
-			for (int ij = 0; ij < SAI->n_references; ij++) {
-				unsigned short nid;
-				f_status = fread(&nid, sizeof(unsigned short), 1, input_LF);
-				*(SAI->references + ij) = (int)nid;
-			}
-		}
-
-		if (SAI->n_depth_references > 0) {
-			SAI->depth_references = new int[SAI->n_depth_references]();
-			for (int ij = 0; ij < SAI->n_depth_references; ij++) {
-				unsigned short nid;
-				f_status = fread(&nid, sizeof(unsigned short), 1, input_LF);
-				*(SAI->depth_references + ij) = (int)nid;
-			}
-		}
-
-		if (SAI->Ms > 0 && SAI->NNt > 0) {
-			SAI->sparse_mask = new unsigned char[SAI->Ms]();
-			f_status = fread(SAI->sparse_mask, sizeof(unsigned char), SAI->Ms, input_LF);
-			SAI->sparse_weights = new int32_t[SAI->Ms]();
-			f_status = fread(SAI->sparse_weights, sizeof(int32_t), SAI->Ms, input_LF);
-		}
-
-		SAI->NB = (1 << SAI->n_references)*SAI->n_references;// (pow(2, SAI->n_references)*SAI->n_references);
-
-		if ( !SAI->use_median ) {
-			if (SAI->stdd < 0.001) {
-				if (SAI->n_references > 0) {
-					SAI->merge_weights = new signed short[SAI->NB / 2]();
-					f_status = fread(SAI->merge_weights, sizeof(signed short), SAI->NB / 2, input_LF);
-				}
-			}
-			else {
-				f_status = fread(&SAI->stdd, sizeof(float), 1, input_LF);
-			}
-		}
-
-		if (!(f_status > 0)) {
+		if ( feof( input_LF ) ) {
 			printf("File reading error. Terminating\t...\n");
 			exit(0);
 		}
+
+		printf("Decoding view %03d_%03d\t", SAI->c, SAI->r);
 
 		SAI->color = new unsigned short[SAI->nr*SAI->nc * 3]();
 		SAI->depth = new unsigned short[SAI->nr*SAI->nc]();
@@ -127,7 +98,7 @@ int main(int argc, char** argv) {
 		predictDepth(SAI, LF);
 
 		/* forward warp color */
-		if (SAI->n_references > 0) {
+		if (SAI->has_color_references) {
 
 			/* holds partial warped views for ii */
 			unsigned short **warped_color_views = new unsigned short*[SAI->n_references]();
@@ -143,8 +114,6 @@ int main(int argc, char** argv) {
 
 				aux_read16PGMPPM(ref_view->path_out_pgm, tmp_w, tmp_r, tmp_ncomp, ref_view->depth);
 				aux_read16PGMPPM(ref_view->path_out_ppm, tmp_w, tmp_r, tmp_ncomp, ref_view->color);
-
-				//int uu = SAI->references[ij];
 
 				/* FORWARD warp color AND depth */
 				warpView0_to_View1(ref_view, SAI, warped_color_views[ij], warped_depth_views[ij], DispTargs[ij]);
@@ -171,17 +140,12 @@ int main(int argc, char** argv) {
 
 			initViewW(SAI, DispTargs);
 
-			if (SAI->stdd < 0.01) {
-				/* merge color with prediction */
-				mergeWarped_N(warped_color_views, DispTargs, SAI, 3);
-				/* hole filling for color*/
-				holefilling(SAI->color, 3, SAI->nr, SAI->nc, 0);
-			}
-			else {
-				if (SAI->use_median) {
-					int startt = clock();
-					mergeMedian_N(warped_color_views, DispTargs, SAI, 3);
-					std::cout << "time elapsed in color median merging\t" << (int)clock() - startt << "\n";
+			/* Bug fix from VM1.0. The logic for choosing median merging over fixed weight merging was faulty. */
+			if (!SAI->use_median) {
+				if (SAI->stdd < 0.001) {
+					/* merge color with prediction */
+					mergeWarped_N(warped_color_views, DispTargs, SAI, 3);
+					/* hole filling for color*/
 					holefilling(SAI->color, 3, SAI->nr, SAI->nc, 0);
 				}
 				else {
@@ -192,6 +156,12 @@ int main(int argc, char** argv) {
 					/* hole filling for color*/
 					holefilling(SAI->color, 3, SAI->nr, SAI->nc, 0);
 				}
+			}
+			else {
+				int startt = clock();
+				mergeMedian_N(warped_color_views, DispTargs, SAI, 3);
+				std::cout << "time elapsed in color median merging\t" << (int)clock() - startt << "\n";
+				holefilling(SAI->color, 3, SAI->nr, SAI->nc, 0);
 			}
 			
 			/* clean */
@@ -207,7 +177,7 @@ int main(int argc, char** argv) {
 			delete[](DispTargs);
 		}
 
-		if (SAI->NNt > 0 && SAI->Ms > 0)
+		if ( SAI->use_global_sparse )
 		{
 			applyGlobalSparseFilter(SAI);
 		}
@@ -216,12 +186,10 @@ int main(int argc, char** argv) {
 
 		int n_bytes_color_residual = 0, n_bytes_depth_residual = 0;
 
-		f_status = fread(&n_bytes_color_residual, sizeof(int), 1,  input_LF);
-
 		/* get residual */
-		if (n_bytes_color_residual > 0)
+		if ( SAI->has_color_residual )
 		{
-
+			//n_bytes_residual += (int)fread(&n_bytes_color_residual, sizeof(int), 1, input_LF)* sizeof(int);
 			if (SAI->yuv_transform && YUV_TRANSFORM) {
 
 				char pgm_residual_Y_path[1024];
@@ -251,21 +219,11 @@ int main(int argc, char** argv) {
 				ycbcr_jp2_names[1] = jp2_residual_Cb_path_jp2;
 				ycbcr_jp2_names[2] = jp2_residual_Cr_path_jp2;
 
-				for (int icomp = 0; icomp < 3; icomp++) {
+				int ncomp_r = SAI->has_chrominance ? 3 : 1;
 
-					if (icomp > 0) {
-						f_status = fread(&n_bytes_color_residual, sizeof(int), 1, input_LF);
-					}
+				for (int icomp = 0; icomp < ncomp_r; icomp++) {
 
-					unsigned char *jp2_residual = new unsigned char[n_bytes_color_residual]();
-					f_status = fread(jp2_residual, sizeof(unsigned char), n_bytes_color_residual, input_LF);
-
-					FILE *jp2_res_file;
-					jp2_res_file = fopen(ycbcr_jp2_names[icomp], "wb");
-					fwrite(jp2_residual, sizeof(unsigned char), n_bytes_color_residual, jp2_res_file);
-					fclose(jp2_res_file);
-
-					delete[](jp2_residual);
+					readResidualFromDisk(ycbcr_jp2_names[icomp], n_bytes_residual, input_LF, JP2_dict);
 
 				}
 
@@ -277,7 +235,7 @@ int main(int argc, char** argv) {
 					offset_v = (1 << 10) - 1;// pow(2, 10) - 1;
 				}
 
-				decodeResidualJP2_YUV(SAI->color, kdu_expand_path, ycbcr_jp2_names, ycbcr_pgm_names, 3, offset_v, (1 << 10) - 1, RESIDUAL_16BIT_bool);
+				decodeResidualJP2_YUV(SAI->color, kdu_expand_path, ycbcr_jp2_names, ycbcr_pgm_names, ncomp_r, offset_v, (1 << 10) - 1, RESIDUAL_16BIT_bool);
 
 			}
 			else {
@@ -292,24 +250,17 @@ int main(int argc, char** argv) {
 
 				sprintf(jp2_residual_path_jp2, "%s%c%03d_%03d%s", output_dir, '/', SAI->c, SAI->r, "_residual.jp2");
 
-				unsigned char *jp2_residual = new unsigned char[n_bytes_color_residual]();
-				f_status = fread(jp2_residual, sizeof(unsigned char), n_bytes_color_residual, input_LF);
-
-				FILE *jp2_res_file;
-				jp2_res_file = fopen(jp2_residual_path_jp2, "wb");
-				fwrite(jp2_residual, sizeof(unsigned char), n_bytes_color_residual, jp2_res_file);
-				fclose(jp2_res_file);
-
-				delete[](jp2_residual);
+				readResidualFromDisk(jp2_residual_path_jp2, n_bytes_residual, input_LF, JP2_dict);
 
 				decodeResidualJP2(SAI->color, kdu_expand_path, jp2_residual_path_jp2, ppm_residual_path, ncomp1, (1 << BIT_DEPTH) - 1, (1 << BIT_DEPTH) - 1, RESIDUAL_16BIT_bool);
 			}
 			
 		}
 
-		f_status = fread(&n_bytes_depth_residual, sizeof(int), 1, input_LF);
 
-		if (n_bytes_depth_residual>0) { /* residual depth if needed */
+		if (SAI->has_depth_residual) { /* residual depth if needed */
+
+			//n_bytes_residual =+ (int)fread(&n_bytes_depth_residual, sizeof(int), 1, input_LF)* sizeof(int);
 
 			int ncomp1 = 0; /* temporary to hold the number of components */
 
@@ -321,15 +272,7 @@ int main(int argc, char** argv) {
 
 			sprintf(jp2_residual_depth_path_jp2, "%s%c%03d_%03d%s", output_dir, '/', SAI->c, SAI->r, "_depth_residual.jp2");
 
-			unsigned char *jp2_depth_residual = new unsigned char[n_bytes_depth_residual]();
-			f_status = fread(jp2_depth_residual, sizeof(unsigned char), n_bytes_depth_residual, input_LF);
-
-			FILE *jp2_depth_res_file;
-			jp2_depth_res_file = fopen(jp2_residual_depth_path_jp2, "wb");
-			fwrite(jp2_depth_residual, sizeof(unsigned char), n_bytes_depth_residual, jp2_depth_res_file);
-			fclose(jp2_depth_res_file);
-
-			delete[](jp2_depth_residual);
+			readResidualFromDisk(jp2_residual_depth_path_jp2, n_bytes_residual, input_LF, JP2_dict);
 
 			decodeResidualJP2(SAI->depth, kdu_expand_path, jp2_residual_depth_path_jp2, pgm_residual_depth_path, ncomp1, 0, (1 << 16) - 1,1);
 
@@ -366,6 +309,7 @@ int main(int argc, char** argv) {
 			SAI->seg_vp = NULL;
 		}
 
+		printf("decoded: %i kilobytes\n", ftell(input_LF) / 1000);
 	}
 
 	fclose(input_LF);

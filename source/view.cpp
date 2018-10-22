@@ -44,4 +44,17 @@ void initView(view* view)
 
 	view->yuv_transform = true;
 
+	view->has_color_residual = false;
+	view->has_depth_residual = false;
+	view->use_global_sparse = false;
+
+	view->has_color_references = false;
+	view->has_depth_references = false;
+	//view->has_min_inv_depth = false;
+
+	view->has_x_displacement = false;
+	view->has_y_displacement = false;
+
+	view->has_chrominance = false;
+
 }

@@ -68,6 +68,14 @@ struct view{
 
 	bool yuv_transform;
 
+	bool has_color_residual, has_depth_residual, use_global_sparse;
+	bool has_color_references, has_depth_references;
+	//bool has_min_inv_depth;
+
+	bool has_x_displacement, has_y_displacement;
+
+	bool has_chrominance;
+
 };
 
 void initView(view* view);

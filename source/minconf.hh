@@ -5,20 +5,23 @@
 
 struct minimal_config { /* this goes to bitstream */
 
-	unsigned short r , c ; // SAI subscript
-	float y, x; // camera displacement
+	unsigned char r , c ; // SAI subscript
 
-	unsigned short min_inv_d; // needed only if inverse depth has negative values, [0,max]-mind = [-mind,max-mind]
+	//float y, x; // camera displacement
 
-	unsigned char n_references, n_depth_references;
+	//unsigned short min_inv_d; // needed only if inverse depth has negative values, [0,max]-mind = [-mind,max-mind]
 
-	unsigned char use_std;
+	//unsigned char n_references, n_depth_references;
 
-	unsigned char NNt, Ms; //for global sparse, NNt defines the neighborhood size [ -NNt:NNt,-NNt:NNt ], Ms is the filter order
+	//unsigned char use_std;
 
-	unsigned char use_median; //use median merging or not
+	//unsigned char NNt, Ms; //for global sparse, NNt defines the neighborhood size [ -NNt:NNt,-NNt:NNt ], Ms is the filter order
 
-	unsigned char yuv_transform;
+	//unsigned char use_median; //use median merging or not
+
+	//unsigned char yuv_transform;
+
+	unsigned short encoding_flags;
 
 };
 

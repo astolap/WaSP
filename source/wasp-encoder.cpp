@@ -20,14 +20,16 @@
 #include "psnr.hh"
 #include "inpainting.hh"
 #include "predictdepth.hh"
+#include "codestream.hh"
 
 
 #define USE_difftest_ng false
 
 #define YUV_SEARCH_LOW 6.80f
-#define YUV_SEARCH_HIGH 7.80f
-#define YUV_SEARCH_STEP 0.20f
+#define YUV_SEARCH_HIGH 8.0f
+#define YUV_SEARCH_STEP 0.10f
 #define YUV_RATIO_DEFAULT 7.20f
+#define MAX_Y_RATIO 0.99
 
 #define STD_SEARCH_LOW 10
 #define STD_SEARCH_HIGH 250
@@ -84,6 +86,8 @@ int main(int argc, char** argv) {
 	YUV_RATIO_SEARCH = yuv_ratio_search_s > 0 ? true : false;
 	STD_SEARCH = std_search_s > 0 ? true : false;
 
+	unsigned short MINIMUM_DEPTH = 0;
+
 	for (int ii = 0; ii < n_views_total; ii++) {
 
 		view *SAI = LF + ii;
@@ -104,8 +108,15 @@ int main(int argc, char** argv) {
 		fread(&xx, sizeof(int), 1, filept); /*reading*/
 		fread(&yy, sizeof(int), 1, filept); /*reading*/
 
-		SAI->x = float(xx) / 100000;
-		SAI->y = float(yy) / 100000;
+		if ( abs(xx) > 0) {
+			SAI->has_x_displacement = true;
+			SAI->x = float(xx) / 100000;
+		}
+
+		if ( abs(yy) > 0) {
+			SAI->has_y_displacement = true;
+			SAI->y = float(yy) / 100000;
+		}
 
 		int rate_color, rate_depth;
 
@@ -123,13 +134,27 @@ int main(int argc, char** argv) {
 		fread(&stdd, sizeof(int), 1, filept); /*reading*/
 		SAI->stdd = ((float)stdd) / 100000;
 
-		fread(&SAI->min_inv_d, sizeof(int), 1, filept); /*reading, if we have negative inverse depth,
+		unsigned short tmpminv;
+
+		fread(&tmpminv, sizeof(int), 1, filept); /*reading, if we have negative inverse depth,
 												   for example in lenslet, we need to subtract min_inv_d
 												   from the inverse depth maps*/
+		if (ii == 0) {
+			if (tmpminv > 0) {
+				MINIMUM_DEPTH = tmpminv;
+			}
+		}
+
+		if (MINIMUM_DEPTH > 0) {
+			//SAI->has_min_inv_depth = true;
+			SAI->min_inv_d = (int)MINIMUM_DEPTH;
+		}
 
 		fread(&(SAI->n_references), sizeof(int), 1, filept); /*reading*/
 
 		if (SAI->n_references > 0) {
+
+			SAI->has_color_references = true;
 
 			SAI->references = new int[SAI->n_references]();
 
@@ -138,7 +163,10 @@ int main(int argc, char** argv) {
 		}
 
 		fread(&(SAI->n_depth_references), sizeof(int), 1, filept); /*reading*/
+
 		if (SAI->n_depth_references > 0) {
+
+			SAI->has_depth_references = true;
 
 			SAI->depth_references = new int[SAI->n_depth_references]();
 
@@ -159,337 +187,15 @@ int main(int argc, char** argv) {
 	}
 	fclose(filept);
 
-
-	/* 2D array format for views, useful in some cases */
-	view ***LF_mat = new view**[maxR]();
-	for (int ii = 0; ii < maxR; ii++) {
-		LF_mat[ii] = new view*[maxC]();
-	}
-
-	for (int r = 0; r < maxR; r++) {
-		for (int c = 0; c < maxC; c++) {
-			LF_mat[r][c] = NULL;
-		}
-	}
-
-	for (int ii = 0; ii < n_views_total; ii++) {
-		view *SAI = LF + ii;
-		LF_mat[SAI->r][SAI->c] = SAI;
-	}
-
-	/* get motion vectors/displacements/warping tables for segmentations, NOT USED IN THIS VERSION */
-	for (int ii = 0; ii < n_views_total; ii++)
-	{
-		view *SAI = LF + ii;
-
-		if (SAI->has_segmentation > 0) { /* displacement/disparity search is only applied to views which have a segmentation */
-
-			unsigned short *temp_segmentation;
-			int ncomp1; //nc_temp and nr_temp should equal SAI->nr,SAI->nc
-
-			if (!aux_read16PGMPPM(SAI->path_input_seg, SAI->nc, SAI->nr, ncomp1, temp_segmentation)) {
-				printf("Error reading segmentation %s\nExiting...\n", SAI->path_input_seg);
-				exit(0);
-			}
-
-			SAI->segmentation = new unsigned short[SAI->nr*SAI->nc]();
-
-			int maxL = 0;
-
-			for (int jj = 0; jj < SAI->nr*SAI->nc; jj++) {
-				*(SAI->segmentation + jj) = (unsigned short)*(temp_segmentation + jj);
-
-				maxL = *(SAI->segmentation + jj) > maxL ? *(SAI->segmentation + jj) : maxL;
-
-			}
-
-			SAI->maxL = maxL;
-
-			/* initialize region displacement table */
-			SAI->region_displacements = new int***[maxR]();
-			for (int iar = 0; iar < maxR; iar++) {
-				SAI->region_displacements[iar] = new int**[maxC]();
-				for (int iac = 0; iac < maxC; iac++) {
-					SAI->region_displacements[iar][iac] = new int*[maxL + 1]();
-					for (int iR = 0; iR <= maxL; iR++) {
-						SAI->region_displacements[iar][iac][iR] = new int[2]();
-					}
-				}
-			}
-
-			delete[](temp_segmentation);
-
-			/* motion vectors for all regions against all views */
-
-			unsigned short *im0;
-
-			aux_read16PGMPPM(SAI->path_input_ppm, SAI->nc, SAI->nr, ncomp1, im0);
-
-			for (int jj = 0; jj < n_views_total; jj++) {
-
-				view *SAI1 = LF + jj;
-
-				if (jj != ii) {
-
-					unsigned short *im1;
-					aux_read16PGMPPM(SAI1->path_input_ppm, SAI1->nc, SAI1->nr, ncomp1, im1);
-
-					int search_radius = 10; // search -search_radius:search_radius in both x,y
-
-					float ***match_score = new float**[maxL + 1]();
-					for (int ik = 0; ik <= maxL; ik++) {
-						match_score[ik] = new float*[search_radius * 2 + 1]();
-						for (int isr = 0; isr < search_radius * 2 + 1; isr++) {
-							match_score[ik][isr] = new float[search_radius * 2 + 1]();
-						}
-					}
-
-					int ***counts = new int**[maxL + 1]();
-					for (int ik = 0; ik <= maxL; ik++) {
-						counts[ik] = new int*[search_radius * 2 + 1]();
-						for (int isr = 0; isr < search_radius * 2 + 1; isr++) {
-							counts[ik][isr] = new int[search_radius * 2 + 1]();
-						}
-					}
-
-					unsigned short *segp = SAI->segmentation;
-
-					for (int ijk = 0; ijk < SAI->nr*SAI->nc; ijk++) {
-						for (int ik = 0; ik <= maxL; ik++) {
-							if (*(segp + ijk) == ik) {
-#pragma omp parallel for
-								for (int isr = -search_radius; isr <= search_radius; isr++) {
-									for (int isc = -search_radius; isc <= search_radius; isc++) {
-
-										int iy = ijk % SAI->nr; //row
-										int ix = (ijk - iy) / SAI->nr; //col
-
-										int iy1 = iy + isr;
-										int ix1 = ix + isc;
-
-										if (iy1 >= 0 && iy1 < SAI->nr && ix1 >= 0 && ix1 < SAI->nc) {
-
-											int ijk1 = ix1*SAI->nr + iy1;
-
-											for (int ic = 0; ic < 3; ic++) {
-												int offc = ic*SAI->nr*SAI->nc;
-												match_score[ik][isr + search_radius][isc + search_radius] += abs(((float)*(im0 + ijk + offc) - (float)*(im1 + ijk1 + offc)));
-											}
-
-											//printf("%f\n", match_score[ik][isr + search_radius][isc + search_radius]);
-
-											counts[ik][isr + search_radius][isc + search_radius]++;
-
-											//printf("%d\n", counts[ik][isr + search_radius][isc + search_radius]);
-
-										}
-									}
-								}
-							}
-						}
-					}
-
-
-
-					delete[](im1);
-
-					/* find best matching displacement */
-					for (int ik = 0; ik <= maxL; ik++) {
-						float lowest_score = FLT_MAX;
-						for (int isr = 0; isr < search_radius * 2 + 1; isr++) {
-							for (int isc = 0; isc < search_radius * 2 + 1; isc++) {
-
-								int nk = counts[ik][isr][isc];
-
-								if (nk > 0) {
-
-									float clow = match_score[ik][isr][isc] / (float)nk;
-
-									//printf("%f\n", clow);
-
-									if (clow < lowest_score) {
-										SAI->region_displacements[SAI1->r][SAI1->c][ik][0] = isr - search_radius;
-										SAI->region_displacements[SAI1->r][SAI1->c][ik][1] = isc - search_radius;
-										lowest_score = clow;
-									}
-
-								}
-							}
-						}
-					}
-
-					/* Fill in missing depth values. This step needs to be done sequentially since we propagate the missing values from side-view to side-view. */
-					/*% find as reference the already solved view closest to the center that
-					% is a neighbor of the current view*/
-
-					int closest_jj = 0;
-					float smallest_distance = FLT_MAX;
-
-					for (int dy = -1; dy <= 1; dy++) {
-						for (int dx = -1; dx <= 1; dx++) {
-
-							view *SAI_f = LF_mat[SAI->r + dy][SAI->c + dx];
-
-							if (SAI_f->i_order < jj) {
-
-								float dist = sqrt((float)((SAI_f->r - SAI->r)*(SAI_f->r - SAI->r) + 
-									(SAI_f->c- SAI->c)*(SAI_f->c - SAI->c)));
-
-								if (dist < smallest_distance) {
-									smallest_distance = dist;
-									closest_jj = SAI_f->i_order;
-								}
-
-							}
-
-						}
-					}
-
-
-					for (int iR = 0; iR <= maxL; iR++) {
-						printf("SAI->region_displacements[%d][%d][%d][0] = %d\t", SAI1->r, SAI1->c, iR, SAI->region_displacements[SAI1->r][SAI1->c][iR][0]);
-						printf("SAI->region_displacements[%d][%d][%d][1] = %d\n", SAI1->r, SAI1->c, iR, SAI->region_displacements[SAI1->r][SAI1->c][iR][1]);
-					}
-
-
-					unsigned short *seg_warped;
-					unsigned short *color_seg_warped;
-
-					seg_warped = new unsigned short[SAI->nr*SAI->nc]();
-					color_seg_warped = new unsigned short[SAI->nr*SAI->nc * 3]();
-
-					for (int ijk = 0; ijk < SAI->nr*SAI->nc; ijk++) {
-						for (int ik = 0; ik <= maxL; ik++) {
-							if (*(segp + ijk) == ik) {
-								int iy = ijk % SAI->nr; //row
-								int ix = (ijk - iy) / SAI->nr; //col
-
-								int iy1 = iy + SAI->region_displacements[SAI1->r][SAI1->c][ik][0];
-								int ix1 = ix + SAI->region_displacements[SAI1->r][SAI1->c][ik][1];
-
-								if (iy1 >= 0 && iy1 < SAI->nr && ix1 >= 0 && ix1 < SAI->nc) {
-
-									int ijk1 = ix1*SAI->nr + iy1;
-
-									if (*(seg_warped + ijk1) == 0) {
-
-										for (int ic = 0; ic < 3; ic++) {
-											int offc = ic*SAI->nr*SAI->nc;
-											if (ic < 1) {
-												*(seg_warped + ijk1 + offc) = ik;
-											}
-											*(color_seg_warped + ijk1 + offc) = *(im0 + ijk + offc);
-										}
-
-									}
-								}
-							}
-						}
-					}
-
-					/* now use the chosen view closest_jj and use 3x3 pixel neighborhood to fill in missing depth with the maximum */
-					if (closest_jj > 0) {
-						view *SAI_f = LF + closest_jj;
-
-						unsigned short *seg_f = SAI_f->segmentation;
-
-						for (int ijk = 0; ijk < SAI->nr*SAI->nc; ijk++) {
-
-							if (*(seg_warped + ijk) == 0) {
-
-								int iy = ijk % SAI->nr; //row
-								int ix = (ijk - iy) / SAI->nr; //col
-
-								unsigned short largest_depth = 0;
-
-								for (int dy = -1; dy <= 1; dy++) {
-									for (int dx = -1; dx <= 1; dx++) {
-
-										int iy1 = iy + dy;
-										int ix1 = ix + dx;
-
-										if (iy1 >= 0 && iy1 < SAI->nr && ix1 >= 0 && ix1 < SAI->nc) {
-
-											unsigned short dval = *(seg_f + ijk + dx*SAI->nr + dy);
-
-											if (dval > largest_depth) {
-												largest_depth = dval;
-											}
-
-										}
-									}
-								}
-
-								*(seg_warped + ijk) = largest_depth;
-
-							}
-						}
-					}
-
-					unsigned short *DM_ROW_tmp = new unsigned short[SAI->nr*SAI->nc]();
-					unsigned short *DM_COL_tmp = new unsigned short[SAI->nr*SAI->nc]();
-
-					/* make row and column disparity maps, save to disk */
-					for (int ijk = 0; ijk < SAI->nr*SAI->nc; ijk++) {
-						int ik = *(seg_warped + ijk);
-						DM_ROW_tmp[ijk] = (unsigned short)SAI->region_displacements[SAI1->r][SAI1->c][ik][0] + 20;
-						DM_COL_tmp[ijk] = (unsigned short)SAI->region_displacements[SAI1->r][SAI1->c][ik][1] + 20;
-					}
-
-					char tempchar[1024];
-					sprintf(tempchar, "%s%03d_%03d%s%03d_%03d%s", output_dir, (SAI)->c, (SAI)->r, "_segmentation_warped_to_", SAI1->c, SAI1->r, ".pgm");
-					aux_write16PGMPPM(tempchar, SAI->nc, SAI->nr, 1, seg_warped);
-
-					memset(tempchar, 0x00, 1024 * sizeof(char));
-					sprintf(tempchar, "%s%03d_%03d%s%03d_%03d%s", output_dir, (SAI)->c, (SAI)->r, "_color_warped_to_", SAI1->c, SAI1->r, ".ppm");
-					aux_write16PGMPPM(tempchar, SAI->nc, SAI->nr, 3, color_seg_warped);
-
-					memset(tempchar, 0x00, 1024 * sizeof(char));
-					sprintf(tempchar, "%s%03d_%03d%s%03d_%03d%s", output_dir, (SAI)->c, (SAI)->r, "_warped_to_", SAI1->c, SAI1->r, "_DM_ROW.pgm");
-					aux_write16PGMPPM(tempchar, SAI->nc, SAI->nr, 1, DM_ROW_tmp);
-
-					memset(tempchar, 0x00, 1024 * sizeof(char));
-					sprintf(tempchar, "%s%03d_%03d%s%03d_%03d%s", output_dir, (SAI)->c, (SAI)->r, "_warped_to_", SAI1->c, SAI1->r, "_DM_COL.pgm");
-					aux_write16PGMPPM(tempchar, SAI->nc, SAI->nr, 1, DM_COL_tmp);
-
-					SAI1->segmentation = seg_warped;
-
-					delete[](DM_ROW_tmp);
-					delete[](DM_COL_tmp);
-
-					//delete[](seg_warped); //!!!!!!!!!!!!!!!!!!!!!!!!!!!!! we need to clean this still
-					delete[](color_seg_warped);
-
-
-					//char dummy;
-					//std::cin >> dummy;
-
-					for (int ik = 0; ik <= maxL; ik++) {
-						for (int isr = 0; isr < search_radius * 2 + 1; isr++) {
-							delete[](match_score[ik][isr]);
-							delete[](counts[ik][isr]);
-						}
-						delete[](match_score[ik]);
-						delete[](counts[ik]);
-					}
-					delete[](match_score);
-					delete[](counts);
-
-				}
-				else {
-					/* nothing to do, for each region displacements are zero*/
-				}
-
-			}
-
-			delete[](im0);
-
-		}
-	}
-
-
 	char path_out_LF_data[1024];
 	sprintf(path_out_LF_data, "%s%c%s", output_dir, '/', "output.LF");
+
+	/* debugging codestream overhead reduction */
+	char path_codestream[1024];
+	sprintf(path_codestream, "%s%c%s", output_dir, '/', "LF.codestream");
+	FILE *tmp_codestream;
+	tmp_codestream = fopen(path_codestream, "wb");
+	fclose(tmp_codestream);
 
 	/* our bitstream starts here */
 	FILE *output_LF_file;
@@ -497,7 +203,7 @@ int main(int argc, char** argv) {
 	fwrite(&n_views_total, sizeof(int), 1, output_LF_file);
 	fclose(output_LF_file);
 
-	bool size_written = false;
+	bool global_header_written = false;
 
 	FILE *output_results_file;
 	char output_results_filename[1024];
@@ -512,9 +218,20 @@ int main(int argc, char** argv) {
 	//fprintf(output_results_file, "%s\n", output_results);
 	fclose(output_results_file);
 
+
+	/* to get effiency from multiple JP2 files, we remove parts of the files
+	which are repetative over all files. For this we have a minimalistic 
+	dictionary method. */
+
+	std::vector<std::vector<unsigned char>> JP2_dict;
+
+	double psnr_yuv_mean = 0;
+
 	for (int ii = 0; ii < n_views_total; ii++) {
 
 		view *SAI = LF + ii;
+
+		printf("Encoding view %03d_%03d\t", SAI->c, SAI->r);
 
 		//char output_results[1024];
 		memset(output_results, 0x00, sizeof(char) * sizeof(output_results)/sizeof(char));
@@ -603,7 +320,7 @@ int main(int argc, char** argv) {
 			initViewW(SAI, DispTargs);
 
 			/* get LS weights */
-			if (SAI->stdd == 0) {
+			if (SAI->stdd < 0.0001) {
 				getViewMergingLSWeights_N(SAI, warped_color_views, DispTargs, original_color_view);
 				/* merge color with prediction */
 				mergeWarped_N(warped_color_views, DispTargs, SAI, 3);
@@ -630,7 +347,6 @@ int main(int argc, char** argv) {
 
 					float stdi = 0;
 
-					//double stds[] = { 5,10,15,20,25,30,35,40,45,50,55,60,65,70,75,80,85 };
 					for (float stds = STD_SEARCH_LOW; stds < STD_SEARCH_HIGH; stds += STD_SEARCH_STEP) {
 						SAI->stdd = stds;
 						/* we don't use LS weights but something derived on geometric distance in view array*/
@@ -688,7 +404,7 @@ int main(int argc, char** argv) {
 		}
 
 
-		//float psnr_result;
+		double psnr_without_sparse = 0;
 
 		if (SAI->n_references > 0) {
 
@@ -696,33 +412,56 @@ int main(int argc, char** argv) {
 
 			//psnr_result = USE_difftest_ng ? getPSNR(NULL, SAI->path_out_ppm, SAI->path_input_ppm, difftest_call) : 0;
 		
-			output_buffer_length += sprintf(output_results + output_buffer_length, "\t%f", getYCbCr_422_PSNR(SAI->color, original_color_view, SAI->nr, SAI->nc, 3, BIT_DEPTH) );
+			psnr_without_sparse = getYCbCr_422_PSNR(SAI->color, original_color_view, SAI->nr, SAI->nc, 3, BIT_DEPTH);
+
+			output_buffer_length += sprintf(output_results + output_buffer_length, "\t%f", psnr_without_sparse);
 
 		}
 		else {
 			output_buffer_length += sprintf(output_results + output_buffer_length, "\t%f", 0.0);
 		}
 
+		unsigned short *colorview_temp = new unsigned short[SAI->nr*SAI->nc * 3]();
+		memcpy(colorview_temp, SAI->color, sizeof(unsigned short)*SAI->nr*SAI->nc * 3);
+
+		double psnr_with_sparse = 0;
+
 		if (SAI->NNt > 0 && SAI->Ms > 0)
 		{
+
+			SAI->use_global_sparse = true;
 
 			int startt = clock();
 
 			getGlobalSparseFilter(SAI, original_color_view);
 
-			std::cout << "time elapsed in getGlobalSparseFilter()\t" << (float)( (int)clock() - startt ) / CLOCKS_PER_SEC << "\n";
+			//std::cout << "time elapsed in getGlobalSparseFilter()\t" << (float)( (int)clock() - startt ) / CLOCKS_PER_SEC << "\n";
 
 			applyGlobalSparseFilter(SAI);
 
+			psnr_with_sparse = getYCbCr_422_PSNR(SAI->color, original_color_view, SAI->nr, SAI->nc, 3, BIT_DEPTH);
+
 			//aux_write16PGMPPM(SAI->path_out_ppm, SAI->nc, SAI->nr, 3, SAI->color);
 			//psnr_result = USE_difftest_ng ? getPSNR(NULL, SAI->path_out_ppm, SAI->path_input_ppm, difftest_call) : 0;
-			output_buffer_length += sprintf(output_results + output_buffer_length, "\t%f", getYCbCr_422_PSNR(SAI->color, original_color_view, SAI->nr, SAI->nc, 3, BIT_DEPTH) );
-
+			
 		}
-		else
-		{
+
+		if (SAI->use_global_sparse) { /* check validity of sparse filter */
+			if ( psnr_with_sparse<psnr_without_sparse ) //<0.1
+			{
+				SAI->use_global_sparse = false;
+				memcpy(SAI->color, colorview_temp, sizeof(unsigned short)*SAI->nr*SAI->nc * 3);
+			}
+		}
+
+		if (SAI->use_global_sparse) {
+			output_buffer_length += sprintf(output_results + output_buffer_length, "\t%f", psnr_with_sparse);
+		}
+		else {
 			output_buffer_length += sprintf(output_results + output_buffer_length, "\t%f", 0.0);
 		}
+
+		delete[](colorview_temp);
 
 		char ppm_residual_path[1024];
 
@@ -794,18 +533,29 @@ int main(int argc, char** argv) {
 
 						memcpy(tmp_im, SAI->color, sizeof(unsigned short)*SAI->nr*SAI->nc * 3);
 
-						encodeResidualJP2_YUV(SAI->nr, SAI->nc, original_color_view, tmp_im, ycbcr_pgm_names,
-							kdu_compress_path, ycbcr_jp2_names, SAI->residual_rate_color, 3, offset_v, rate_a / 8.0f, RESIDUAL_16BIT_bool);
+						int ncomp_r = 3;
 
-						decodeResidualJP2_YUV(tmp_im, kdu_expand_path, ycbcr_jp2_names, ycbcr_pgm_names, 3, offset_v, (1<<BIT_DEPTH) - 1, RESIDUAL_16BIT_bool);
+						if (rate_a / 8.0 < MAX_Y_RATIO) {
+							SAI->has_chrominance = true;
+						}
+						else {
+							SAI->has_chrominance = false;
+							ncomp_r = 1;
+						}
+
+						encodeResidualJP2_YUV(SAI->nr, SAI->nc, original_color_view, tmp_im, ycbcr_pgm_names,
+							kdu_compress_path, ycbcr_jp2_names, SAI->residual_rate_color, ncomp_r, offset_v, rate_a / 8.0f, RESIDUAL_16BIT_bool);
+
+						decodeResidualJP2_YUV(tmp_im, kdu_expand_path, ycbcr_jp2_names, ycbcr_pgm_names, ncomp_r, offset_v, (1<<BIT_DEPTH) - 1, RESIDUAL_16BIT_bool);
 
 						double psnr_result_yuv = getYCbCr_422_PSNR(tmp_im, original_color_view, SAI->nr, SAI->nc, 3, 10);
 
 						if (psnr_result_yuv > highest_psnr) {
 							highest_psnr = (float)psnr_result_yuv;
 							rate_a1 = rate_a;
-							printf("PSNR YUV:\t%f\tratio\t%f/%f\n", highest_psnr, rate_a1, 8.0);
 						}
+
+						printf("PSNR YUV:\t%f\tratio\t%f/%f\n", highest_psnr, rate_a, 8.0);
 
 					}
 
@@ -815,13 +565,23 @@ int main(int argc, char** argv) {
 					rate_a1 = (float)YUV_RATIO_DEFAULT;
 				}
 
+				int ncomp_r = 3;
+
+				if (rate_a1 / 8.0 < MAX_Y_RATIO) {
+					SAI->has_chrominance = true;
+				}
+				else {
+					SAI->has_chrominance = false;
+					ncomp_r = 1;
+				}
+
 				unsigned short *tmpim = new unsigned short[SAI->nr*SAI->nc * 3]();
 				memcpy(tmpim, SAI->color, sizeof(unsigned short)*SAI->nr*SAI->nc * 3);
 
 				encodeResidualJP2_YUV(SAI->nr, SAI->nc, original_color_view, SAI->color, ycbcr_pgm_names,
-					kdu_compress_path, ycbcr_jp2_names, SAI->residual_rate_color, 3, offset_v, rate_a1 / (float)8.0, RESIDUAL_16BIT_bool);
+					kdu_compress_path, ycbcr_jp2_names, SAI->residual_rate_color, ncomp_r, offset_v, rate_a1 / (float)8.0, RESIDUAL_16BIT_bool);
 
-				decodeResidualJP2_YUV(SAI->color, kdu_expand_path, ycbcr_jp2_names, ycbcr_pgm_names, 3, offset_v, (1<<BIT_DEPTH) - 1, RESIDUAL_16BIT_bool);
+				decodeResidualJP2_YUV(SAI->color, kdu_expand_path, ycbcr_jp2_names, ycbcr_pgm_names, ncomp_r, offset_v, (1<<BIT_DEPTH) - 1, RESIDUAL_16BIT_bool);
 
 				/* also compete against no yuv transformation */
 
@@ -853,8 +613,10 @@ int main(int argc, char** argv) {
 					kdu_compress_path, jp2_residual_path_jp2, SAI->residual_rate_color, 3, offset_v, RESIDUAL_16BIT_bool);
 
 				decodeResidualJP2(SAI->color, kdu_expand_path, jp2_residual_path_jp2, ppm_residual_path, ncomp1, offset_v, offset_v, RESIDUAL_16BIT_bool);
+
 			}
 
+			SAI->has_color_residual = true;
 		}
 
 		if (SAI->residual_rate_depth > 0 && depth_file_exist) { /* residual depth if needed */
@@ -868,6 +630,7 @@ int main(int argc, char** argv) {
 
 			decodeResidualJP2(SAI->depth, kdu_expand_path, jp2_residual_depth_path_jp2, pgm_residual_depth_path, ncomp1, 0, (1<<16) - 1, 1);
 
+			SAI->has_depth_residual = true;
 		}
 
 		/* median filter depth */
@@ -894,7 +657,11 @@ int main(int argc, char** argv) {
 
 
 		//psnr_result = USE_difftest_ng ? getPSNR(NULL, SAI->path_out_ppm, SAI->path_input_ppm, difftest_call) : 0;
-		output_buffer_length += sprintf(output_results + output_buffer_length, "\t%f", getYCbCr_422_PSNR(SAI->color, original_color_view, SAI->nr, SAI->nc, 3, BIT_DEPTH) );
+
+		double final_psnr = getYCbCr_422_PSNR(SAI->color, original_color_view, SAI->nr, SAI->nc, 3, BIT_DEPTH);
+		psnr_yuv_mean += final_psnr;
+
+		output_buffer_length += sprintf(output_results + output_buffer_length, "\t%f", final_psnr );
 
 		output_buffer_length += sprintf(output_results + output_buffer_length, "\t%f", rate_a1); 
 		output_buffer_length += sprintf(output_results + output_buffer_length, "\t%f", SAI->stdd);
@@ -905,113 +672,53 @@ int main(int argc, char** argv) {
 
 		/* write view configuration data to bitstream */
 
-		int n_bytes_prediction = 0;
+		int n_bytes_prediction = 0, tmp_pred_bytes = 0;
 		int n_bytes_residual = 0;
 
 		output_LF_file = fopen(path_out_LF_data, "ab");
 
-		if ( !size_written ) {
-			n_bytes_prediction += (int)fwrite(&SAI->nr, sizeof(int), 1, output_LF_file)* sizeof(int); // needed only once per LF
-			n_bytes_prediction += (int)fwrite(&SAI->nc, sizeof(int), 1, output_LF_file)* sizeof(int); // 
-			n_bytes_prediction += (int)fwrite(&yuv_transform_s, sizeof(int), 1, output_LF_file)* sizeof(int);
-			size_written = true;
+		if (!global_header_written) { //these are global
+			n_bytes_prediction += (int)fwrite(&SAI->nr, sizeof(int), 1, output_LF_file) * sizeof(int); // needed only once per LF
+			n_bytes_prediction += (int)fwrite(&SAI->nc, sizeof(int), 1, output_LF_file) * sizeof(int); // 
+			n_bytes_prediction += (int)fwrite(&yuv_transform_s, sizeof(int), 1, output_LF_file) * sizeof(int); 
+			n_bytes_prediction += (int)fwrite(&MINIMUM_DEPTH, sizeof(unsigned short), 1, output_LF_file) * sizeof(unsigned short);
+			global_header_written = true;
 		}
 
-		minimal_config mconf = makeMinimalConfig(SAI);
+		viewHeaderToCodestream(n_bytes_prediction, SAI, output_LF_file, yuv_transform_s);
 
-		printf("size of minimal_config %i bytes\n", (int)sizeof(minimal_config));
-
-		n_bytes_prediction += (int)fwrite(&mconf, sizeof(minimal_config), 1, output_LF_file)* sizeof(minimal_config);
-
-		/* lets see what else needs to be written to bitstream */
-
-		if (mconf.n_references > 0) {
-			for (int ij = 0; ij < mconf.n_references; ij++) {
-				unsigned short nid = (unsigned short) *(SAI->references + ij);
-				n_bytes_prediction += (int)fwrite(&nid, sizeof(unsigned short), 1, output_LF_file)* sizeof(unsigned short);
-			}
-		}
-
-		if (mconf.n_depth_references > 0) {
-			for (int ij = 0; ij < mconf.n_depth_references; ij++) {
-				unsigned short nid = (unsigned short) *(SAI->depth_references + ij);
-				n_bytes_prediction += (int)fwrite(&nid, sizeof(unsigned short), 1, output_LF_file) * sizeof(unsigned short);
-			}
-		}
-
-		if (mconf.Ms > 0 && mconf.NNt > 0) {
-			n_bytes_prediction += (int)fwrite(SAI->sparse_mask, sizeof(unsigned char), SAI->Ms, output_LF_file)* sizeof(unsigned char);
-			n_bytes_prediction += (int)fwrite(SAI->sparse_weights, sizeof(int32_t), SAI->Ms, output_LF_file)* sizeof(int32_t);
-		}
-
-		if (mconf.use_median < 1) {
-			if (mconf.use_std < 1) {
-				if (mconf.n_references>0) {
-					/* use LS merging weights */
-					n_bytes_prediction += (int)fwrite(SAI->merge_weights, sizeof(signed short), SAI->NB / 2, output_LF_file)* sizeof(signed short);
-				}
-			}
-			else {
-				/* use standard deviation */
-				n_bytes_prediction += (int)fwrite(&SAI->stdd, sizeof(float), 1, output_LF_file) * sizeof(signed short);
-			}
-		}
+		/* debugging */
+		tmp_codestream = fopen(path_codestream, "ab");
+		viewHeaderToCodestream(tmp_pred_bytes, SAI, tmp_codestream, yuv_transform_s);
+		fclose(tmp_codestream);
 
 		if (SAI->residual_rate_color > 0) {
 
 			if (SAI->yuv_transform && YUV_TRANSFORM) {
-				for (int icomp = 0; icomp < 3; icomp++) {
-					int n_bytes_color_residual = aux_GetFileSize(ycbcr_jp2_names[icomp]);
 
-					unsigned char *jp2_residual = new unsigned char[n_bytes_color_residual]();
-					FILE *jp2_color_residual_file = fopen(ycbcr_jp2_names[icomp], "rb");
-					fread(jp2_residual, sizeof(unsigned char), n_bytes_color_residual, jp2_color_residual_file);
-					fclose(jp2_color_residual_file);
+				int ncomp_r = SAI->has_chrominance ? 3 : 1;
 
-					n_bytes_residual += (int)fwrite(&n_bytes_color_residual, sizeof(int), 1, output_LF_file)* sizeof(int);
-					n_bytes_residual += (int)fwrite(jp2_residual, sizeof(unsigned char), n_bytes_color_residual, output_LF_file)* sizeof(unsigned char);
+				for (int icomp = 0; icomp < ncomp_r; icomp++) {
 
-					delete[](jp2_residual);
+					writeResidualToDisk(ycbcr_jp2_names[icomp], output_LF_file, n_bytes_residual, JP2_dict);
+
 				}
 			}
 			else {
-				int n_bytes_color_residual = aux_GetFileSize(jp2_residual_path_jp2);
 
-				unsigned char *jp2_residual = new unsigned char[n_bytes_color_residual]();
-				FILE *jp2_color_residual_file = fopen(jp2_residual_path_jp2, "rb");
-				fread(jp2_residual, sizeof(unsigned char), n_bytes_color_residual, jp2_color_residual_file);
-				fclose(jp2_color_residual_file);
-
-				n_bytes_residual += (int)fwrite(&n_bytes_color_residual, sizeof(int), 1, output_LF_file)* sizeof(int);
-				n_bytes_residual += (int)fwrite(jp2_residual, sizeof(unsigned char), n_bytes_color_residual, output_LF_file)* sizeof(unsigned char);
-
-				delete[](jp2_residual);
+				writeResidualToDisk(jp2_residual_path_jp2, output_LF_file, n_bytes_residual, JP2_dict);
 			}
-		}
-		else {
-			int n_bytes_color_residual = 0;
-			n_bytes_residual += (int)fwrite(&n_bytes_color_residual, sizeof(int), 1, output_LF_file)* sizeof(int);
 		}
 
 		if (SAI->residual_rate_depth > 0 && depth_file_exist) {
-			int n_bytes_depth_residual = aux_GetFileSize(jp2_residual_depth_path_jp2);
 
-			unsigned char *jp2_depth_residual = new unsigned char[n_bytes_depth_residual]();
-			FILE *jp2_depth_residual_file = fopen(jp2_residual_depth_path_jp2, "rb");
-			fread(jp2_depth_residual, sizeof(unsigned char), n_bytes_depth_residual, jp2_depth_residual_file);
-			fclose(jp2_depth_residual_file);
+			writeResidualToDisk(jp2_residual_depth_path_jp2, output_LF_file, n_bytes_residual, JP2_dict);
 
-			n_bytes_residual += (int)fwrite(&n_bytes_depth_residual, sizeof(int), 1, output_LF_file)* sizeof(int);
-			n_bytes_residual += (int)fwrite(jp2_depth_residual, sizeof(unsigned char), n_bytes_depth_residual, output_LF_file)* sizeof(unsigned char);
-
-			delete[](jp2_depth_residual);
-		}
-		else {
-			int n_bytes_depth_residual = 0;
-			n_bytes_residual += (int)fwrite(&n_bytes_depth_residual, sizeof(int), 1, output_LF_file)* sizeof(int);
 		}
 
 		fclose(output_LF_file);
+
+		printf("encoded: %i kilobytes\t\tPSNR YUV (%03d_%03d): %2.3f\tPSNR YUV mean: %2.3f\n", aux_GetFileSize(path_out_LF_data) / 1000, SAI->r,SAI->c, final_psnr, psnr_yuv_mean/(ii+1));
 
 		output_buffer_length += sprintf(output_results + output_buffer_length, "\t%i", n_bytes_prediction);
 		output_buffer_length += sprintf(output_results + output_buffer_length, "\t%i", n_bytes_residual);
@@ -1072,12 +779,6 @@ int main(int argc, char** argv) {
 			delete[](SAI->segmentation);
 
 	}
-
-	
-	for (int ii = 0; ii < maxR; ii++) {
-		delete[](LF_mat[ii]);
-	}
-	delete[](LF_mat);
 
 	delete[](LF);
 

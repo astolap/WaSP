@@ -9,5 +9,6 @@
 int system_1(char *str);
 
 long aux_GetFileSize(char* filename);
+long aux_GetFileSize(const char* filename);
 
 #endif
