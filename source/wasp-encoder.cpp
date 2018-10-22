@@ -225,9 +225,13 @@ int main(int argc, char** argv) {
 
 	std::vector<std::vector<unsigned char>> JP2_dict;
 
+	double psnr_yuv_mean = 0;
+
 	for (int ii = 0; ii < n_views_total; ii++) {
 
 		view *SAI = LF + ii;
+
+		printf("Encoding view %03d_%03d\t", SAI->c, SAI->r);
 
 		//char output_results[1024];
 		memset(output_results, 0x00, sizeof(char) * sizeof(output_results)/sizeof(char));
@@ -431,7 +435,7 @@ int main(int argc, char** argv) {
 
 			getGlobalSparseFilter(SAI, original_color_view);
 
-			std::cout << "time elapsed in getGlobalSparseFilter()\t" << (float)( (int)clock() - startt ) / CLOCKS_PER_SEC << "\n";
+			//std::cout << "time elapsed in getGlobalSparseFilter()\t" << (float)( (int)clock() - startt ) / CLOCKS_PER_SEC << "\n";
 
 			applyGlobalSparseFilter(SAI);
 
@@ -653,7 +657,11 @@ int main(int argc, char** argv) {
 
 
 		//psnr_result = USE_difftest_ng ? getPSNR(NULL, SAI->path_out_ppm, SAI->path_input_ppm, difftest_call) : 0;
-		output_buffer_length += sprintf(output_results + output_buffer_length, "\t%f", getYCbCr_422_PSNR(SAI->color, original_color_view, SAI->nr, SAI->nc, 3, BIT_DEPTH) );
+
+		double final_psnr = getYCbCr_422_PSNR(SAI->color, original_color_view, SAI->nr, SAI->nc, 3, BIT_DEPTH);
+		psnr_yuv_mean += final_psnr;
+
+		output_buffer_length += sprintf(output_results + output_buffer_length, "\t%f", final_psnr );
 
 		output_buffer_length += sprintf(output_results + output_buffer_length, "\t%f", rate_a1); 
 		output_buffer_length += sprintf(output_results + output_buffer_length, "\t%f", SAI->stdd);
@@ -709,6 +717,8 @@ int main(int argc, char** argv) {
 		}
 
 		fclose(output_LF_file);
+
+		printf("encoded: %i kilobytes\t\tPSNR YUV (%03d_%03d): %2.3f\tPSNR YUV mean: %2.3f\n", aux_GetFileSize(path_out_LF_data) / 1000, SAI->r,SAI->c, final_psnr, psnr_yuv_mean/(ii+1));
 
 		output_buffer_length += sprintf(output_results + output_buffer_length, "\t%i", n_bytes_prediction);
 		output_buffer_length += sprintf(output_results + output_buffer_length, "\t%i", n_bytes_residual);

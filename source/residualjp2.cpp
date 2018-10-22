@@ -143,10 +143,10 @@ void writeResidualToDisk(const char *jp2_residual_path_jp2, FILE *output_LF_file
 			updateDictionary = true;
 			updateJP2Dictionary(JP2_dict, JP2header, headerSize);
 			dict_index = (int)JP2_dict.size() - 1;
-			printf("Dictonary update, index=%i\n", dict_index);
+			//printf("Dictonary update, index=%i\n", dict_index);
 		}
 
-		printf("Using dictionary index:\t%i\n", dict_index);
+		//printf("Using dictionary index:\t%i\n", dict_index);
 
 		delete[](JP2header);
 

@@ -23,7 +23,7 @@ void applyGlobalSparseFilter(view *view0){
 	for (int ii = 0; ii < Ms; ii++){
 		if (Regr0[ii] > 0){
 			theta[Regr0[ii] - 1] = ((float)theta0[ii]) / (float)(1 << BIT_DEPTH_SPARSE);
-			printf("%i\t%f\n", Regr0[ii], theta[Regr0[ii] - 1]);
+			//printf("%i\t%f\n", Regr0[ii], theta[Regr0[ii] - 1]);
 		}
 	}
 

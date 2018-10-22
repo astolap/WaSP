@@ -90,6 +90,8 @@ int main(int argc, char** argv) {
 			exit(0);
 		}
 
+		printf("Decoding view %03d_%03d\t", SAI->c, SAI->r);
+
 		SAI->color = new unsigned short[SAI->nr*SAI->nc * 3]();
 		SAI->depth = new unsigned short[SAI->nr*SAI->nc]();
 
@@ -307,6 +309,7 @@ int main(int argc, char** argv) {
 			SAI->seg_vp = NULL;
 		}
 
+		printf("decoded: %i kilobytes\n", ftell(input_LF) / 1000);
 	}
 
 	fclose(input_LF);

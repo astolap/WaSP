@@ -4,55 +4,11 @@
 
 #include <iostream>
 
-//void packSparseMask(const int Ms, const int NNt, unsigned char *sparse_mask, int32_t *packed) {
-//
-//	int N = floor( (float)((2*NNt+1)*(2*NNt+1)+1) / 32.0 + 0.5);
-//
-//	packed = new int32_t[N]();
-//
-//	for (int ij = 0; ij < Ms; ij++) {
-//
-//		unsigned char value = sparse_mask[ij];
-//
-//		if ( value > 0) {
-//
-//			int offset = (value-1) / 30;
-//
-//			packed[offset] = packed[offset] | 1 << ((int32_t)sparse_mask[ij]- offset*31 );
-//
-//		}
-//	}
-//
-//}
-//
-//void unpackSparseMask(const int Ms, const int NNt, unsigned char *sparse_mask, int32_t *packed) {
-//
-//	int N = floor((float)((2 * NNt + 1)*(2 * NNt + 1) + 1) / 32.0 + 0.5);
-//
-//	packed = new int32_t[N]();
-//
-//	int ik = 0;
-//
-//	for (int M = 0; M < N; M++) {
-//
-//		int32_t p32 = packed[N];
-//
-//		for (int ij = 0; ij < 32; ij++) {
-//
-//			if ((p32 & (1 << ij - 31 * N)) > 0) {
-//				sparse_mask[ik++] = ij + 32*N;
-//
-//			}
-//		}
-//	}
-//
-//}
-
 void viewHeaderToCodestream(int &n_bytes_prediction, view *SAI, FILE *output_LF_file, const int yuv_transform_s) {
 
 	minimal_config mconf = makeMinimalConfig(SAI);
 
-	printf("size of minimal_config %i bytes\n", (int)sizeof(minimal_config));
+	//printf("size of minimal_config %i bytes\n", (int)sizeof(minimal_config));
 
 	n_bytes_prediction += (int)fwrite(&mconf, sizeof(minimal_config), 1, output_LF_file) * sizeof(minimal_config);
 
@@ -139,7 +95,7 @@ void codestreamToViewHeader( int &n_bytes_prediction, view *SAI, FILE *input_LF,
 
 	n_bytes_prediction += (int)fread(&mconf, sizeof(minimal_config), 1, input_LF)* sizeof(minimal_config);
 
-	printf("size of minimal_config %i bytes\n", (int)sizeof(minimal_config));
+	//printf("size of minimal_config %i bytes\n", (int)sizeof(minimal_config));
 
 	setup_form_minimal_config(&mconf, SAI);
 
