@@ -240,11 +240,16 @@ void decodeResidualJP2_YUV(unsigned short *ps, const char *kdu_expand_path, char
 
 	int nc1, nr1,ncomp1;
 
+	signed int BP = RESIDUAL_16BIT_bool ? 16 : 10;
+
 	for (int icomp = 0; icomp < ncomp; icomp++) {
 		if (aux_read16PGMPPM(ycbcr_pgm_names[icomp], nc1, nr1, ncomp1, jp2_residual))
 		{
 			if (ycbcr == NULL) {
 				ycbcr = new unsigned short[nc1*nr1*3]();
+				for (int ii = nc1*nr1; ii < 3 * nc1*nr1; ii++) {
+					*(ycbcr + ii) = 128 * (1 << (BP - 8)); /* initialize chrominance */
+				}
 			}
 
 			if (YUV_422) {
@@ -270,12 +275,12 @@ void decodeResidualJP2_YUV(unsigned short *ps, const char *kdu_expand_path, char
 	}
 
 	signed int dv = RESIDUAL_16BIT_bool ? 1 : 2;
-	signed int BP = RESIDUAL_16BIT_bool ? 16 : 10;
-	signed int maxval = (1 << BP) - 1;// pow(2, BP) - 1;
+	
+	signed int maxval = (1 << (BP)) - 1;// pow(2, BP) - 1;
 
-	for (int ii = 0; ii < nr1*nc1*ncomp; ii++) {
-		*(ycbcr + ii) = clip(*(ycbcr + ii), (unsigned short)0, (unsigned short)maxval);
-	}
+	//for (int ii = 0; ii < nr1*nc1*ncomp; ii++) {
+	//	*(ycbcr + ii) = clip(*(ycbcr + ii), (unsigned short)0, (unsigned short)maxval);
+	//}
 
 	unsigned short *rgb = new unsigned short[nr1*nc1*3]();
 
@@ -359,7 +364,7 @@ void encodeResidualJP2_YUV(const int nr, const int nc, unsigned short *original_
 
 		char kdu_compress_s[1024];
 	
-		sprintf(kdu_compress_s, "\"%s\"%s%s%s%s%s%f%s%d", kdu_compress_path, " -i ", ycbcr_pgm_names[icomp], " -o ", ycbcr_jp2_names[icomp], " -no_weights -full -no_info -precise -rate ", rateR,
+		sprintf(kdu_compress_s, "\"%s\"%s%s%s%s%s%f%s%d", kdu_compress_path, " -i ", ycbcr_pgm_names[icomp], " -o ", ycbcr_jp2_names[icomp], " -num_threads 0 -no_weights -full -no_info -precise -rate ", rateR,
 			" Clevels=",CLEVELS);
 
 		int status = system_1(kdu_compress_s);

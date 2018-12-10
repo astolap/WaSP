@@ -481,7 +481,7 @@ int main(int argc, char** argv) {
 		char *ycbcr_pgm_names[3];
 		char *ycbcr_jp2_names[3];
 
-		float rate_a1 = 0;
+		float rate_a1 = (float)YUV_RATIO_DEFAULT;
 
 		/* get residual */
 		if (SAI->residual_rate_color > 0)
@@ -512,6 +512,9 @@ int main(int argc, char** argv) {
 
 			if (YUV_TRANSFORM) {
 
+				unsigned short *tmpim = new unsigned short[SAI->nr*SAI->nc * 3]();
+				memcpy(tmpim, SAI->color, sizeof(unsigned short)*SAI->nr*SAI->nc * 3);
+
 				int offset_v = 0;
 
 				if (RESIDUAL_16BIT) {
@@ -520,8 +523,6 @@ int main(int argc, char** argv) {
 				else {
 					offset_v = (1<<BIT_DEPTH) - 1;
 				}
-
-				//float rate_a = 6.5 / 8.0;// 7.2 / 8.0;
 
 				if (YUV_RATIO_SEARCH) {
 
@@ -555,14 +556,11 @@ int main(int argc, char** argv) {
 							rate_a1 = rate_a;
 						}
 
-						printf("PSNR YUV:\t%f\tratio\t%f/%f\n", highest_psnr, rate_a, 8.0);
+						printf("PSNR YUV:\t%f\t%f\tratio\t%1.2f/%1.2f\n", highest_psnr, psnr_result_yuv, rate_a, 8.0);
 
 					}
 
 					delete[](tmp_im);
-				}
-				else {
-					rate_a1 = (float)YUV_RATIO_DEFAULT;
 				}
 
 				int ncomp_r = 3;
@@ -575,13 +573,12 @@ int main(int argc, char** argv) {
 					ncomp_r = 1;
 				}
 
-				unsigned short *tmpim = new unsigned short[SAI->nr*SAI->nc * 3]();
-				memcpy(tmpim, SAI->color, sizeof(unsigned short)*SAI->nr*SAI->nc * 3);
-
 				encodeResidualJP2_YUV(SAI->nr, SAI->nc, original_color_view, SAI->color, ycbcr_pgm_names,
-					kdu_compress_path, ycbcr_jp2_names, SAI->residual_rate_color, ncomp_r, offset_v, rate_a1 / (float)8.0, RESIDUAL_16BIT_bool);
+					kdu_compress_path, ycbcr_jp2_names, SAI->residual_rate_color, ncomp_r, offset_v, 
+					rate_a1 / (float)8.0, RESIDUAL_16BIT_bool);
 
-				decodeResidualJP2_YUV(SAI->color, kdu_expand_path, ycbcr_jp2_names, ycbcr_pgm_names, ncomp_r, offset_v, (1<<BIT_DEPTH) - 1, RESIDUAL_16BIT_bool);
+				decodeResidualJP2_YUV(SAI->color, kdu_expand_path, ycbcr_jp2_names, 
+					ycbcr_pgm_names, ncomp_r, offset_v, (1<<BIT_DEPTH) - 1, RESIDUAL_16BIT_bool);
 
 				/* also compete against no yuv transformation */
 
@@ -590,9 +587,11 @@ int main(int argc, char** argv) {
 				offset_v = (1<<BIT_DEPTH) - 1;
 
 				encodeResidualJP2(SAI->nr, SAI->nc, original_color_view, tmpim, ppm_residual_path,
-					kdu_compress_path, jp2_residual_path_jp2, SAI->residual_rate_color, 3, offset_v, RESIDUAL_16BIT_bool);
+					kdu_compress_path, jp2_residual_path_jp2, SAI->residual_rate_color, 3, offset_v, 
+					RESIDUAL_16BIT_bool);
 
-				decodeResidualJP2(tmpim, kdu_expand_path, jp2_residual_path_jp2, ppm_residual_path, ncomp1, offset_v, offset_v, RESIDUAL_16BIT_bool);
+				decodeResidualJP2(tmpim, kdu_expand_path, jp2_residual_path_jp2, 
+					ppm_residual_path, ncomp1, offset_v, offset_v, RESIDUAL_16BIT_bool);
 
 				double psnr_result_yuv_wo_trans = getYCbCr_422_PSNR(tmpim, original_color_view, SAI->nr, SAI->nc, 3, 10);
 
