@@ -18,9 +18,9 @@ void getJP2Header(unsigned char *JP2, unsigned char *&header, int JP2Size, int &
 
 	for (int ii = 0; ii < JP2Size-1; ii++) {
 		if ((unsigned short)(JP2[ii] << 8 | JP2[ii + 1]) == 0xFF90) { /*we have first tile*/
-			headerSize = ii + 1;
-			header = new unsigned char[ii + 1];
-			memcpy(header, JP2, ii + 1);
+			headerSize = ii + 2;
+			header = new unsigned char[headerSize];
+			memcpy(header, JP2, headerSize);
 			return;
 		}
 	}
