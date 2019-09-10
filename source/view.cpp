@@ -2,6 +2,8 @@
 /* Author: Pekka Astola */
 /* <pekka.astola@tuni.fi>*/
 
+#include <string.h>
+
 #include "view.hh"
 #include "ppm.hh"
 #include "ycbcr.hh"

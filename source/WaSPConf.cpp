@@ -2,6 +2,7 @@
 /* Author: Pekka Astola */
 /* <pekka.astola@tuni.fi>*/
 
+#include <string.h>
 #include "WaSPConf.hh"
 
 WaSPConfig::WaSPConfig(int argc, char *argv[], const char *type) {
