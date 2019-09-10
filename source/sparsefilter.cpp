@@ -1,3 +1,7 @@
+/* sparsefilter.cpp */
+/* Author: Pekka Astola */
+/* <pekka.astola@tuni.fi>*/
+
 #include "sparsefilter.hh"
 #include "fastols.hh"
 #include "bitdepth.hh"
@@ -6,200 +10,309 @@
 #include <cstdio>
 #include <vector>
 #include <algorithm>
+#include <cstring>
 
-#define NULL 0
+uint16_t *cropImage(
+    const uint16_t *input_image,
+    const uint32_t nr,
+    const uint32_t nc,
+    const uint32_t NNt) {
 
-void applyGlobalSparseFilter(view *view0){
+    int32_t nr_cropped = nr - 2 * NNt;
+    int32_t nc_cropped = nc - 2 * NNt;
 
-	unsigned char *Regr0 = view0->sparse_mask;
-	int32_t *theta0 = view0->sparse_weights;
+    uint16_t *input_image_cropped = new uint16_t[nr_cropped*nc_cropped]();
 
-	int Ms = view0->Ms;
-	int NNt = view0->NNt;
-	int nr = view0->nr, nc = view0->nc;
+    for (uint32_t ir = NNt; ir < nr - NNt; ir++) {
+        for (uint32_t ic = NNt; ic < nc - NNt; ic++) {
+            int32_t offset_padded = ir + nr * ic;
+            int32_t offset_cropped = (ir - NNt) + nr_cropped * (ic - NNt);
 
-	float *theta = new float[(2 * NNt + 1)*(2 * NNt + 1) + 1]();
+            *(input_image_cropped + offset_cropped) =
+                *(input_image + offset_padded);
 
-	for (int ii = 0; ii < Ms; ii++){
-		if (Regr0[ii] > 0){
-			theta[Regr0[ii] - 1] = ((float)theta0[ii]) / (float)(1 << BIT_DEPTH_SPARSE);
-			//printf("%i\t%f\n", Regr0[ii], theta[Regr0[ii] - 1]);
-		}
-	}
+        }
+    }
 
-	//for (int ii = 0; ii < (2 * NNt + 1)*(2 * NNt + 1) + 1; ii++) {
-	//	printf("%f\n", theta[ii] );
-	//}
-
-	float *final_view = new float[nr*nc * 3]();
-
-	unsigned short *pshort = view0->color;
-
-	for (int ii = 0; ii < nr*nc * 3; ii++)
-		final_view[ii] = pshort[ii];
-
-	for (int rr = NNt; rr < nr - NNt; rr++){
-		for (int cc = NNt; cc < nc - NNt; cc++)
-		{
-			for (int icomp = 0; icomp < 3; icomp++)
-				final_view[rr + cc*nr + icomp*nr*nc] = 0;
-
-			int ee = 0;
-
-			for (int dy = -NNt; dy <= NNt; dy++){
-				for (int dx = -NNt; dx <= NNt; dx++){
-					for (int icomp = 0; icomp < 3; icomp++){
-						final_view[rr + cc*nr + icomp*nr*nc] += theta[ee] * ((float)pshort[rr + dy + (cc + dx)*nr + icomp*nr*nc]);
-					}
-					ee++;
-				}
-			}
-
-			/* bias term */
-			for (int icomp = 0; icomp < 3; icomp++){
-				final_view[rr + cc*nr + icomp*nr*nc] += theta[(2 * NNt + 1)*(2 * NNt + 1)];
-			}
-
-		}
-	}
-
-
-	for (int ii = 0; ii < nr*nc * 3; ii++){
-		if (final_view[ii] < 0)
-			final_view[ii] = 0;
-		if (final_view[ii] > (1 << BIT_DEPTH) - 1) //(pow(2, BIT_DEPTH) - 1))
-			final_view[ii] = (1 << BIT_DEPTH) - 1;// (pow(2, BIT_DEPTH) - 1);
-
-		pshort[ii] = (unsigned short)(final_view[ii]);
-	}
-
-	delete[](theta);
-	delete[](final_view);
+    return input_image_cropped;
 
 }
 
-void getGlobalSparseFilter(view *view0, unsigned short *original_color_view)
-{
+uint16_t *padArrayUint16_t(
+    const uint16_t *input_image, 
+    const uint32_t nr,
+    const uint32_t nc,
+    const uint32_t NNt) {
 
-	int nr = view0->nr;
-	int nc = view0->nc;
-	int NNt = view0->NNt;
-	int Ms = view0->Ms;
+    int32_t nr_padded = nr + 2 * NNt;
+    int32_t nc_padded = nc + 2 * NNt;
 
-	unsigned char *Regr0 = new unsigned char[Ms]();
-	int32_t *theta0 = new int32_t[Ms]();
+    uint16_t *input_image_padded = new uint16_t[nr_padded*nc_padded]();
 
-	view0->sparse_weights = theta0;
-	view0->sparse_mask = Regr0;
+    for (uint32_t ir = NNt; ir < nr_padded - NNt; ir++) {
+        for (uint32_t ic = NNt; ic < nc_padded - NNt; ic++) {
 
-	int Npp = (nr - NNt * 2)*(nc - NNt * 2);
-	int Npp0 = Npp / 3;
+            int32_t offset_padded = ir + nr_padded * ic;
+            int32_t offset = (ir - NNt) + nr * (ic - NNt);
 
-	int MT = (NNt * 2 + 1)*(NNt * 2 + 1) + 1; /* number of regressors */
+            *(input_image_padded + offset_padded) =
+                *(input_image + offset);
 
-	double *AA = new double[Npp*MT]();
-	double *Yd = new double[Npp]();
+        }
+    }
 
-	for (int ii = 0; ii < Npp; ii++)
-		*(AA + ii + (NNt * 2 + 1)*(NNt * 2 + 1)*Npp) = 1.0 / ((double)(1 << BIT_DEPTH) - 1);
+    /*top borders*/
+    for (uint32_t ir = 0; ir < NNt; ir++) {
+        for (uint32_t ic = NNt; ic < nc_padded - NNt; ic++) {
 
-	int iiu = 0;
+            int32_t offset_from = NNt + nr_padded * ic;
+            int32_t offset_to = ir + nr_padded * ic;
 
-	unsigned short *pshort = view0->color;
+            *(input_image_padded + offset_to) =
+                *(input_image_padded + offset_from);
 
-	//double *PHI = new double[MT*MT]();
-	//double *PSI = new double[MT]();
+        }
+    }
 
-	//int offs = 2 * NNt + 1;
+    /*bottom borders*/
+    for (uint32_t ir = nr_padded - NNt; ir < nr_padded; ir++) {
+        for (uint32_t ic = NNt; ic < nc_padded - NNt; ic++) {
 
-	for (int ir = NNt; ir < nr - NNt; ir++){
-		for (int ic = NNt; ic < nc - NNt; ic++){
-			int ai = 0;
-			for (int dy = -NNt; dy <= NNt; dy++){
-				for (int dx = -NNt; dx <= NNt; dx++) {
-					for (int icomp = 0; icomp < 3; icomp++) {
+            int32_t offset_from = nr_padded - NNt - 1 + nr_padded * ic;
+            int32_t offset_to = ir + nr_padded * ic;
 
-						int offset = ir + dy + nr*(ic + dx) + icomp*nr*nc;
+            *(input_image_padded + offset_to) =
+                *(input_image_padded + offset_from);
 
-						/* get the desired Yd*/
-						if (dy == 0 && dx == 0) {
-							*(Yd + iiu + 0*Npp0) += ((double)*(original_color_view + offset)) / ( (double)(1 << BIT_DEPTH) - 1);// (pow(2, BIT_DEPTH) - 1);
-						}
+        }
+    }
 
-						/* get the regressors */
-						*(AA + iiu + 0*Npp0 + ai*Npp) += ((double)*(pshort + offset)) / ( (double)(1 << BIT_DEPTH) - 1);// (pow(2, BIT_DEPTH) - 1);
+    /*left borders*/
+    for (uint32_t ir = 0; ir < nr_padded; ir++) {
+        for (uint32_t ic = 0; ic < NNt; ic++) {
 
-					}
-					*(AA + iiu + 0 * Npp0 + ai*Npp) = *(AA + iiu + 0 * Npp0 + ai*Npp) / 3;
+            int32_t offset_from = ir + nr_padded * NNt;
+            int32_t offset_to = ir + nr_padded * ic;
 
-					ai++;
+            *(input_image_padded + offset_to) =
+                *(input_image_padded + offset_from);
+
+        }
+    }
+
+    /*right borders*/
+    for (uint32_t ir = 0; ir < nr_padded; ir++) {
+        for (uint32_t ic = nc_padded - NNt; ic < nc_padded; ic++) {
+
+            int32_t offset_from = ir + nr_padded * (nc_padded - NNt - 1);
+            int32_t offset_to = ir + nr_padded * ic;
+
+            *(input_image_padded + offset_to) =
+                *(input_image_padded + offset_from);
+
+        }
+    }
+
+    return input_image_padded;
+
+}
+
+spfilter getGlobalSparseFilter(
+    const uint16_t *original_image,
+    const uint16_t *input_image,
+    const int32_t nr,
+    const int32_t nc,
+    const int32_t NNt,
+    const int32_t Ms,
+    const double bias_term_value) {
+
+    int32_t MT = (NNt * 2 + 1) * (NNt * 2 + 1) + 1; /* number of regressors */
+
+    int32_t totalP = (nr - NNt * 2) * (nc - NNt * 2);
+
+    const int32_t skipv = 1;
+    const int32_t skiph = 1;
+
+    uint32_t Npp = totalP/skipv/skiph + 1;
+
+    double *AA = new double[Npp * MT]();
+    double *Yd = new double[Npp]();
+
+    for (int32_t ii = 0; ii < Npp; ii++) {
+        *(AA + ii + (NNt * 2 + 1) * (NNt * 2 + 1) * Npp) = bias_term_value;
+    }
+
+    int32_t iiu = 0;
+
+    double Q = ((double)(1 << BIT_DEPTH) - 1);
+
+    for (uint32_t ir = NNt; ir < nr - NNt; ir=ir+skipv) {
+        for (uint32_t ic = NNt; ic < nc - NNt; ic=ic+skiph) {
+            int32_t ai = 0;
+            for (int32_t dy = -NNt; dy <= NNt; dy++) {
+                for (int32_t dx = -NNt; dx <= NNt; dx++) {
+
+                    int32_t offset = ir + dy + nr * (ic + dx);
+
+                    /* get the desired Yd*/
+                    if (dy == 0 && dx == 0) {
+                        *(Yd + iiu) +=
+                            ((double) *(original_image + offset)) / Q;	// (pow(2, BIT_DEPTH) - 1);
+                    }
+
+                    /* get the regressors */
+                    *(AA + iiu + ai * Npp) += 
+                        ((double) *(input_image + offset)) / Q;	// (pow(2, BIT_DEPTH) - 1);
+
+                    ai++;
+                }
+            }
+
+            iiu++;
+        }
+    }
+
+    int32_t *PredRegr0 = new int32_t[MT]();
+    double *PredTheta0 = new double[MT]();
+
+    int32_t Mtrue = FastOLS_new(
+        &AA,
+        &Yd,
+        PredRegr0,
+        PredTheta0,
+        Ms,
+        MT,
+        MT,
+        Npp);
+
+    if (AA != nullptr) {
+        delete[](AA);
+    }
+    if (Yd != nullptr) {
+        delete[](Yd);
+    }
+
+    spfilter sparse_filter;
+
+    for (int32_t ii = 0; ii < MT; ii++) {
+        sparse_filter.regressor_indexes.push_back(PredRegr0[ii]);
+        sparse_filter.filter_coefficients.push_back(PredTheta0[ii]);
+    }
+
+    sparse_filter.Ms = Ms;
+    sparse_filter.NNt = NNt;
+    sparse_filter.bias_term_value = bias_term_value;
+
+    return sparse_filter;
+}
+
+void quantize_and_reorder_spfilter(
+    spfilter &sparse_filter) {
+
+    std::vector<std::pair<int32_t, double>> sparsefilter_pair;
+
+    for (int32_t ij = 0; ij < sparse_filter.Ms; ij++) {
+        std::pair<int32_t, double> tmp_sp;
+        tmp_sp.first = sparse_filter.regressor_indexes.at(ij);
+        tmp_sp.second = sparse_filter.filter_coefficients.at(ij);
+        sparsefilter_pair.push_back(tmp_sp);
+    }
+
+    /*ascending sort based on regressor index 
+    (e.g., integer between 1 and 50 since we have 50 regressors */
+    sort(sparsefilter_pair.begin(),
+        sparsefilter_pair.end());
+
+    sparse_filter.quantized_filter_coefficients.clear();
+    sparse_filter.regressor_indexes.clear();
+
+    double Q = static_cast<double>(1 << BIT_DEPTH_SPARSE);
+
+    for (int32_t ii = 0; ii < sparse_filter.Ms; ii++) {
+        sparse_filter.regressor_indexes.push_back(sparsefilter_pair.at(ii).first);
+
+        int32_t quantized_coeff = static_cast<int32_t>(floor(sparsefilter_pair.at(ii).second * Q + 0.5));
+
+        quantized_coeff = quantized_coeff > (1 << 15)-1 ? (1 << 15)-1 : quantized_coeff;
+        quantized_coeff = quantized_coeff < -(1 << 15) ? -(1 << 15) : quantized_coeff;
+
+        sparse_filter.quantized_filter_coefficients.push_back(static_cast<int16_t>(quantized_coeff));
+    }
+
+}
+
+void dequantize_and_reorder_spfilter(
+    spfilter &sparse_filter) {
+
+    sparse_filter.filter_coefficients.clear();
+
+    int32_t MT = (sparse_filter.NNt * 2 + 1) * (sparse_filter.NNt * 2 + 1) + 1;
+
+    for (int32_t ii = 0; ii < MT; ii++) {
+        sparse_filter.filter_coefficients.push_back(0.0);
+    }
+
+    double Q = static_cast<double>(1 << BIT_DEPTH_SPARSE);
+
+    for (int32_t ii = 0; ii < sparse_filter.Ms; ii++) {
 
 
-					//for (int dy1 = -NNt; dy1 <= NNt; dy1++) {
-					//	for (int dx1 = -NNt; dx1 <= NNt; dx1++) {
-					//		for (int icomp = 0; icomp < 3; icomp++) {
+        double theta0 =
+            static_cast<double>(sparse_filter.quantized_filter_coefficients.at(ii));
 
-					//			int offset_1 = ir + dy + nr*(ic + dx) + icomp*nr*nc;
-					//			int offset_2 = ir + dy1 + nr*(ic + dx1) + icomp*nr*nc;
+        sparse_filter.filter_coefficients.at(sparse_filter.regressor_indexes.at(ii)) = theta0 / Q;
 
-					//			double val1 = ((double)*(pshort + offset_1)) / (pow(2, BIT_DEPTH) - 1);
-					//			double val2 = ((double)*(pshort + offset_2)) / (pow(2, BIT_DEPTH) - 1);
 
-					//			double des = ((double)*(original_color_view + offset_1)) / (pow(2, BIT_DEPTH) - 1);
+    }
+}
 
-					//			PHI[(dy+NNt) + offs*(dx+NNt) + MT*( (dy1+NNt) + offs*(dx1+NNt))] += val1*val2;
-					//			PSI[(dy+NNt) + offs*(dx+NNt)] += val1*des;
+std::vector<double> applyGlobalSparseFilter(
+    const uint16_t *input_image,
+    const int32_t nr,
+    const int32_t nc,
+    const int32_t Ms,
+    const int32_t NNt,
+    const double bias_term_value,
+    const std::vector<double> filter_coeffs) {
 
-					//		}
-					//	}
-					//}
-				}
-			}
-			*(Yd + iiu + 0 * Npp0) = *(Yd + iiu + 0 * Npp0) / 3;
-			iiu++;
-		}
-	}
+    std::vector<double> final_view;
 
-	int *PredRegr0 = new int[MT]();
-	double *PredTheta0 = new double[MT]();
+    double Q = ((double)(1 << BIT_DEPTH) - 1);
 
-	int Mtrue = FastOLS_new(&AA, &Yd, PredRegr0, PredTheta0, Ms, MT, (NNt * 2 + 1)*(NNt * 2 + 1) + 1, Npp);
-	//int Mtrue = FastOLS_new(AA, Yd, PredRegr0, PredTheta0, Ms, MT, (NNt * 2 + 1)*(NNt * 2 + 1) + 1, Npp,PHI,PSI);
+    for (int32_t ii = 0; ii < nr * nc; ii++) {
+        final_view.push_back(static_cast<double>(input_image[ii])/Q);
+    }
 
-	if (AA != NULL) {
-		delete[](AA);
-	}
-	if (Yd != NULL) {
-		delete[](Yd);
-	}
+    for (int32_t rr = NNt; rr < nr - NNt; rr++) {
+        for (int32_t cc = NNt; cc < nc - NNt; cc++) {
 
-	for (int ii = 0; ii < Ms; ii++){
-		*(Regr0 + ii) = ((unsigned char)*(PredRegr0 + ii) + 1);
-		*(theta0 + ii) = (int32_t)floor(*(PredTheta0 + ii) * (int32_t)(1 << BIT_DEPTH_SPARSE) + 0.5 );// pow(2, BIT_DEPTH_SPARSE));
-	}
+            final_view.at(rr + cc * nr) = 0.0;
 
-	delete[](PredRegr0);
-	delete[](PredTheta0);
+            int32_t ee = 0;
 
-	/* sorting of filter coeffs and sparsity mask as increasing order of regressor index, new for ES2.4 */
+            for (int32_t dy = -NNt; dy <= NNt; dy++) {
+                for (int32_t dx = -NNt; dx <= NNt; dx++) {
 
-	std::vector<std::pair<unsigned char, int32_t>> sparsefilter;
+                    double regr_value = 
+                        static_cast<double>(input_image[rr + dy + (cc + dx) * nr])/Q;
 
-	for (int ij = 0; ij < view0->Ms; ij++) {
-		std::pair<unsigned char, int32_t> tmp_sp;
-		tmp_sp.first = view0->sparse_mask[ij];
-		tmp_sp.second = view0->sparse_weights[ij];
-		sparsefilter.push_back(tmp_sp);
-	}
+                    final_view.at(rr + cc * nr) += filter_coeffs.at(ee)*regr_value;
 
-	sort(sparsefilter.begin(), sparsefilter.end()); /*ascending sort based on regressor index (e.g., integer between 1 and 50 since we have 50 regressors */
+                    ee++;
+                }
+            }
 
-	memset(view0->sparse_mask, 0x00, sizeof(unsigned char)*view0->Ms);
-	memset(view0->sparse_weights, 0x00, sizeof(int32_t)*view0->Ms);
+            /* bias term */
+            final_view.at(rr + cc * nr) += 
+                bias_term_value*filter_coeffs.at((2 * NNt + 1)* (2 * NNt + 1));
 
-	for (int ij = 0; ij < view0->Ms; ij++) {
-		view0->sparse_mask[ij] = sparsefilter.at(ij).first;
-		view0->sparse_weights[ij] = sparsefilter.at(ij).second;
-	}
+        }
+    }
+
+    for (int32_t ii = 0; ii < nr * nc; ii++) {
+        final_view.at(ii) = final_view.at(ii) * Q;
+    }
+
+    return final_view;
 
 }

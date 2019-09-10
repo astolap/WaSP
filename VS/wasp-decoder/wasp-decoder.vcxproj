@@ -18,6 +18,46 @@
       <Platform>x64</Platform>
     </ProjectConfiguration>
   </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\..\source\bitdepth.hh" />
+    <ClInclude Include="..\..\source\clip.hh" />
+    <ClInclude Include="..\..\source\codestream.hh" />
+    <ClInclude Include="..\..\source\fastols.hh" />
+    <ClInclude Include="..\..\source\fileaux.hh" />
+    <ClInclude Include="..\..\source\inpainting.hh" />
+    <ClInclude Include="..\..\source\json.hh" />
+    <ClInclude Include="..\..\source\medianfilter.hh" />
+    <ClInclude Include="..\..\source\merging.hh" />
+    <ClInclude Include="..\..\source\minconf.hh" />
+    <ClInclude Include="..\..\source\ppm.hh" />
+    <ClInclude Include="..\..\source\predictdepth.hh" />
+    <ClInclude Include="..\..\source\psnr.hh" />
+    <ClInclude Include="..\..\source\residualjp2.hh" />
+    <ClInclude Include="..\..\source\sparsefilter.hh" />
+    <ClInclude Include="..\..\source\view.hh" />
+    <ClInclude Include="..\..\source\warping.hh" />
+    <ClInclude Include="..\..\source\WaSPConf.hh" />
+    <ClInclude Include="..\..\source\WaSPDecoder.hh" />
+    <ClInclude Include="..\..\source\ycbcr.hh" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="..\..\source\codestream.cpp" />
+    <ClCompile Include="..\..\source\fastols.cpp" />
+    <ClCompile Include="..\..\source\fileaux.cpp" />
+    <ClCompile Include="..\..\source\merging.cpp" />
+    <ClCompile Include="..\..\source\minconf.cpp" />
+    <ClCompile Include="..\..\source\ppm.cpp" />
+    <ClCompile Include="..\..\source\predictdepth.cpp" />
+    <ClCompile Include="..\..\source\psnr.cpp" />
+    <ClCompile Include="..\..\source\residualjp2.cpp" />
+    <ClCompile Include="..\..\source\sparsefilter.cpp" />
+    <ClCompile Include="..\..\source\view.cpp" />
+    <ClCompile Include="..\..\source\warping.cpp" />
+    <ClCompile Include="..\..\source\wasp-decoder.cpp" />
+    <ClCompile Include="..\..\source\WaSPConf.cpp" />
+    <ClCompile Include="..\..\source\WaSPDecoder.cpp" />
+    <ClCompile Include="..\..\source\ycbcr.cpp" />
+  </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>15.0</VCProjectVersion>
     <ProjectGuid>{28E44228-FC67-4D1F-AF0E-0B881F538A35}</ProjectGuid>
@@ -116,42 +156,6 @@
       <OptimizeReferences>true</OptimizeReferences>
     </Link>
   </ItemDefinitionGroup>
-  <ItemGroup>
-    <ClInclude Include="..\..\source\bitdepth.hh" />
-    <ClInclude Include="..\..\source\clip.hh" />
-    <ClInclude Include="..\..\source\codestream.hh" />
-    <ClInclude Include="..\..\source\fastols.hh" />
-    <ClInclude Include="..\..\source\fileaux.hh" />
-    <ClInclude Include="..\..\source\inpainting.hh" />
-    <ClInclude Include="..\..\source\medianfilter.hh" />
-    <ClInclude Include="..\..\source\merging.hh" />
-    <ClInclude Include="..\..\source\minconf.hh" />
-    <ClInclude Include="..\..\source\ppm.hh" />
-    <ClInclude Include="..\..\source\predictdepth.hh" />
-    <ClInclude Include="..\..\source\psnr.hh" />
-    <ClInclude Include="..\..\source\residualjp2.hh" />
-    <ClInclude Include="..\..\source\sparsefilter.hh" />
-    <ClInclude Include="..\..\source\view.hh" />
-    <ClInclude Include="..\..\source\warping.hh" />
-    <ClInclude Include="..\..\source\ycbcr.hh" />
-  </ItemGroup>
-  <ItemGroup>
-    <ClCompile Include="..\..\source\codestream.cpp" />
-    <ClCompile Include="..\..\source\fastols.cpp" />
-    <ClCompile Include="..\..\source\fileaux.cpp" />
-    <ClCompile Include="..\..\source\inpainting.cpp" />
-    <ClCompile Include="..\..\source\merging.cpp" />
-    <ClCompile Include="..\..\source\minconf.cpp" />
-    <ClCompile Include="..\..\source\ppm.cpp" />
-    <ClCompile Include="..\..\source\predictdepth.cpp" />
-    <ClCompile Include="..\..\source\psnr.cpp" />
-    <ClCompile Include="..\..\source\residualjp2.cpp" />
-    <ClCompile Include="..\..\source\sparsefilter.cpp" />
-    <ClCompile Include="..\..\source\view.cpp" />
-    <ClCompile Include="..\..\source\warping.cpp" />
-    <ClCompile Include="..\..\source\wasp-decoder.cpp" />
-    <ClCompile Include="..\..\source\ycbcr.cpp" />
-  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>

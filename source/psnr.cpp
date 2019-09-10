@@ -1,3 +1,7 @@
+/* psnr.cpp */
+/* Author: Pekka Astola */
+/* <pekka.astola@tuni.fi>*/
+
 #include "psnr.hh"
 #include "ycbcr.hh"
 #include "fileaux.hh"
@@ -5,128 +9,104 @@
 #include <stdio.h>
 #include <cmath>
 
-float getPSNR(FILE *fileout, const char *path_out_ppm, const char *path_input_ppm, const char *difftest_call)
+double getYCbCr_444_PSNR(
+    uint16_t *im0,
+    uint16_t* im1,
+    const int32_t NR,
+    const int32_t NC,
+    const int32_t NCOMP,
+    const int32_t N)
 {
 
-	if (fileout == NULL)
-		fileout = stdout;
+    uint16_t *ycbcr0, *ycbcr1;
 
-	/* run psnr here */
+    ycbcr0 = im0;
+    ycbcr1 = im1;
 
-	char psnr_call[1024];
-	sprintf(psnr_call, "%s%s%s%s", difftest_call, path_out_ppm, " ", path_input_ppm);
+    double nd = (double)(1 << N) - 1;
 
-	FILE *pfile;
-	pfile = _popen(psnr_call, "r");
+    double PSNR_Y = PSNR(ycbcr0, ycbcr1, NR, NC, 1, nd);
+    double PSNR_Cb = PSNR(ycbcr0 + NR*NC, ycbcr1 + NR*NC, NR, NC, 1, nd);
+    double PSNR_Cr = PSNR(ycbcr0 + 2 * NR*NC, ycbcr1 + 2 * NR*NC, NR, NC, 1, nd);
 
-	char psnr_buffer[1024];
-	while (fgets(psnr_buffer, sizeof(psnr_buffer), pfile) != 0) {
-		/*...*/
-	}
-	_pclose(pfile);
+    return (6 * PSNR_Y + PSNR_Cb + PSNR_Cr) / 8;
 
-	char tmp_char[1024];
-	float psnr_value = 0;
-
-	sscanf(psnr_buffer, "%s\t%f", tmp_char, &psnr_value);
-
-	fprintf(fileout, "%s\n", psnr_buffer);
-
-	return psnr_value;
 }
 
 
-double getYCbCr_422_PSNR(unsigned short *im0, unsigned short* im1, const int NR, const int NC, const int NCOMP, const int N)
-{
+double getYCbCr_422_PSNR(uint16_t *im0, uint16_t* im1, const int32_t NR,
+                         const int32_t NC, const int32_t NCOMP, const int32_t N) {
 
-	unsigned short 
-		*im0_y, *im1_y, 
-		*im0_cb, *im1_cb, 
-		*im0_cr, *im1_cr;
+  uint16_t *im0_y, *im1_y, *im0_cb, *im1_cb, *im0_cr, *im1_cr;
 
-	RGB2YUV422(im0, &im0_y, &im0_cb, &im0_cr, NR, NC, NCOMP, N);
-	RGB2YUV422(im1, &im1_y, &im1_cb, &im1_cr, NR, NC, NCOMP, N);
+  RGB2YUV422(im0, &im0_y, &im0_cb, &im0_cr, NR, NC, NCOMP, N);
+  RGB2YUV422(im1, &im1_y, &im1_cb, &im1_cr, NR, NC, NCOMP, N);
 
-	double nd = (double)(1 << N) - 1; // pow(2, N) - 1;
+  double nd = (double) (1 << N) - 1;  // pow(2, N) - 1;
 
-	double PSNR_Y = PSNR(im0_y, im1_y, NR, NC, 1, nd);
-	double PSNR_Cb = PSNR(im0_cb, im1_cb, NR, NC/2, 1, nd);
-	double PSNR_Cr = PSNR(im0_cb, im1_cb, NR, NC/2, 1, nd);
+  double PSNR_Y = PSNR(im0_y, im1_y, NR, NC, 1, nd);
+  double PSNR_Cb = PSNR(im0_cb, im1_cb, NR, NC / 2, 1, nd);
+  double PSNR_Cr = PSNR(im0_cb, im1_cb, NR, NC / 2, 1, nd);
 
-	delete[](im0_y);
-	delete[](im1_y);
-	delete[](im0_cb);
-	delete[](im1_cb);
-	delete[](im0_cr);
-	delete[](im1_cr);
+  delete[] (im0_y);
+  delete[] (im1_y);
+  delete[] (im0_cb);
+  delete[] (im1_cb);
+  delete[] (im0_cr);
+  delete[] (im1_cr);
 
-	return (6 * PSNR_Y + PSNR_Cb + PSNR_Cr) / 8;
+  return (6 * PSNR_Y + PSNR_Cb + PSNR_Cr) / 8;
 
 }
 
-double getYCbCr_444_PSNR(unsigned short *im0, unsigned short* im1, const int NR, const int NC, const int NCOMP, const int N)
-{
+double PSNR(
+    uint16_t *im0, 
+    uint16_t* im1, 
+    const int32_t NR,
+    const int32_t NC, 
+    const int32_t NCOMP, 
+    double maxval) {
 
-	unsigned short *ycbcr0, *ycbcr1;
+  double se = 0;
 
-	ycbcr0 = new unsigned short[NR*NC*3]();
-	ycbcr1 = new unsigned short[NR*NC*3]();
+  for (int32_t ii = 0; ii < NR * NC * NCOMP; ii++)
 
-	RGB2YCbCr(im0, ycbcr0, NR, NC, N);
-	RGB2YCbCr(im1, ycbcr1, NR, NC, N);
+  {
+    double dx = (double) (*(im0 + ii)) - (double) (*(im1 + ii));
 
-	double nd = (double)(1 << N) - 1;
+    se += dx * dx;
+  }
 
-	double PSNR_Y = PSNR(ycbcr0, ycbcr1, NR, NC, 1, nd);
-	double PSNR_Cb = PSNR(ycbcr0+NR*NC, ycbcr1 + NR*NC, NR, NC, 1, nd);
-	double PSNR_Cr = PSNR(ycbcr0 + 2*NR*NC, ycbcr1 + 2*NR*NC, NR, NC, 1, nd);
+  double mse = se / NR / NC / NCOMP;
 
-	delete[](ycbcr0);
-	delete[](ycbcr1);
-
-	return (6 * PSNR_Y + PSNR_Cb + PSNR_Cr) / 8;
-
-}
-
-double PSNR(unsigned short *im0, unsigned short* im1, const int NR, const int NC, const int NCOMP, double maxval)
-{
-
-	double se = 0;
-
-	for (int ii = 0; ii < NR*NC*NCOMP; ii++)
-
-	{
-		double dx = (double)(*(im0 + ii)) - (double)(*(im1 + ii));
-
-		se += dx*dx;
-	}
-
-	double mse = se / NR / NC / NCOMP;
-
-	return 10 * log10((maxval*maxval) / mse);
+  return 10 * log10((maxval * maxval) / mse);
 
 }
 
-double PSNR(unsigned short *im0, unsigned short* im1, const int NR, const int NC, const int NCOMP)
-{
+double PSNR(
+    uint16_t *im0, 
+    uint16_t* im1, 
+    const int32_t NR,
+    const int32_t NC, 
+    const int32_t NCOMP) {
 
-	double se = 0;
+  double se = 0;
 
-	double maxval = 0;
+  double maxval = 0;
 
-	for (int ii = 0; ii < NR*NC*NCOMP; ii++)
+  for (int32_t ii = 0; ii < NR * NC * NCOMP; ii++)
 
-	{
-		double dx = (double)(*(im0 + ii)) - (double)(*(im1 + ii));
+  {
+    double dx = (double) (*(im0 + ii)) - (double) (*(im1 + ii));
 
-		maxval = *(im1 + ii) > maxval ? *(im1 + ii) : maxval;
+    maxval = *(im1 + ii) > maxval ? *(im1 + ii) : maxval;
 
-		se += dx*dx;
-	}
+    se += dx * dx;
+  }
 
-	double mse = se / NR / NC / NCOMP;
+  double mse = se / NR / NC / NCOMP;
 
-	return 10 * log10((maxval*maxval) / mse);
+  return 10 * log10((maxval * maxval) / mse);
 
 }
 

@@ -15,6 +15,9 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="..\..\source\psnr.hh">
+      <Filter>Header Files</Filter>
+    </ClInclude>
     <ClInclude Include="..\..\source\residualjp2.hh">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -22,6 +25,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="..\..\source\warping.hh">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\source\WaSPDecoder.hh">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="..\..\source\view.hh">
@@ -45,6 +51,9 @@
     <ClInclude Include="..\..\source\inpainting.hh">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\source\json.hh">
+      <Filter>Header Files</Filter>
+    </ClInclude>
     <ClInclude Include="..\..\source\medianfilter.hh">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -60,7 +69,7 @@
     <ClInclude Include="..\..\source\predictdepth.hh">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\source\psnr.hh">
+    <ClInclude Include="..\..\source\WaSPConf.hh">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="..\..\source\codestream.hh">
@@ -80,7 +89,7 @@
     <ClCompile Include="..\..\source\warping.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\source\wasp-decoder.cpp">
+    <ClCompile Include="..\..\source\WaSPDecoder.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="..\..\source\view.cpp">
@@ -89,13 +98,13 @@
     <ClCompile Include="..\..\source\ycbcr.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\source\codestream.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\source\fastols.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="..\..\source\fileaux.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\source\inpainting.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="..\..\source\merging.cpp">
@@ -110,7 +119,10 @@
     <ClCompile Include="..\..\source\predictdepth.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\source\codestream.cpp">
+    <ClCompile Include="..\..\source\WaSPConf.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\source\wasp-decoder.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
