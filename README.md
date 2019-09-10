@@ -8,7 +8,7 @@
 
 ## Introduction
 
-This is the WaSP (Warping and Sparse Prediction) light field compression software. The program is intended for encoding light fields, such as the [JPEG Pleno datasets](https://jpeg.org/plenodb/lf/pleno_lf/). 
+This is the WaSP (Warping and Sparse Prediction) light field compression software. The program is intended for encoding light fields, such as the [JPEG Pleno datasets](https://jpeg.org/plenodb/lf/pleno_lf/). The WaSP algorithm was submitted as proposal to the [JPEG Pleno standardization](https://jpeg.org/jpegpleno/index.html), and is used as the 4D prediction mode in [ISO/IEC DIS 21794-2](https://www.iso.org/standard/74532.html).  the Earlier versions of WaSP are also known in the literature as JPEG Pleno verification model (VM) software 1.0 and 1.1.
 
 The program is developed and maintained by [Pekka Astola](http://www.cs.tut.fi/~astolap/).
 
