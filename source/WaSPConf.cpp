@@ -6,13 +6,15 @@
 
 WaSPConfig::WaSPConfig(int argc, char *argv[], const char *type) {
 
+    print_intro();
+
     if (!strcmp(type,"encoder") && !parseCommandLine_encoder(argc, argv)) {
-        printf("\n HELP \n");
+        print_encoder_help();
         exit(0);
     }
 
     if (!strcmp(type, "decoder") && !parseCommandLine_decoder(argc, argv)) {
-        printf("\n HELP \n");
+        print_decoder_help();
         exit(0);
     }
 
@@ -25,6 +27,10 @@ WaSPConfig::~WaSPConfig() {
 bool WaSPConfig::parseCommandLine_decoder(int argc, char *argv[]) {
 
     if (argc < 7) {
+        return false;
+    }
+
+    if (argc > 7) {
         return false;
     }
 
@@ -64,9 +70,45 @@ bool WaSPConfig::parseCommandLine_decoder(int argc, char *argv[]) {
 
 }
 
+void WaSPConfig::print_encoder_help() {
+    printf("\n\tUsage: wasp-encoder"
+        "\n\t--input [INPUT DIRECTORY .PPM/.PGM]"
+        "\n\t--output [OUTPUT DIRECTORY .PPM/.PGM]"
+        "\n\t--config [JSON CONFIG]"
+        "\n\t--kakadu [KAKADU BINARY DIRECTORY]\n");
+    return;
+}
+
+void WaSPConfig::print_decoder_help() {
+    printf("\n\tUsage: wasp-decoder"
+        "\n\t--output [OUTPUT DIRECTORY .PPM/.PGM]"
+        "\n\t--config [JSON CONFIG]"
+        "\n\t--kakadu [KAKADU BINARY DIRECTORY]\n");
+    return;
+}
+
+void WaSPConfig::print_intro() {
+    printf("\n\t--------------------------------------------------------\n");
+    printf(
+        "\n\tWaSP - Warping and Sparse Prediction"
+        "\n\tAuthor: Pekka Astola (pekka.astola@tuni.fi), 2018-2019"
+        "\n\tWeb page: https://github.com/astolap/WaSP"
+        "\n\tHome page of author: http://www.cs.tut.fi/~astolap/"
+        "\n\tPublication: P. Astola and I. Tabus,"
+        "\n\t\t\tWaSP: Hierarchical Warping, Merging, and Sparse Prediction for Light Field Image Compression,"
+        "\n\t\t\t2018 7th European Workshop on Visual Information Processing (EUVIP), Tampere, 2018, pp. 1-6."
+        "\n\n");
+    printf("\n\t--------------------------------------------------------\n");
+    return;
+}
+
 bool WaSPConfig::parseCommandLine_encoder(int argc, char *argv[]) {
 
     if (argc < 9) {
+        return false;
+    }
+
+    if (argc > 9) {
         return false;
     }
 

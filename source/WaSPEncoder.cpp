@@ -582,15 +582,17 @@ void WaSPEncoder::generate_inverse_depth_levelwise() {
 
 void WaSPEncoder::generate_texture_residual_level_wise() {
 
-    FILE *tmp;
-    tmp = fopen("C:/Temp/coeffs.data", "wb");
-    int32_t qvalc = (1<<BIT_DEPTH_SPARSE);
-    fwrite(&qvalc, sizeof(int32_t), 1, tmp);
-    fclose(tmp);
+    //FILE *tmp;
+    //tmp = fopen("C:/Temp/coeffs.data", "wb");
+    //int32_t qvalc = (1<<BIT_DEPTH_SPARSE);
+    //fwrite(&qvalc, sizeof(int32_t), 1, tmp);
+    //fclose(tmp);
 
     maxh = get_highest_level(LF, n_views_total);
 
     for (int32_t hlevel = 1; hlevel <= maxh; hlevel++) {
+
+        printf("\n\tProcessing of hierarchical level: %d\n\n", hlevel);
 
         const int32_t bpc = 10;
 
@@ -696,15 +698,15 @@ void WaSPEncoder::generate_texture_residual_level_wise() {
                             SAI->Ms,
                             SPARSE_BIAS_TERM));
 
-                        FILE *tmp;
-                        tmp = fopen("C:/Temp/coeffs.data", "ab");
+                        //FILE *tmp;
+                        //tmp = fopen("C:/Temp/coeffs.data", "ab");
 
-                        fwrite(&SAI->sparse_filters.at(icomp).filter_coefficients[icomp],
-                            sizeof(double),
-                            SAI->sparse_filters.at(icomp).filter_coefficients.size(),
-                            tmp);
+                        //fwrite(&SAI->sparse_filters.at(icomp).filter_coefficients[icomp],
+                        //    sizeof(double),
+                        //    SAI->sparse_filters.at(icomp).filter_coefficients.size(),
+                        //    tmp);
 
-                        fclose(tmp);
+                        //fclose(tmp);
 
                       /*  aux_write16PGMPPM("C:/Temp/padded_sai.pgm", SAI->nc + 2 * SAI->NNt, SAI->nr + 2 * SAI->NNt, 1, padded_icomp_sai);
                         aux_write16PGMPPM("C:/Temp/padded_orig.pgm", SAI->nc + 2 * SAI->NNt, SAI->nr + 2 * SAI->NNt, 1, padded_icomp_orig);*/

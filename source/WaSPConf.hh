@@ -33,6 +33,10 @@ class WaSPConfig {
  
   bool parseCommandLine_encoder(int argc, char *argv[]);
   bool parseCommandLine_decoder(int argc, char *argv[]);
+
+  void print_encoder_help();
+  void print_decoder_help();
+  void print_intro();
  
   public:
   
