@@ -55,7 +55,13 @@ If you encounter the error *"kakadu/kdu_compress: /usr/lib/x86_64-linux-gnu/libs
 
 ## Running the software
 
-Download the light field data sets from [JPEG Pleno database](https://jpeg.org/plenodb/lf/pleno_lf/), and use one of the [configuration files](https://github.com/astolap/WaSP/blob/master/configuration_files) provided. The syntax for the encoder is,
+For test data, download the light field data sets from [JPEG Pleno database](https://jpeg.org/plenodb/lf/pleno_lf/), and use one of the [configuration files](https://github.com/astolap/WaSP/blob/master/configuration_files) provided. 
+
+The encoder takes as an input the path to the dataset (including the texture views in .PPM format, and the normalized disparity views in .PGM format), the path to the Kakadu executable, the path to the .json configuration file, and the output directory. The encoder will output the final encoded light field as output.LF, and also produces the decoded .PPM and .PGM files.
+
+The decoder takes as an input the encoded .LF file, the path to the output directory (which will be filled with the decoded .PPM and .PGM files), and the path to the Kakadu executable.
+
+The syntax for the encoder is,
 > wasp-encoder --input [INPUT DIRECTORY .PPM/.PGM --output [OUTPUT DIRECTORY .LF] --config [JSON CONFIG FILE] --kakadu [KAKADU BINARY DIRECTORY].
 
 The syntax for the decoder is,
