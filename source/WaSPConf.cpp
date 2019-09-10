@@ -76,7 +76,7 @@ void WaSPConfig::print_encoder_help() {
         "\n\t--input [INPUT DIRECTORY .PPM/.PGM]"
         "\n\t--output [OUTPUT DIRECTORY .PPM/.PGM]"
         "\n\t--config [JSON CONFIG]"
-        "\n\t--kakadu [KAKADU BINARY DIRECTORY]\n");
+        "\n\t--kakadu [KAKADU BINARY DIRECTORY]\n\n");
     return;
 }
 
@@ -84,7 +84,7 @@ void WaSPConfig::print_decoder_help() {
     printf("\n\tUsage: wasp-decoder"
         "\n\t--output [OUTPUT DIRECTORY .PPM/.PGM]"
         "\n\t--config [JSON CONFIG]"
-        "\n\t--kakadu [KAKADU BINARY DIRECTORY]\n");
+        "\n\t--kakadu [KAKADU BINARY DIRECTORY]\n\n");
     return;
 }
 
