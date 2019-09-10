@@ -1,20 +1,47 @@
-# WaSP light field compression
+
+# WaSP - light field compression
+### Table of contents
+ 1. [Introduction](#introduction)
+ 2. [Installing](#installing-and-compiling)
+    1. [Kakadu JPEG 2000 encoder](#kakadu-installation)
+ 3. [Running the software](#running-the-software)
 
 ## Introduction
 
-This is the WaSP (Warping and Sparse Prediction) light field compression software.
+This is the WaSP (Warping and Sparse Prediction) light field compression software. The program is intended for encoding light fields, such as the [JPEG Pleno datasets](https://jpeg.org/plenodb/lf/pleno_lf/). 
 
-## Installation instructions
+The program is developed and maintained by [Pekka Astola](http://www.cs.tut.fi/~astolap/).
 
-This software has been developed and tested on Windows 7,10 and has mostly been developed using Visual Studio. However, a makefile for compiling on Linux is provided and it has been tested on **Ubuntu 14.04 LTS**. Run 
+If you plan to use this program for research, remember to cite the following publication,
+
+```
+@INPROCEEDINGS{8611756,  
+author={P. {Astola} and I. {Tabus}},  
+booktitle={2018 7th European Workshop on Visual Information Processing (EUVIP)},  
+title={WaSP: Hierarchical Warping, Merging, and Sparse Prediction for Light Field Image Compression},  
+year={2018},  
+volume={},  
+number={},  
+pages={1-6},  
+keywords={cameras;data compression;image coding;video codecs;warped versions;warped references;optimal LS merger;occluded pixels;merged image;original view;sparse predictor;plenoptic camera images;high density camera array data;JPEG Pleno test conditions;earlier scheme;JPEG Pleno Light Field coding standard;current view;reference views;improved view merging;generalized functionality;codec;earlier version;previous hierarchical levels;particular level;versatile light field compression scheme;Light Field image compression;sparse prediction;hierarchical warping;Encoding;Cameras;Image color analysis;Image coding;Transform coding;Codecs;Merging},  
+doi={10.1109/EUVIP.2018.8611756},  
+ISSN={2471-8963},  
+month={Nov},}
+```
+
+## Installing and compiling
+
+This software has been developed using Visual Studio on Windows 10. For Visual Studio a solution file is provided. 
+
+However, a [makefile](#[https://github.com/astolap/WaSP/blob/master/makefile](https://github.com/astolap/WaSP/blob/master/makefile)) for compiling on Linux is provided, and it has been tested on **Ubuntu 14.04 LTS**. On Linux simply run, 
 
 >make all
 
-to build both encoder and decoder.
+to build both encoder and decoder. 
 
-### Kakadu installation on Linux
+### Kakadu installation
 
-Residual encoding is currently done by JPEG2000 and for that we use the Kakadu Software.
+Normalized disparity and texture residual encoding is performed by JPEG 2000 using the [Kakadu](https://kakadusoftware.com/) encoder.
 
 [Download Kakadu for Linux or Windows](http://kakadusoftware.com/downloads/) and see Kakadu's README.txt for instructions regarding **LD\_LIBRARY\_PATH**. 
 
@@ -26,92 +53,10 @@ If you encounter the error *"kakadu/kdu_compress: /usr/lib/x86_64-linux-gnu/libs
 
 >sudo apt-get install libstdc++6
 
-## Demo
+## Running the software
 
-An [encoding of the I01_Bikes at rate 0.75 bpp](http://www.cs.tut.fi/~astolap/WaSP/github_demo/I01_Bikes-169_41.8452_0.74854.LF) is provided as an example for the decoder. You can run the decoder with,
+Download the light field data sets from [JPEG Pleno database](https://jpeg.org/plenodb/lf/pleno_lf/), and use one of the [configuration files](https://github.com/astolap/WaSP/blob/master/configuration_files) provided. The syntax for the encoder is,
+> wasp-encoder --input [INPUT DIRECTORY .PPM/.PGM --output [OUTPUT DIRECTORY .LF] --config [JSON CONFIG FILE] --kakadu [KAKADU BINARY DIRECTORY].
 
->./wasp-decoder-bin /path/to/I01_Bikes-169_41.8452_0.74854.LF /path/to/output /path/to/Kakadu/
-
-For encoding a [sample configuration file](http://www.cs.tut.fi/~astolap/WaSP/github_demo/I01_Bikes-169_41.8452_0.74854.conf) is provided for the same I01_Bikes encoding. Download [inverse depth for Lytro dataset](http://www.cs.tut.fi/~astolap/WaSP/Lytro_inverse_depth.zip) before attempting to run the encoder. Place the inverse depth .pgm files in the directory containing the original .ppm files. You can run the encoder with,
-
->./wasp-encoder-bin /path/to/original_images/ /path/to/output/directory /path/to/Kakadu/ /path/to/I01_Bikes-169_41.8452_0.74854.conf
-
-WaSP is experimental software and provides very limited functionality. Support is provided for 10-bit .ppm files only.
-
-## Running the encoder
-
-Encoder takes four arguments: path to input images, path to output directory, path to Kakadu directory and path to the configuration file. 
-
-Encoder assumes that the images are named using col_row.ppm in %03d format, for example view row=8,col=4 should be in a file named **003\_007.ppm**. Indexing for the file names starts from zero. For the UNSW style inverse depths, the encoder assumes that depth files are named as **003\_007.pgm** and are found in the same folder as the color images.
-
-Encoder also assumes that the directory pointing to Kakadu installation contains **kdu_compress** and **kdu_expand** executables.
-
-### Configuration file
-
-Currently, the configuration file is a collection of parameters (as 32-bit signed integers) generated with Matlab. The structure of the configuration file is the following (each line representing one int32), starting with the global (applied to each view) header information
-
-1. total number of views to be encoded
-
-2. YUV\_TRANSFORM, true (1) or false (0)
-
-3. YUV\_RATIO_SEARCH, true (1) or false (0)
-
-4. STD\_SEARCH, true (1) or false (0)
-
-   continuing for each view to be encoded,
-
-5. row index in light field, for example 8 (used to fetch .ppm files, the example here is view 003_007.ppm)
-
-6. column index in light field, for example 4 (used to fetch .ppm files, the example here is view 003_007.ppm)
-
-7. camera position along the horizontal (e.g. from UNSW camera centers) multiplied with 100000
-
-8. camera position along the vertical (e.g. from UNSW camera centers) multiplied with 100000
-
-9. rate for the color component of the view multiplied with 100000
-
-10. rate for the depth component of the view multiplied with 100000
-
-11. Sparse filter order, for example 25
-
-12. Sparse filter neighborhood, for example 3 would imply 7x7 neighborhood ( -3:3, -3:3 )
-
-13. standard deviation used for geometry based view merging. Use this for only very low bit rates.
-
-14. minimum inverse depth value to be subtracted from the inverse depth file. This is needed if the inverse depth file contains also negative values (as can be in the lenslet case). This value is represented in the integer range after multiplication by 2^14 and should always be positive.
-
-15. number of reference views used in predicting the **color** component of this view, for example Nc,
-
-   if Nc>0
-
-   15+1:15+Nc. the indices of the reference views. Index for each view is one integer, and for example for the first view this integer == 0, the second view == 1 and so on. To generate a configuration file you need to keep track of the order.
-	
-16. (or 15+Nc+1) number of reference views used in predicting the **depth** component of this view, for example Nd,
-
-   if Nd>0
-
-   15+Nc+2:15+Nc+Nd+1. same instructions as for color views
-	
-17. (or 15+Nc+Nd+2) whether the view uses a segmentation, true (1) or false (0)
-
-### Reading or modifying configuration files
-
-You can use the Matlab functions in the Matlab directory to modify and write your own configuration files.
-
-### Output of the encoder
-
-The encoder outputs to the bitstream **output.LF** in the output directory. Additionally, it also decodes the views to the output directory.
-
-## Running the decoder
-
-The decoder takes three arguments: path to input file (for example path to the output.LF file), directory for outputting the decoded images (.ppm and .pgm) and path to the directory containing Kakadu executables.
-
-## References
-
-This work is based on academic research and any research based on this software should cite at least the first of the following papers:
-
-**P. Astola, I. Tabus, *WaSP: Hierarchical Warping, Merging, and Sparse Prediction for Light Field Image Compression*, EUVIP 2018**
-
-**P. Astola, I. Tabus, *Light Field Compression of HDCA Images Combining Linear Prediction and JPEG 2000*, EUSIPCO 2018**
-
-**I. Tabus, P. Helin, P. Astola, *Lossy Compression of Lenslet Images from Plenoptic Cameras Combining Sparse Predictive Coding and JPEG 2000*, ICIP 2017**
+The syntax for the decoder is,
+> wasp-decoder --input [INPUT .LF] --output [OUTPUT DIRECTORY .PPM/.PGM] --kakadu [KAKADU BINARY DIRECTORY].
