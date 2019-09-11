@@ -1167,7 +1167,7 @@ void WaSPEncoder::generate_texture_residual_level_wise() {
 
 void WaSPEncoder::write_bitstream() {
 
-    printf("Writing header informatinon to codestream\n");
+    printf("Writing header information to codestream\n");
 
     uint8_t colorspace_enumerator;
 
