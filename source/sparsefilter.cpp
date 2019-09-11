@@ -124,27 +124,29 @@ spfilter getGlobalSparseFilter(
     const int32_t nc,
     const int32_t NNt,
     const int32_t Ms,
-    const double bias_term_value) {
+    const double bias_term_value,
+    const int32_t sub_sampling_factor) {
 
     int32_t MT = (NNt * 2 + 1) * (NNt * 2 + 1) + 1; /* number of regressors */
 
-    int32_t totalP = (nr - NNt * 2) * (nc - NNt * 2);
+    //int32_t totalP = (nr - NNt * 2) * (nc - NNt * 2);
 
-    const int32_t skipv = 1;
-    const int32_t skiph = 1;
+    const int32_t skipv = sub_sampling_factor;
+    const int32_t skiph = sub_sampling_factor;
 
-    uint32_t Npp = totalP/skipv/skiph + 1;
+    uint32_t Npp = ((nr - NNt * 2) / skipv + 1)*((nc - NNt * 2) / skipv + 1);
 
     double *AA = new double[Npp * MT]();
     double *Yd = new double[Npp]();
 
+    /*init bias column*/
     for (int32_t ii = 0; ii < Npp; ii++) {
         *(AA + ii + (NNt * 2 + 1) * (NNt * 2 + 1) * Npp) = bias_term_value;
     }
 
     int32_t iiu = 0;
 
-    double Q = ((double)(1 << BIT_DEPTH) - 1);
+    double Q = static_cast<double>( (1 << BIT_DEPTH) - 1);
 
     for (uint32_t ir = NNt; ir < nr - NNt; ir=ir+skipv) {
         for (uint32_t ic = NNt; ic < nc - NNt; ic=ic+skiph) {
@@ -157,12 +159,12 @@ spfilter getGlobalSparseFilter(
                     /* get the desired Yd*/
                     if (dy == 0 && dx == 0) {
                         *(Yd + iiu) +=
-                            ((double) *(original_image + offset)) / Q;	// (pow(2, BIT_DEPTH) - 1);
+                            ((double) *(original_image + offset)) / Q;	
                     }
 
                     /* get the regressors */
                     *(AA + iiu + ai * Npp) += 
-                        ((double) *(input_image + offset)) / Q;	// (pow(2, BIT_DEPTH) - 1);
+                        ((double) *(input_image + offset)) / Q;	
 
                     ai++;
                 }

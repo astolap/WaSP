@@ -59,7 +59,8 @@ spfilter getGlobalSparseFilter(
     const int32_t nc,
     const int32_t NNt,
     const int32_t Ms,
-    const double bias_term_value);
+    const double bias_term_value,
+    const int32_t sub_sampling_factor);
 
 std::vector<double> applyGlobalSparseFilter(
     const uint16_t *input_image,

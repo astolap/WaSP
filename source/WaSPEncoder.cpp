@@ -696,7 +696,8 @@ void WaSPEncoder::generate_texture_residual_level_wise() {
                             SAI->nc + 2 * SAI->NNt,
                             SAI->NNt,
                             SAI->Ms,
-                            SPARSE_BIAS_TERM));
+                            SPARSE_BIAS_TERM,
+                            setup.sparse_subsampling));
 
                         //FILE *tmp;
                         //tmp = fopen("C:/Temp/coeffs.data", "ab");

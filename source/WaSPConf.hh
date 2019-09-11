@@ -23,8 +23,11 @@ struct WaSPsetup {
 
     string input_directory;
     string output_directory;
-    string config_file;
     string wasp_kakadu_directory;
+
+    /*encoder side only*/
+    string config_file;
+    int32_t sparse_subsampling; 
 
 };
 

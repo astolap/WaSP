@@ -27,9 +27,9 @@ WaSPConfig::~WaSPConfig() {
 
 bool WaSPConfig::parseCommandLine_decoder(int argc, char *argv[]) {
 
-    if (argc < 7) {
-        return false;
-    }
+    //if (argc < 7) {
+    //    return false;
+    //}
 
     if (argc > 7) {
         return false;
@@ -67,6 +67,21 @@ bool WaSPConfig::parseCommandLine_decoder(int argc, char *argv[]) {
 
     }
 
+    if (WaSP_encoder_setup.input_directory.length() == 0) {
+        printf("\n Input directory not set\n");
+        return false;
+    }
+
+    if (WaSP_encoder_setup.output_directory.length() == 0) {
+        printf("\n Output directory not set\n");
+        return false;
+    }
+
+    if (WaSP_encoder_setup.wasp_kakadu_directory.length() == 0) {
+        printf("\n Kakadu directory not set\n");
+        return false;
+    }
+
     return true;
 
 }
@@ -76,7 +91,9 @@ void WaSPConfig::print_encoder_help() {
         "\n\t--input [INPUT DIRECTORY .PPM/.PGM]"
         "\n\t--output [OUTPUT DIRECTORY .LF/.PPM/.PGM]"
         "\n\t--config [JSON CONFIG]"
-        "\n\t--kakadu [KAKADU BINARY DIRECTORY]\n\n");
+        "\n\t--kakadu [KAKADU BINARY DIRECTORY]"
+        "\n\t--sparse_subsampling [Subsampling factor when solving sparse filter."
+        "\n\t\tneeds to be integer >0. Values 2 or 4 will increase encoder speed with some loss in PSNR.]\n\n");
     return;
 }
 
@@ -105,13 +122,15 @@ void WaSPConfig::print_intro() {
 
 bool WaSPConfig::parseCommandLine_encoder(int argc, char *argv[]) {
 
-    if (argc < 9) {
-        return false;
-    }
+    //if (argc < 9) {
+    //    return false;
+    //}
 
-    if (argc > 9) {
-        return false;
-    }
+    //if (argc > 10) {
+    //    return false;
+    //}
+
+    WaSP_encoder_setup.sparse_subsampling = 1;
 
     for (int32_t ii = 1; ii < argc-1; ii+=2) {
 
@@ -148,10 +167,44 @@ bool WaSPConfig::parseCommandLine_encoder(int argc, char *argv[]) {
 
         }
 
+        else if (!strcmp(argv[ii], "-s")) {
+            WaSP_encoder_setup.sparse_subsampling = atoi(argv[ii + 1]);
+        }
+
+        else if (!strcmp(argv[ii], "--sparse_subsampling")) {
+            WaSP_encoder_setup.sparse_subsampling = atoi(argv[ii + 1]);
+
+        }
+
         else {
             return false;
         }
 
+    }
+
+    if (WaSP_encoder_setup.config_file.length() == 0) {
+        printf("\n Config file (.json) not set\n");
+        return false;
+    }
+
+    if (WaSP_encoder_setup.input_directory.length() == 0) {
+        printf("\n Input directory not set\n");
+        return false;
+    }
+
+    if (WaSP_encoder_setup.output_directory.length() == 0) {
+        printf("\n Output directory not set\n");
+        return false;
+    }
+
+    if (WaSP_encoder_setup.wasp_kakadu_directory.length() == 0) {
+        printf("\n Kakadu directory not set\n");
+        return false;
+    }
+
+    if (WaSP_encoder_setup.sparse_subsampling < 1) {
+        printf("\n Sub sampling factor needs to be >= 1\n");
+        return false;
     }
 
     return true;
