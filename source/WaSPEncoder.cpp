@@ -1,7 +1,28 @@
-/* WaSPEncoder.cpp */
-/* Author: Pekka Astola */
-/* <pekka.astola@tuni.fi>*/
-
+/*BSD 2-Clause License
+* Copyright(c) 2019, Pekka Astola
+* All rights reserved.
+*
+* Redistribution and use in source and binary forms, with or without
+* modification, are permitted provided that the following conditions are met :
+*
+* 1. Redistributions of source code must retain the above copyright notice, this
+* list of conditions and the following disclaimer.
+*
+* 2. Redistributions in binary form must reproduce the above copyright notice,
+* this list of conditions and the following disclaimer in the documentation
+* and/or other materials provided with the distribution.
+*
+* THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+* AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+* IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+* DISCLAIMED.IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE
+* FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
+* DAMAGES(INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
+*     SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
+*     CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
+*     OR TORT(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+*     OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+*/
 
 #include <fstream>
 #include <iomanip>
@@ -26,9 +47,9 @@
 WaSPEncoder::WaSPEncoder(const WaSPsetup encoder_setup)
 {
 
-  setup = encoder_setup;
+    setup = encoder_setup;
 
-  load_config_json(setup.config_file);
+    load_config_json(setup.config_file);
 
 }
 
@@ -36,9 +57,11 @@ WaSPEncoder::~WaSPEncoder() {
 }
 
 void WaSPEncoder::encode() {
-  generate_inverse_depth_levelwise();
-  generate_texture_residual_level_wise();
-  generate_WaSP_bitstream();
+
+    generate_inverse_depth_levelwise();
+    generate_texture_residual_level_wise();
+    write_bitstream();
+
 }
 
 void WaSPEncoder::write_config(string config_json_file_out) {
@@ -73,7 +96,7 @@ void WaSPEncoder::write_config(string config_json_file_out) {
         view_configuration["cweight_search"] = SAI->cweight_search;
 
         view_configuration["rate_texture"] = SAI->residual_rate_color,
-        view_configuration["rate_inverse_depth"] = SAI->residual_rate_depth;
+            view_configuration["rate_inverse_depth"] = SAI->residual_rate_depth;
 
         view_configuration["view_merging_mode"] = SAI->mmode;
 
@@ -88,21 +111,21 @@ void WaSPEncoder::write_config(string config_json_file_out) {
         view_configuration["minimum_inverse_depth"] = SAI->min_inv_d;
 
         view_configuration["number_of_texture_references"] = SAI->n_references;
-        view_configuration["number_of_inverse_depth_references"] = 
+        view_configuration["number_of_inverse_depth_references"] =
             SAI->n_depth_references;
 
         std::vector<int32_t> sai_texture_references;
-        for (int32_t ij = 0; ij<SAI->n_references; ij++) {
+        for (int32_t ij = 0; ij < SAI->n_references; ij++) {
             sai_texture_references.push_back(SAI->references[ij]);
         }
-        view_configuration["texture_reference_indices"] = 
+        view_configuration["texture_reference_indices"] =
             sai_texture_references;
 
         std::vector<int32_t> sai_inverse_depth_references;
-        for (int32_t ij = 0; ij<SAI->n_depth_references; ij++) {
+        for (int32_t ij = 0; ij < SAI->n_depth_references; ij++) {
             sai_inverse_depth_references.push_back(SAI->depth_references[ij]);
         }
-        view_configuration["inverse_depth_reference_indices"] = 
+        view_configuration["inverse_depth_reference_indices"] =
             sai_inverse_depth_references;
 
 
@@ -145,17 +168,15 @@ void WaSPEncoder::load_config_json(string config_json_file) {
 
         SAI->colorspace = colorspace_LF;
 
-        // TODO: initialization can receive the JSON data structure
-        // Notice that it can improve the source code readability
         initView(SAI);
         SAI->i_order = ii;
 
         SAI->ncomp = 3;
 
-        SAI->r = view_configuration["row_index"].get<int32_t>(); // INSTEAD OF "fread(&(SAI->r), sizeof(int32_t), 1, filept);"
-        SAI->c = view_configuration["column_index"].get<int32_t>(); // INSTEAD OF "fread(&(SAI->c), sizeof(int32_t), 1, filept);"
+        SAI->r = view_configuration["row_index"].get<int32_t>();
+        SAI->c = view_configuration["column_index"].get<int32_t>();
 
-        SAI->cweight_search = 
+        SAI->cweight_search =
             view_configuration["cweight_search"].get<int32_t>() > 0 ? true : false;
 
         SAI->residual_rate_color =
@@ -165,20 +186,18 @@ void WaSPEncoder::load_config_json(string config_json_file) {
 
         SAI->mmode = view_configuration["view_merging_mode"].get<unsigned char>();
 
-        SAI->x = view_configuration["horizontal_camera_center_position"].get<float>(); // INSTEAD OF "fread(&(SAI->r), sizeof(int32_t), 1, filept);"
-        SAI->y = view_configuration["vertical_camera_center_position"].get<float>(); // INSTEAD OF "fread(&(SAI->c), sizeof(int32_t), 1, filept);"
+        SAI->x = view_configuration["horizontal_camera_center_position"].get<float>();
+        SAI->y = view_configuration["vertical_camera_center_position"].get<float>();
 
-        SAI->Ms = view_configuration["sparse_filter_order"].get<int32_t>(); //(&SAI->Ms, sizeof(int32_t), 1, filept); /*reading*/
-        SAI->NNt = view_configuration["sparse_filter_neighborhood_size"].get<int32_t>(); //(&SAI->NNt, sizeof(int32_t), 1, filept); /*reading*/
+        SAI->Ms = view_configuration["sparse_filter_order"].get<int32_t>();
+
+        SAI->NNt = view_configuration["sparse_filter_neighborhood_size"].get<int32_t>();
 
         SAI->stdd = view_configuration["fixed_merging_weight_parameter"].get<float>();
 
-        SAI->min_inv_d = view_configuration["minimum_inverse_depth"].get<int32_t>();//fread(&tmpminv, sizeof(int32_t), 1, filept); /*reading, if we have negative inverse depth,
-                                                                             //for example in lenslet, we need to subtract min_inv_d
-                                                                             //from the inverse depth maps*/
-
+        SAI->min_inv_d = view_configuration["minimum_inverse_depth"].get<int32_t>();
         SAI->n_references =
-            view_configuration["number_of_texture_references"].get<int32_t>();// fread(&(SAI->n_references), sizeof(int32_t), 1, filept); /*reading*/
+            view_configuration["number_of_texture_references"].get<int32_t>();
         SAI->n_depth_references =
             view_configuration["number_of_inverse_depth_references"].get<int32_t>();
 
@@ -225,8 +244,8 @@ void WaSPEncoder::load_config_json(string config_json_file) {
         }
 
         setPaths(
-            SAI, 
-            setup.input_directory.c_str(), 
+            SAI,
+            setup.input_directory.c_str(),
             setup.output_directory.c_str());
 
     }
@@ -313,7 +332,7 @@ void WaSPEncoder::merge_texture_views(
             nr1,
             nc1,
             ncomp1,
-           10,
+            10,
             SAI->colorspace);
 
         for (int32_t icomp = 0; icomp < SAI->ncomp; icomp++) {
@@ -343,7 +362,7 @@ void WaSPEncoder::merge_texture_views(
                 SAI->seg_vp);
         }
 
-        
+
     }
 
     if (SAI->mmode == 1) {
@@ -402,7 +421,7 @@ void WaSPEncoder::generate_inverse_depth_levelwise() {
 
     /*the term inverse depth is used interchangeably with normalized disparity */
 
-    int32_t maxh = get_highest_level(LF,n_views_total);
+    int32_t maxh = get_highest_level(LF, n_views_total);
 
     /*we dont have to do the last level*/
     for (int32_t hlevel = 1; hlevel < maxh; hlevel++) {
@@ -424,7 +443,7 @@ void WaSPEncoder::generate_inverse_depth_levelwise() {
 
             SAI->depth = new uint16_t[SAI->nr * SAI->nc]();
 
-            if (hlevel==1) { /*intra coding of inverse depth*/
+            if (hlevel == 1) { /*intra coding of inverse depth*/
 
                 bool depth_file_exist = false;
 
@@ -478,7 +497,7 @@ void WaSPEncoder::generate_inverse_depth_levelwise() {
 
                     delete[](encoding_parameters);
                     /* ------------------------------
-                    INVERSE DEPTH ENCODING ENDS 
+                    INVERSE DEPTH ENCODING ENDS
                     ------------------------------*/
 
                     /* ------------------------------
@@ -493,7 +512,7 @@ void WaSPEncoder::generate_inverse_depth_levelwise() {
                         SAI->jp2_residual_depth_path_jp2);
 
                     /*------------------------------
-                    INVERSE DEPTH DECODING ENDS 
+                    INVERSE DEPTH DECODING ENDS
                     ------------------------------*/
 
                     SAI->has_depth_residual = true;
@@ -601,7 +620,7 @@ void WaSPEncoder::generate_texture_residual_level_wise() {
 
         if (hlevel > 1) {
             Q = 2;
-            
+
             offset = (1 << bpc) - 1; /* 10bit images currently */
         }
 
@@ -670,17 +689,17 @@ void WaSPEncoder::generate_texture_residual_level_wise() {
                         SAI->nr,
                         SAI->nc,
                         SAI->ncomp,
-                       bpc,
+                        bpc,
                         SAI->colorspace);
 
                     SAI->sparse_filters.clear();
 
                     for (int32_t icomp = 0; icomp < SAI->ncomp; icomp++) {
 
-                        uint16_t *padded_icomp_sai = 
-                            padArrayUint16_t(SAI->color + SAI->nr*SAI->nc*icomp, 
-                                SAI->nr, 
-                                SAI->nc, 
+                        uint16_t *padded_icomp_sai =
+                            padArrayUint16_t(SAI->color + SAI->nr*SAI->nc*icomp,
+                                SAI->nr,
+                                SAI->nc,
                                 SAI->NNt);
 
                         uint16_t *padded_icomp_orig =
@@ -715,11 +734,11 @@ void WaSPEncoder::generate_texture_residual_level_wise() {
                         delete[](padded_icomp_sai);
                         delete[](padded_icomp_orig);
 
-                       /* exit(0);*/
+                        /* exit(0);*/
                     }
 
                     uint16_t *sp_filtered_image_padded =
-                        new uint16_t[(SAI->nr+2*SAI->NNt)*(SAI->nc+2*SAI->NNt)*SAI->ncomp]();
+                        new uint16_t[(SAI->nr + 2 * SAI->NNt)*(SAI->nc + 2 * SAI->NNt)*SAI->ncomp]();
 
                     uint16_t *sp_filtered_image =
                         new uint16_t[SAI->nr*SAI->nc*SAI->ncomp]();
@@ -740,7 +759,7 @@ void WaSPEncoder::generate_texture_residual_level_wise() {
 
                         std::vector<double> filtered_icomp = applyGlobalSparseFilter(
                             padded_icomp_sai,
-                            SAI->nr+2*SAI->NNt,
+                            SAI->nr + 2 * SAI->NNt,
                             SAI->nc + 2 * SAI->NNt,
                             SAI->Ms,
                             SAI->NNt,
@@ -768,8 +787,8 @@ void WaSPEncoder::generate_texture_residual_level_wise() {
                                 SAI->NNt);
 
                         memcpy(
-                            sp_filtered_image + SAI->nr*SAI->nc*icomp, 
-                            cropped_icomp, 
+                            sp_filtered_image + SAI->nr*SAI->nc*icomp,
+                            cropped_icomp,
                             sizeof(uint16_t)*SAI->nr*SAI->nc);
 
                         delete[](cropped_icomp);
@@ -779,12 +798,12 @@ void WaSPEncoder::generate_texture_residual_level_wise() {
                     delete[](sp_filtered_image_padded);
 
                     double psnr_without_sparse = PSNR(
-                        original_color_view, 
-                        SAI->color, 
-                        SAI->nr, 
-                        SAI->nc, 
-                        SAI->ncomp, 
-                        (1<<bpc)-1);
+                        original_color_view,
+                        SAI->color,
+                        SAI->nr,
+                        SAI->nc,
+                        SAI->ncomp,
+                        (1 << bpc) - 1);
 
                     double psnr_with_sparse = PSNR(
                         original_color_view,
@@ -792,7 +811,7 @@ void WaSPEncoder::generate_texture_residual_level_wise() {
                         SAI->nr,
                         SAI->nc,
                         SAI->ncomp,
-                        (1 <<bpc) - 1);
+                        (1 << bpc) - 1);
 
                     if (psnr_with_sparse > psnr_without_sparse) {
 
@@ -853,7 +872,7 @@ void WaSPEncoder::generate_texture_residual_level_wise() {
                     SAI->nr,
                     SAI->nc,
                     SAI->ncomp,
-                   bpc,
+                    bpc,
                     SAI->colorspace);
 
                 double *residual_image_double = get_residual(
@@ -870,7 +889,7 @@ void WaSPEncoder::generate_texture_residual_level_wise() {
                     SAI->nr,
                     SAI->nc,
                     SAI->ncomp,
-                   bpc,
+                    bpc,
                     Q,
                     offset);
 
@@ -894,7 +913,7 @@ void WaSPEncoder::generate_texture_residual_level_wise() {
 
         }
 
-        /* encode residual images using JP2 for all views at level=hlevel 
+        /* encode residual images using JP2 for all views at level=hlevel
         here we can substitute JP2 with MuLE etc*/
         for (int32_t ii = 0; ii < view_indices.size(); ii++) {
 
@@ -915,7 +934,7 @@ void WaSPEncoder::generate_texture_residual_level_wise() {
                     SAI->nr,
                     SAI->nc,
                     SAI->ncomp,
-                   bpc,
+                    bpc,
                     SAI->colorspace);
 
                 aux_read16PGMPPM(
@@ -940,7 +959,7 @@ void WaSPEncoder::generate_texture_residual_level_wise() {
                         std::vector<double> cweights = { cweight,1.0,1.0 };
 
                         char *cparams = kakadu_cparams(
-                            &cweights[0], 
+                            &cweights[0],
                             SAI->ncomp);
 
                         char *oparams = kakadu_oparams(
@@ -971,7 +990,7 @@ void WaSPEncoder::generate_texture_residual_level_wise() {
                             SAI->nr,
                             SAI->nc,
                             SAI->ncomp,
-                           bpc,
+                            bpc,
                             Q,
                             offset);
 
@@ -981,7 +1000,7 @@ void WaSPEncoder::generate_texture_residual_level_wise() {
                             SAI->nr,
                             SAI->nc,
                             SAI->ncomp,
-                           bpc);
+                            bpc);
 
                         double psnr_c = getYCbCr_444_PSNR(
                             corrected,
@@ -989,7 +1008,7 @@ void WaSPEncoder::generate_texture_residual_level_wise() {
                             SAI->nr,
                             SAI->nc,
                             SAI->ncomp,
-                           bpc);
+                            bpc);
 
                         delete[](residual);
                         delete[](corrected);
@@ -1092,7 +1111,7 @@ void WaSPEncoder::generate_texture_residual_level_wise() {
                     SAI->nr,
                     SAI->nc,
                     SAI->ncomp,
-                   bpc,
+                    bpc,
                     Q,
                     offset);
 
@@ -1102,7 +1121,7 @@ void WaSPEncoder::generate_texture_residual_level_wise() {
                     SAI->nr,
                     SAI->nc,
                     SAI->ncomp,
-                   bpc);
+                    bpc);
 
                 /* update SAI->color to contain
                 corrected (i.e., prediction + residual) version*/
@@ -1146,92 +1165,91 @@ void WaSPEncoder::generate_texture_residual_level_wise() {
 
 }
 
-void WaSPEncoder::generate_WaSP_bitstream() {
+void WaSPEncoder::write_bitstream() {
 
     printf("Writing header informatinon to codestream\n");
 
     uint8_t colorspace_enumerator;
 
-    if (colorspace_LF.compare("RGB")==0) {
+    if (colorspace_LF.compare("RGB") == 0) {
         colorspace_enumerator = 0;
     }
-    if (colorspace_LF.compare("YCbCr")==0) {
+    if (colorspace_LF.compare("YCbCr") == 0) {
         colorspace_enumerator = 1;
     }
 
-  char path_out_LF_data[1024];
-  sprintf(
-      path_out_LF_data, 
-      "%s/%s", 
-      setup.output_directory.c_str(),
-      "output.LF");
+    char path_out_LF_data[1024];
+    sprintf(
+        path_out_LF_data,
+        "%s/%s",
+        setup.output_directory.c_str(),
+        "output.LF");
 
-  FILE* output_LF_file = fopen(path_out_LF_data, "wb");
+    FILE* output_LF_file = fopen(path_out_LF_data, "wb");
 
-  int32_t n_bytes_prediction = 0;
-  int32_t n_bytes_residual = 0;
+    int32_t n_bytes_prediction = 0;
+    int32_t n_bytes_residual = 0;
 
-  n_bytes_prediction += (int32_t) fwrite(
-      &n_views_total, 
-      sizeof(int32_t), 
-      1,
-      output_LF_file);
-  n_bytes_prediction += (int32_t) fwrite(
-      &LF->nr, 
-      sizeof(int32_t), 
-      1, 
-      output_LF_file)
-      * sizeof(int32_t);  // needed only once per LF
-  n_bytes_prediction += (int32_t) fwrite(
-      &LF->nc, sizeof(int32_t), 
-      1, 
-      output_LF_file)
-      * sizeof(int32_t);  //
-  n_bytes_prediction += (int32_t) fwrite(
-      &LF->min_inv_d, 
-      sizeof(uint16_t), 
-      1,
-      output_LF_file) * sizeof(uint16_t);
-  n_bytes_prediction += (int32_t)fwrite(
-      &colorspace_enumerator,
-      sizeof(uint8_t),
-      1,
-      output_LF_file) * sizeof(uint8_t);
-  n_bytes_prediction += (int32_t)fwrite(
-      &maxh,
-      sizeof(int32_t),
-      1,
-      output_LF_file) * sizeof(int32_t);
-
-  for (int32_t ii = 0; ii < n_views_total; ii++) {
-
-    view *SAI = LF + ii;
-
-    printf("Writing codestream for view %03d_%03d\n", SAI->c, SAI->r);
-
-    viewHeaderToCodestream(
-        n_bytes_prediction, 
-        SAI, 
+    n_bytes_prediction += (int32_t)fwrite(
+        &n_views_total,
+        sizeof(int32_t),
+        1,
         output_LF_file);
+    n_bytes_prediction += (int32_t)fwrite(
+        &LF->nr,
+        sizeof(int32_t),
+        1,
+        output_LF_file)
+        * sizeof(int32_t);  // needed only once per LF
+    n_bytes_prediction += (int32_t)fwrite(
+        &LF->nc, sizeof(int32_t),
+        1,
+        output_LF_file)
+        * sizeof(int32_t);  //
+    n_bytes_prediction += (int32_t)fwrite(
+        &LF->min_inv_d,
+        sizeof(uint16_t),
+        1,
+        output_LF_file) * sizeof(uint16_t);
+    n_bytes_prediction += (int32_t)fwrite(
+        &colorspace_enumerator,
+        sizeof(uint8_t),
+        1,
+        output_LF_file) * sizeof(uint8_t);
+    n_bytes_prediction += (int32_t)fwrite(
+        &maxh,
+        sizeof(int32_t),
+        1,
+        output_LF_file) * sizeof(int32_t);
 
-    if (SAI->has_color_residual) {
-        writeResidualToDisk(
-            SAI->jp2_residual_path_jp2, 
-            output_LF_file,
-            n_bytes_residual, 
-            JP2_dict);
+    for (int32_t ii = 0; ii < n_views_total; ii++) {
+
+        view *SAI = LF + ii;
+
+        printf("Writing codestream for view %03d_%03d\n", SAI->c, SAI->r);
+
+        viewHeaderToCodestream(
+            n_bytes_prediction,
+            SAI,
+            output_LF_file);
+
+        if (SAI->has_color_residual) {
+            writeResidualToDisk(
+                SAI->jp2_residual_path_jp2,
+                output_LF_file,
+                n_bytes_residual,
+                JP2_dict);
+        }
+
+        if (SAI->has_depth_residual) {
+            writeResidualToDisk(
+                SAI->jp2_residual_depth_path_jp2,
+                output_LF_file,
+                n_bytes_residual,
+                JP2_dict);
+        }
+
     }
 
-    if (SAI->has_depth_residual) {
-      writeResidualToDisk(
-          SAI->jp2_residual_depth_path_jp2, 
-          output_LF_file,
-          n_bytes_residual, 
-          JP2_dict);
-    }
-    
-    //cout << "generate_WaSP_bitstream->ii=" << ii << endl;
-  }
-
-  fclose(output_LF_file);
+    fclose(output_LF_file);
 }
