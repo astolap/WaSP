@@ -50,20 +50,27 @@ struct spfilter {
 
     int32_t Ms;
     int32_t NNt;
-    int32_t coeff_bit_precision;
+    //int32_t coeff_bit_precision;
+    int32_t MT;
 
     double bias_term_value;
 
 };
 
 uint16_t *padArrayUint16_t(
-    const uint16_t *input_image,
+    uint16_t *input_image,
+    const uint32_t nr,
+    const uint32_t nc,
+    const uint32_t NNt);
+
+std::vector<uint16_t> padArrayUint16_t_vec(
+    uint16_t *input_image,
     const uint32_t nr,
     const uint32_t nc,
     const uint32_t NNt);
 
 uint16_t *cropImage(
-    const uint16_t *input_image,
+    uint16_t *input_image,
     const uint32_t nr,
     const uint32_t nc,
     const uint32_t NNt);
@@ -74,6 +81,15 @@ void quantize_and_reorder_spfilter(
 void dequantize_and_reorder_spfilter(
     spfilter &sparse_filter);
 
+spfilter getGlobalSparseFilter_vec(
+    const uint16_t *original_image,
+    const std::vector<std::vector<uint16_t>> &input_images,
+    const int32_t nr,
+    const int32_t nc,
+    const int32_t NNt,
+    const int32_t Ms,
+    const double bias_term_value);
+
 spfilter getGlobalSparseFilter(
     const uint16_t *original_image,
     const uint16_t *input_image,
@@ -81,8 +97,16 @@ spfilter getGlobalSparseFilter(
     const int32_t nc,
     const int32_t NNt,
     const int32_t Ms,
+    const double bias_term_value);
+
+std::vector<double> applyGlobalSparseFilter_vec(
+    const std::vector<std::vector<uint16_t>> &input_images,
+    const int32_t nr,
+    const int32_t nc,
+    const int32_t Ms,
+    const int32_t NNt,
     const double bias_term_value,
-    const int32_t sub_sampling_factor);
+    const std::vector<double> filter_coeffs);
 
 std::vector<double> applyGlobalSparseFilter(
     const uint16_t *input_image,

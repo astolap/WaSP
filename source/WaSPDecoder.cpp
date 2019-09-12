@@ -327,22 +327,49 @@ void WaSPDecoder::predict_texture_view(view* SAI) {
                 dequantize_and_reorder_spfilter(
                     SAI->sparse_filters.at(icomp));
 
-                uint16_t *padded_icomp_sai =
-                    padArrayUint16_t(SAI->color + SAI->nr*SAI->nc*icomp,
+                std::vector<std::vector<uint16_t>> padded_regressors;
+
+                padded_regressors.push_back(
+                    padArrayUint16_t_vec(
+                        SAI->color + SAI->nr*SAI->nc*icomp,
                         SAI->nr,
                         SAI->nc,
-                        SAI->NNt);
+                        SAI->NNt));
 
-                std::vector<double> filtered_icomp = applyGlobalSparseFilter(
-                    padded_icomp_sai,
-                    SAI->nr + 2 * SAI->NNt,
-                    SAI->nc + 2 * SAI->NNt,
-                    SAI->Ms,
-                    SAI->NNt,
-                    SPARSE_BIAS_TERM,
-                    SAI->sparse_filters.at(icomp).filter_coefficients);
+                for (int ikr = 0; ikr < SAI->n_references; ikr++) {
 
-                delete[](padded_icomp_sai);
+                    view *ref_view = LF + SAI->references[ikr];
+
+                    int32_t tmp_w, tmp_r, tmp_ncomp;
+
+                    aux_read16PGMPPM(
+                        ref_view->path_internal_colorspace_out_ppm,
+                        tmp_w,
+                        tmp_r,
+                        tmp_ncomp,
+                        ref_view->color);
+
+                    padded_regressors.push_back(
+                        padArrayUint16_t_vec(
+                            ref_view->color + SAI->nr*SAI->nc*icomp,
+                            SAI->nr,
+                            SAI->nc,
+                            SAI->NNt));
+
+                    delete[](ref_view->color);
+                    ref_view->color = nullptr;
+
+                }
+
+                std::vector<double> filtered_icomp =
+                    applyGlobalSparseFilter_vec(
+                        padded_regressors,
+                        SAI->nr + 2 * SAI->NNt,
+                        SAI->nc + 2 * SAI->NNt,
+                        SAI->Ms,
+                        SAI->NNt,
+                        SPARSE_BIAS_TERM,
+                        SAI->sparse_filters.at(icomp).filter_coefficients);
 
                 for (int32_t iij = 0; iij < (SAI->nr + 2 * SAI->NNt)*(SAI->nc + 2 * SAI->NNt); iij++) {
 

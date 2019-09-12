@@ -611,7 +611,7 @@ void WaSPEncoder::generate_texture_residual_level_wise() {
 
     for (int32_t hlevel = 1; hlevel <= maxh; hlevel++) {
 
-        printf("\n\tProcessing of hierarchical level: %d\n\n", hlevel);
+        printf("\n\tProcessing hierarchical level: %d\n\n", hlevel);
 
         const int32_t bpc = 10;
 
@@ -682,8 +682,6 @@ void WaSPEncoder::generate_texture_residual_level_wise() {
 
                 if (SAI->Ms > 0 && SAI->NNt > 0) {
 
-                    printf("Sparse filtering stage for view %03d_%03d\n", SAI->c, SAI->r);
-
                     uint16_t *original_color_view = read_input_ppm(
                         SAI->path_input_ppm,
                         SAI->nr,
@@ -694,48 +692,82 @@ void WaSPEncoder::generate_texture_residual_level_wise() {
 
                     SAI->sparse_filters.clear();
 
+                    /*READ DECODED REFERENCE VIEWS*/
+                    for (int ikr = 0; ikr < SAI->n_references; ikr++) {
+
+                        view *ref_view = LF + SAI->references[ikr];
+
+                        int32_t tmp_w, tmp_r, tmp_ncomp;
+
+                        aux_read16PGMPPM(
+                            ref_view->path_internal_colorspace_out_ppm,
+                            tmp_w,
+                            tmp_r,
+                            tmp_ncomp,
+                            ref_view->color);
+
+                    }
+
                     for (int32_t icomp = 0; icomp < SAI->ncomp; icomp++) {
 
-                        uint16_t *padded_icomp_sai =
-                            padArrayUint16_t(SAI->color + SAI->nr*SAI->nc*icomp,
+                        std::vector<std::vector<uint16_t>> padded_regressors;
+
+                        padded_regressors.push_back(
+                            padArrayUint16_t_vec(
+                                SAI->color + SAI->nr*SAI->nc*icomp,
                                 SAI->nr,
                                 SAI->nc,
-                                SAI->NNt);
+                                SAI->NNt));
+
+                        for (int ikr = 0; ikr < SAI->n_references; ikr++) {
+
+                            view *ref_view = LF + SAI->references[ikr];
+
+                            padded_regressors.push_back(
+                                padArrayUint16_t_vec(
+                                    ref_view->color + SAI->nr*SAI->nc*icomp,
+                                    SAI->nr,
+                                    SAI->nc,
+                                    SAI->NNt));
+
+                        }
 
                         uint16_t *padded_icomp_orig =
-                            padArrayUint16_t(original_color_view + SAI->nr*SAI->nc*icomp,
+                            padArrayUint16_t(
+                                original_color_view + SAI->nr*SAI->nc*icomp,
                                 SAI->nr,
                                 SAI->nc,
                                 SAI->NNt);
 
-                        SAI->sparse_filters.push_back(getGlobalSparseFilter(
+                        SAI->sparse_filters.push_back(getGlobalSparseFilter_vec(
                             padded_icomp_orig,
-                            padded_icomp_sai,
+                            padded_regressors,
                             SAI->nr + 2 * SAI->NNt,
                             SAI->nc + 2 * SAI->NNt,
                             SAI->NNt,
                             SAI->Ms,
-                            SPARSE_BIAS_TERM,
-                            setup.sparse_subsampling));
+                            SPARSE_BIAS_TERM));
 
                         //FILE *tmp;
                         //tmp = fopen("C:/Temp/coeffs.data", "ab");
 
-                        //fwrite(&SAI->sparse_filters.at(icomp).filter_coefficients[icomp],
+                        //fwrite(&SAI->sparse_filters.at(icomp).filter_coefficients[0],
                         //    sizeof(double),
                         //    SAI->sparse_filters.at(icomp).filter_coefficients.size(),
                         //    tmp);
 
                         //fclose(tmp);
 
-                      /*  aux_write16PGMPPM("C:/Temp/padded_sai.pgm", SAI->nc + 2 * SAI->NNt, SAI->nr + 2 * SAI->NNt, 1, padded_icomp_sai);
+                        /*  aux_write16PGMPPM("C:/Temp/padded_sai.pgm", SAI->nc + 2 * SAI->NNt, SAI->nr + 2 * SAI->NNt, 1, padded_icomp_sai);
                         aux_write16PGMPPM("C:/Temp/padded_orig.pgm", SAI->nc + 2 * SAI->NNt, SAI->nr + 2 * SAI->NNt, 1, padded_icomp_orig);*/
 
-                        delete[](padded_icomp_sai);
+                        //delete[](padded_icomp_sai);
                         delete[](padded_icomp_orig);
 
                         /* exit(0);*/
                     }
+
+                    /* APPLY FILTER */
 
                     uint16_t *sp_filtered_image_padded =
                         new uint16_t[(SAI->nr + 2 * SAI->NNt)*(SAI->nc + 2 * SAI->NNt)*SAI->ncomp]();
@@ -751,22 +783,37 @@ void WaSPEncoder::generate_texture_residual_level_wise() {
                         dequantize_and_reorder_spfilter(
                             SAI->sparse_filters.at(icomp));
 
-                        uint16_t *padded_icomp_sai =
-                            padArrayUint16_t(SAI->color + SAI->nr*SAI->nc*icomp,
+                        std::vector<std::vector<uint16_t>> padded_regressors;
+
+                        padded_regressors.push_back(
+                            padArrayUint16_t_vec(
+                                SAI->color + SAI->nr*SAI->nc*icomp,
                                 SAI->nr,
                                 SAI->nc,
-                                SAI->NNt);
+                                SAI->NNt));
 
-                        std::vector<double> filtered_icomp = applyGlobalSparseFilter(
-                            padded_icomp_sai,
-                            SAI->nr + 2 * SAI->NNt,
-                            SAI->nc + 2 * SAI->NNt,
-                            SAI->Ms,
-                            SAI->NNt,
-                            SPARSE_BIAS_TERM,
-                            SAI->sparse_filters.at(icomp).filter_coefficients);
+                        for (int ikr = 0; ikr < SAI->n_references; ikr++) {
 
-                        delete[](padded_icomp_sai);
+                            view *ref_view = LF + SAI->references[ikr];
+
+                            padded_regressors.push_back(
+                                padArrayUint16_t_vec(
+                                    ref_view->color + SAI->nr*SAI->nc*icomp,
+                                    SAI->nr,
+                                    SAI->nc,
+                                    SAI->NNt));
+
+                        }
+
+                        std::vector<double> filtered_icomp =
+                            applyGlobalSparseFilter_vec(
+                                padded_regressors,
+                                SAI->nr + 2 * SAI->NNt,
+                                SAI->nc + 2 * SAI->NNt,
+                                SAI->Ms,
+                                SAI->NNt,
+                                SPARSE_BIAS_TERM,
+                                SAI->sparse_filters.at(icomp).filter_coefficients);
 
                         for (int32_t iij = 0; iij < (SAI->nr + 2 * SAI->NNt)*(SAI->nc + 2 * SAI->NNt); iij++) {
 
@@ -795,6 +842,17 @@ void WaSPEncoder::generate_texture_residual_level_wise() {
 
                     }
 
+                    /* CLEAN */
+
+                    for (int ikr = 0; ikr < SAI->n_references; ikr++) {
+
+                        view *ref_view = LF + SAI->references[ikr];
+
+                        delete[](ref_view->color);
+                        ref_view->color = nullptr;
+
+                    }
+
                     delete[](sp_filtered_image_padded);
 
                     double psnr_without_sparse = PSNR(
@@ -803,7 +861,7 @@ void WaSPEncoder::generate_texture_residual_level_wise() {
                         SAI->nr,
                         SAI->nc,
                         SAI->ncomp,
-                        (1 << bpc) - 1);
+                        (1 << 10) - 1);
 
                     double psnr_with_sparse = PSNR(
                         original_color_view,
@@ -822,9 +880,6 @@ void WaSPEncoder::generate_texture_residual_level_wise() {
 
                         SAI->use_global_sparse = true;
 
-                    }
-                    else {
-                        SAI->use_global_sparse = false; /*should never happen. implies something wrong with filter design or filter coefficient quantization*/
                     }
 
                     delete[](sp_filtered_image);
