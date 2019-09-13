@@ -90,6 +90,8 @@ void initView(view* view) {
 
   view->cweight_search = false;
 
+  view->number_of_sp_filters = 0;
+
 }
 
 int32_t get_highest_level(

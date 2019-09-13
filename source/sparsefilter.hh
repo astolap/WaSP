@@ -50,7 +50,6 @@ struct spfilter {
 
     int32_t Ms;
     int32_t NNt;
-    //int32_t coeff_bit_precision;
     int32_t MT;
 
     double bias_term_value;
@@ -110,6 +109,28 @@ std::vector<double> applyGlobalSparseFilter_vec(
 
 std::vector<double> applyGlobalSparseFilter(
     const uint16_t *input_image,
+    const int32_t nr,
+    const int32_t nc,
+    const int32_t Ms,
+    const int32_t NNt,
+    const double bias_term_value,
+    const std::vector<double> filter_coeffs);
+
+spfilter getGlobalSparseFilter_vec_reg(
+    const uint16_t *original_image,
+    const std::vector<std::vector<uint16_t>> &input_images,
+    const std::vector<int32_t> seg,
+    const int32_t regi,
+    const int32_t nr,
+    const int32_t nc,
+    const int32_t NNt,
+    const int32_t Ms,
+    const double bias_term_value);
+
+std::vector<double> applyGlobalSparseFilter_vec_reg(
+    const std::vector<std::vector<uint16_t>> &input_images,
+    const std::vector<int32_t> seg,
+    const int32_t regi,
     const int32_t nr,
     const int32_t nc,
     const int32_t Ms,

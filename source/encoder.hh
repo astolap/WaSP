@@ -71,6 +71,8 @@ class encoder {
   int32_t MINIMUM_DEPTH = 0;
   int32_t maxh; /*maximum hierarchy level*/
 
+  uint32_t n_seg_iterations = 0;
+
   bool STD_SEARCH = false;
 
   std::string colorspace_LF;

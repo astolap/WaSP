@@ -54,6 +54,7 @@ private:
     int32_t number_of_rows = 0;
     int32_t number_of_columns = 0;
     int32_t maxh = 0; /*maximum hierarchy level*/
+    uint32_t n_seg_iterations = 0;
 
     std::string colorspace_LF;
 

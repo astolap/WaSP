@@ -402,6 +402,171 @@ spfilter getGlobalSparseFilter_vec(
     return sparse_filter;
 }
 
+spfilter getGlobalSparseFilter_vec_reg(
+    const uint16_t *original_image,
+    const std::vector<std::vector<uint16_t>> &input_images,
+    const std::vector<int32_t> seg,
+    const int32_t regi,
+    const int32_t nr,
+    const int32_t nc,
+    const int32_t NNt,
+    const int32_t Ms,
+    const double bias_term_value) {
+
+    int32_t NAA = input_images.size();
+
+    int32_t MT = NAA*(NNt * 2 + 1) * (NNt * 2 + 1) + 1; /* number of regressors */
+
+    int32_t Npp = 0;
+
+    for (uint32_t ir = NNt; ir < nr - NNt; ir++) {
+        for (uint32_t ic = NNt; ic < nc - NNt; ic++) {
+            if (seg[ir + ic*nr] == regi) {
+                Npp++;
+            }
+        }
+    }
+
+    double *AA = new double[Npp * MT]();
+    double *Yd = new double[Npp]();
+
+    for (int32_t ii = 0; ii < Npp; ii++) {
+        *(AA + ii + (MT - 1) * Npp) = bias_term_value;
+    }
+
+    int32_t iiu = 0;
+
+    double Q = ((double)(1 << BIT_DEPTH) - 1);
+
+    for (uint32_t ir = NNt; ir < nr - NNt; ir++) {
+        for (uint32_t ic = NNt; ic < nc - NNt; ic++) {
+
+            if (seg[ir + ic*nr] == regi) {
+
+                int32_t ai = 0;
+                for (int32_t NREF = 0; NREF < NAA; NREF++) {
+
+                    const uint16_t *input_image = input_images.at(NREF).data();
+
+                    for (int32_t dy = -NNt; dy <= NNt; dy++) {
+                        for (int32_t dx = -NNt; dx <= NNt; dx++) {
+
+                            int32_t offset = ir + dy + nr * (ic + dx);
+
+                            /* get the desired Yd*/
+                            if (dy == 0 && dx == 0 && NREF == 0) {
+                                *(Yd + iiu) =
+                                    ((double) *(original_image + offset)) / Q;
+                            }
+
+                            /* get the regressors */
+                            *(AA + iiu + ai * Npp) =
+                                ((double) *(input_image + offset)) / Q;
+
+                            ai++;
+                        }
+                    }
+                }
+
+                iiu++;
+            }
+        }
+    }
+
+    int32_t *PredRegr0 = new int32_t[MT]();
+    double *PredTheta0 = new double[MT]();
+
+    int32_t Mtrue = FastOLS_new(
+        &AA,
+        &Yd,
+        PredRegr0,
+        PredTheta0,
+        Ms,
+        MT,
+        MT,
+        Npp);
+
+    if (AA != nullptr) {
+        delete[](AA);
+    }
+    if (Yd != nullptr) {
+        delete[](Yd);
+    }
+
+    spfilter sparse_filter;
+
+    for (int32_t ii = 0; ii < MT; ii++) {
+        sparse_filter.regressor_indexes.push_back(PredRegr0[ii]);
+        sparse_filter.filter_coefficients.push_back(PredTheta0[ii]);
+    }
+
+    sparse_filter.Ms = Ms;
+    sparse_filter.NNt = NNt;
+    sparse_filter.MT = MT;
+    sparse_filter.bias_term_value = bias_term_value;
+
+    return sparse_filter;
+}
+
+std::vector<double> applyGlobalSparseFilter_vec_reg(
+    const std::vector<std::vector<uint16_t>> &input_images,
+    const std::vector<int32_t> seg,
+    const int32_t regi,
+    const int32_t nr,
+    const int32_t nc,
+    const int32_t Ms,
+    const int32_t NNt,
+    const double bias_term_value,
+    const std::vector<double> filter_coeffs) {
+
+    std::vector<double> final_view;
+
+    double Q = ((double)(1 << BIT_DEPTH) - 1);
+
+    const uint16_t *input_image = input_images.at(0).data();
+
+    for (int32_t ii = 0; ii < nr * nc; ii++) {
+        final_view.push_back(static_cast<double>(input_image[ii]));
+    }
+
+    for (int32_t rr = NNt; rr < nr - NNt; rr++) {
+        for (int32_t cc = NNt; cc < nc - NNt; cc++) {
+
+            if (seg[rr + cc * nr] == regi) {
+
+                final_view.at(rr + cc * nr) = 0.0;
+
+                int32_t ee = 0;
+
+                for (int NREF = 0; NREF < input_images.size(); NREF++) {
+
+                    const uint16_t *input_image = input_images.at(NREF).data();
+
+                    for (int32_t dy = -NNt; dy <= NNt; dy++) {
+                        for (int32_t dx = -NNt; dx <= NNt; dx++) {
+
+                            double regr_value =
+                                static_cast<double>(input_image[rr + dy + (cc + dx) * nr]);
+
+                            final_view.at(rr + cc * nr) += filter_coeffs.at(ee)*regr_value;
+
+                            ee++;
+                        }
+                    }
+                }
+
+                /* bias term */
+                final_view.at(rr + cc * nr) +=
+                    bias_term_value*Q*filter_coeffs.at(input_images.size()*(2 * NNt + 1)* (2 * NNt + 1));
+
+            }
+        }
+    }
+
+    return final_view;
+
+}
+
 void quantize_and_reorder_spfilter(
     spfilter &sparse_filter) {
 

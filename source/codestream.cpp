@@ -112,6 +112,12 @@ void viewHeaderToCodestream(
         unsigned char tmpMs = (unsigned char)SAI->Ms;
 
         n_bytes_prediction += (int32_t)fwrite(
+            &SAI->number_of_sp_filters,
+            sizeof(uint8_t),
+            1,
+            output_LF_file) * sizeof(uint8_t);
+
+        n_bytes_prediction += (int32_t)fwrite(
             &tmpNNt,
             sizeof(unsigned char),
             1,
@@ -123,9 +129,9 @@ void viewHeaderToCodestream(
             1,
             output_LF_file) * sizeof(unsigned char);
 
-        for (int32_t icomp = 0; icomp < SAI->ncomp; icomp++) {
+        for (int32_t ii = 0; ii < SAI->number_of_sp_filters; ii++) {
             n_bytes_prediction += (int32_t)fwrite(
-                &SAI->sparse_filters.at(icomp).quantized_filter_coefficients[0],
+                &SAI->sparse_filters.at(ii).quantized_filter_coefficients[0],
                 sizeof(int16_t),
                 SAI->Ms,
                 output_LF_file)
@@ -135,18 +141,18 @@ void viewHeaderToCodestream(
         int32_t Nsp = SAI->sparse_filters.at(0).MT;// (SAI->NNt * 2 + 1)* (SAI->NNt * 2 + 1) + 1;
         int32_t sp_mask_nbytes = (Nsp % 8) ? Nsp / 8 + 1 : Nsp / 8;
 
-        uint8_t *sparsemask = new uint8_t[sp_mask_nbytes*SAI->ncomp]();
+        uint8_t *sparsemask = new uint8_t[sp_mask_nbytes*SAI->number_of_sp_filters]();
 
-        for (int32_t icomp = 0; icomp < SAI->ncomp; icomp++) {
+        for (int32_t ii = 0; ii < SAI->number_of_sp_filters; ii++) {
 
             for (int32_t ij = 0; ij < SAI->Ms; ij++) {
 
                 uint32_t regr_indx =
-                    SAI->sparse_filters.at(icomp).regressor_indexes.at(ij);
+                    SAI->sparse_filters.at(ii).regressor_indexes.at(ij);
 
                 uint32_t q = regr_indx / 8;
 
-                uint8_t *sparse_mask_byte = &sparsemask[q + sp_mask_nbytes*icomp];
+                uint8_t *sparse_mask_byte = &sparsemask[q + sp_mask_nbytes*ii];
 
                 *sparse_mask_byte = *sparse_mask_byte
                     | (1 << (regr_indx - q * 8));
@@ -157,7 +163,7 @@ void viewHeaderToCodestream(
         n_bytes_prediction += (int32_t)fwrite(
             sparsemask,
             sizeof(uint8_t),
-            sp_mask_nbytes*SAI->ncomp,
+            sp_mask_nbytes*SAI->number_of_sp_filters,
             output_LF_file)
             * sizeof(uint8_t);
 
@@ -262,6 +268,12 @@ void codestreamToViewHeader(
         unsigned char tmpMs = 0;
 
         n_bytes_prediction += (int32_t)fread(
+            &SAI->number_of_sp_filters,
+            sizeof(uint8_t),
+            1,
+            input_LF) * sizeof(uint8_t);
+
+        n_bytes_prediction += (int32_t)fread(
             &tmpNNt,
             sizeof(unsigned char),
             1,
@@ -278,25 +290,25 @@ void codestreamToViewHeader(
 
         SAI->sparse_filters.clear();
 
-        for (int32_t icomp = 0; icomp < SAI->ncomp; icomp++) {
+        for (int32_t ii = 0; ii < SAI->number_of_sp_filters; ii++) {
 
             spfilter tmpsp;
             SAI->sparse_filters.push_back(tmpsp);
 
-            SAI->sparse_filters.at(icomp).Ms = SAI->Ms;
-            SAI->sparse_filters.at(icomp).NNt = SAI->NNt;
+            SAI->sparse_filters.at(ii).Ms = SAI->Ms;
+            SAI->sparse_filters.at(ii).NNt = SAI->NNt;
 
-            SAI->sparse_filters.at(icomp).MT =
-                (SAI->n_references + 1)*(SAI->NNt * 2 + 1) * (SAI->NNt * 2 + 1) + 1;
+            SAI->sparse_filters.at(ii).MT =
+                (SAI->n_references)*(SAI->NNt * 2 + 1) * (SAI->NNt * 2 + 1) + 1;
 
-            SAI->sparse_filters.at(icomp).quantized_filter_coefficients.clear();
+            SAI->sparse_filters.at(ii).quantized_filter_coefficients.clear();
 
-            for (int32_t ii = 0; ii < SAI->Ms; ii++) {
-                SAI->sparse_filters.at(icomp).quantized_filter_coefficients.push_back(0);
+            for (int32_t ij = 0; ij < SAI->Ms; ij++) {
+                SAI->sparse_filters.at(ii).quantized_filter_coefficients.push_back(0);
             }
 
             n_bytes_prediction += (int32_t)fread(
-                &SAI->sparse_filters.at(icomp).quantized_filter_coefficients[0],
+                &SAI->sparse_filters.at(ii).quantized_filter_coefficients[0],
                 sizeof(int16_t),
                 SAI->Ms,
                 input_LF)
@@ -307,21 +319,21 @@ void codestreamToViewHeader(
         int32_t Nsp = SAI->sparse_filters.at(0).MT;// (SAI->NNt * 2 + 1)* (SAI->NNt * 2 + 1) + 1;
         int32_t sp_mask_nbytes = (Nsp % 8) ? Nsp / 8 + 1 : Nsp / 8;
 
-        uint8_t *sparsemask = new uint8_t[sp_mask_nbytes*SAI->ncomp]();
+        uint8_t *sparsemask = new uint8_t[sp_mask_nbytes*SAI->number_of_sp_filters]();
 
         n_bytes_prediction += (int32_t)fread(
             sparsemask,
             sizeof(uint8_t),
-            sp_mask_nbytes*SAI->ncomp,
+            sp_mask_nbytes*SAI->number_of_sp_filters,
             input_LF)
             * sizeof(uint8_t);
 
-        for (int32_t icomp = 0; icomp < SAI->ncomp; icomp++) {
+        for (int32_t ii = 0; ii < SAI->number_of_sp_filters; ii++) {
 
-            SAI->sparse_filters.at(icomp).regressor_indexes.clear();
+            SAI->sparse_filters.at(ii).regressor_indexes.clear();
 
-            for (int32_t ii = 0; ii < Nsp; ii++) {
-                SAI->sparse_filters.at(icomp).regressor_indexes.push_back(0);
+            for (int32_t ij = 0; ij < Nsp; ij++) {
+                SAI->sparse_filters.at(ii).regressor_indexes.push_back(0);
             }
 
             uint32_t ik = 0;
@@ -330,10 +342,10 @@ void codestreamToViewHeader(
 
                 uint32_t q = ij / 8;
 
-                uint8_t *sparse_mask_byte = &sparsemask[sp_mask_nbytes*icomp + q];
+                uint8_t *sparse_mask_byte = &sparsemask[sp_mask_nbytes*ii + q];
 
                 if (*sparse_mask_byte & (1 << (ij - q * 8))) {
-                    SAI->sparse_filters.at(icomp).regressor_indexes.at(ik) = ij;
+                    SAI->sparse_filters.at(ii).regressor_indexes.at(ik) = ij;
                     ik++;
                 }
 

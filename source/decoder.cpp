@@ -42,6 +42,7 @@
 #include "inpainting.hh"
 #include "sparsefilter.hh"
 #include "WaSPConf.hh"
+#include "segmentation.hh"
 
 #define SAVE_PARTIAL_WARPED_VIEWS false
 
@@ -114,6 +115,12 @@ void decoder::decode_header() {
         sizeof(int32_t),
         1,
         input_LF) * sizeof(uint8_t);
+
+    n_bytes_prediction += (int32_t)fread(
+        &n_seg_iterations,
+        sizeof(uint32_t),
+        1,
+        input_LF) * sizeof(uint32_t);
 
 }
 
@@ -319,35 +326,69 @@ void decoder::predict_texture_view(view* SAI) {
 
         if (SAI->use_global_sparse) {
 
-            uint16_t *sp_filtered_image_padded =
-                new uint16_t[(SAI->nr + 2 * SAI->NNt)*(SAI->nc + 2 * SAI->NNt)*SAI->ncomp]();
+            /*obtain segmentation*/
+            int32_t tmp_w, tmp_r, tmp_ncomp;
+            aux_read16PGMPPM(
+                SAI->path_out_pgm,
+                tmp_w,
+                tmp_r,
+                tmp_ncomp,
+                SAI->depth);
+
+            uint16_t *img16_padded =
+                padArrayUint16_t(
+                    SAI->depth,
+                    SAI->nr,
+                    SAI->nc,
+                    SAI->NNt);
+
+            delete[](SAI->depth);
+            SAI->depth = nullptr;
+
+            std::vector<uint16_t> img16_padded_v(
+                img16_padded,
+                img16_padded + (SAI->nr + 2 * SAI->NNt)*(SAI->nc + 2 * SAI->NNt));
+
+            segmentation seg = normdispsegmentation(
+                img16_padded_v,
+                n_seg_iterations,
+                SAI->nr + 2 * SAI->NNt,
+                SAI->nc + 2 * SAI->NNt);
+
+            std::vector<uint16_t> seg16(seg.seg.begin(), seg.seg.end());
+
+            aux_write16PGMPPM("C:/Temp/seg.pgm",
+                SAI->nc + 2 * SAI->NNt,
+                SAI->nr + 2 * SAI->NNt,
+                1,
+                &seg16[0]);
+
+            /*READ DECODED REFERENCE VIEWS*/
+            for (int ikr = 0; ikr < SAI->n_references; ikr++) {
+
+                view *ref_view = LF + SAI->references[ikr];
+
+                int32_t tmp_w, tmp_r, tmp_ncomp;
+
+                aux_read16PGMPPM(
+                    ref_view->path_internal_colorspace_out_ppm,
+                    tmp_w,
+                    tmp_r,
+                    tmp_ncomp,
+                    ref_view->color);
+
+            }
+
+            uint32_t sp_e = 0;
 
             for (int32_t icomp = 0; icomp < SAI->ncomp; icomp++) {
 
-                dequantize_and_reorder_spfilter(
-                    SAI->sparse_filters.at(icomp));
-
                 std::vector<std::vector<uint16_t>> padded_regressors;
 
-                padded_regressors.push_back(
-                    padArrayUint16_t_vec(
-                        SAI->color + SAI->nr*SAI->nc*icomp,
-                        SAI->nr,
-                        SAI->nc,
-                        SAI->NNt));
-
+                /* rest of reference views (regressors) */
                 for (int ikr = 0; ikr < SAI->n_references; ikr++) {
 
                     view *ref_view = LF + SAI->references[ikr];
-
-                    int32_t tmp_w, tmp_r, tmp_ncomp;
-
-                    aux_read16PGMPPM(
-                        ref_view->path_internal_colorspace_out_ppm,
-                        tmp_w,
-                        tmp_r,
-                        tmp_ncomp,
-                        ref_view->color);
 
                     padded_regressors.push_back(
                         padArrayUint16_t_vec(
@@ -356,49 +397,88 @@ void decoder::predict_texture_view(view* SAI) {
                             SAI->nc,
                             SAI->NNt));
 
-                    delete[](ref_view->color);
-                    ref_view->color = nullptr;
-
                 }
 
-                std::vector<double> filtered_icomp =
-                    applyGlobalSparseFilter_vec(
-                        padded_regressors,
-                        SAI->nr + 2 * SAI->NNt,
-                        SAI->nc + 2 * SAI->NNt,
-                        SAI->Ms,
-                        SAI->NNt,
-                        SPARSE_BIAS_TERM,
-                        SAI->sparse_filters.at(icomp).filter_coefficients);
+                std::vector<uint16_t> padded_result;
+                for (int ii = 0; ii < padded_regressors.at(0).size(); ii++)
+                {
+                    padded_result.push_back(0);
+                }
 
-                for (int32_t iij = 0; iij < (SAI->nr + 2 * SAI->NNt)*(SAI->nc + 2 * SAI->NNt); iij++) {
+                for (int ir = 1;
+                    ir <= seg.number_of_regions;
+                    ir++)
+                {
+
+                    //printf("%d\n%d", ir, seg.region_histogram[ir]);
+
+                    /*dequantize coeffs*/
+                    dequantize_and_reorder_spfilter(
+                        SAI->sparse_filters.at(sp_e));
+
+                    /* APPLY FILTER */
+                    std::vector<double> filtered_icomp =
+                        applyGlobalSparseFilter_vec_reg(
+                            padded_regressors,
+                            seg.seg,
+                            ir,
+                            SAI->nr + 2 * SAI->NNt,
+                            SAI->nc + 2 * SAI->NNt,
+                            SAI->Ms,
+                            SAI->NNt,
+                            SPARSE_BIAS_TERM,
+                            SAI->sparse_filters.at(sp_e++).filter_coefficients);
+
+
+                    /*clip values*/
 
                     double mmax = static_cast<double>((1 << BIT_DEPTH) - 1);
 
-                    filtered_icomp[iij] =
-                        clip(filtered_icomp[iij], 0.0, mmax);
+                    for (
+                        int32_t iij = 0;
+                        iij < (SAI->nr + 2 * SAI->NNt)*(SAI->nc + 2 * SAI->NNt);
+                        iij++)
+                    {
 
-                    sp_filtered_image_padded[iij + (SAI->nr + 2 * SAI->NNt)*(SAI->nc + 2 * SAI->NNt)*icomp] =
-                        static_cast<uint16_t>(floor(filtered_icomp[iij] + 0.5));
+                        if (seg.seg[iij] == ir) {
 
+                            filtered_icomp[iij] =
+                                clip(filtered_icomp[iij], 0.0, mmax);
+
+                            padded_result[iij] =
+                                static_cast<uint16_t>(floor(filtered_icomp[iij] + 0.5));
+
+                        }
+                    }
                 }
 
                 uint16_t *cropped_icomp =
-                    cropImage(sp_filtered_image_padded + (SAI->nr + 2 * SAI->NNt)*(SAI->nc + 2 * SAI->NNt)*icomp,
-                    (SAI->nr + 2 * SAI->NNt),
+                    cropImage(
+                        &padded_result[0],
+                        (SAI->nr + 2 * SAI->NNt),
                         (SAI->nc + 2 * SAI->NNt),
                         SAI->NNt);
 
-                memcpy(
+                std::memcpy(
                     SAI->color + SAI->nr*SAI->nc*icomp,
                     cropped_icomp,
                     sizeof(uint16_t)*SAI->nr*SAI->nc);
 
                 delete[](cropped_icomp);
 
+
             }
 
-            delete[](sp_filtered_image_padded);
+            for (int ikr = 0; ikr < SAI->n_references; ikr++)
+            {
+
+                view *ref_view = LF + SAI->references[ikr];
+
+                delete[](ref_view->color);
+                ref_view->color = nullptr;
+
+            }
+            
         }
     }
 }
@@ -448,9 +528,6 @@ void decoder::decode_views() {
         SAI->color = new uint16_t[SAI->nr * SAI->nc * 3]();
         SAI->depth = new uint16_t[SAI->nr * SAI->nc]();
 
-        /*main texture prediction here*/
-        predict_texture_view(SAI);
-
         /*extract residuals from codestream*/
         if (SAI->has_color_residual) {
 
@@ -473,6 +550,45 @@ void decoder::decode_views() {
                 input_LF,
                 JP2_dict);
         }
+        
+        if (SAI->has_depth_residual) {
+
+            delete[](SAI->depth);
+
+            /* has JP2 encoded depth */
+
+            decodeKakadu(
+                SAI->path_out_pgm,
+                (setup.wasp_kakadu_directory + "/kdu_expand").c_str(),
+                SAI->jp2_residual_depth_path_jp2);
+
+            int32_t nr1, nc1, ncomp1;
+
+            aux_read16PGMPPM(
+                SAI->path_out_pgm,
+                nc1,
+                nr1,
+                ncomp1,
+                SAI->depth);
+
+        }
+        else {
+
+            /*inverse depth prediction*/
+            WaSP_predict_depth(SAI, LF);
+
+        }
+
+        /*write inverse depth .pgm*/
+        aux_write16PGMPPM(
+            SAI->path_out_pgm,
+            SAI->nc,
+            SAI->nr,
+            1,
+            SAI->depth);
+
+        /*main texture prediction here*/
+        predict_texture_view(SAI);
 
         /* apply texture residual */
         if (SAI->has_color_residual) {
@@ -528,37 +644,6 @@ void decoder::decode_views() {
 
         }
 
-        if (SAI->has_depth_residual) {
-
-            delete[](SAI->depth);
-
-            /* has JP2 encoded depth */
-
-            decodeKakadu(
-                SAI->path_out_pgm,
-                (setup.wasp_kakadu_directory + "/kdu_expand").c_str(),
-                SAI->jp2_residual_depth_path_jp2);
-
-            int32_t nr1, nc1, ncomp1;
-
-            aux_read16PGMPPM(
-                SAI->path_out_pgm,
-                nc1,
-                nr1,
-                ncomp1,
-                SAI->depth);
-
-        }
-        else {
-
-            /*inverse depth prediction*/
-
-            if (SAI->level < maxh) {
-                WaSP_predict_depth(SAI, LF);
-            }
-
-        }
-
         if (MEDFILT_DEPTH) {
 
             uint16_t *filtered_depth = medfilt2D(
@@ -577,7 +662,6 @@ void decoder::decode_views() {
         }
 
         /*internal colorspace version*/
-
         aux_write16PGMPPM(
             SAI->path_internal_colorspace_out_ppm,
             SAI->nc,
@@ -586,7 +670,6 @@ void decoder::decode_views() {
             SAI->color);
 
         /*colorspace transformation back to input*/
-
         write_output_ppm(
             SAI->color,
             SAI->path_out_ppm,
@@ -595,17 +678,6 @@ void decoder::decode_views() {
             SAI->ncomp,
             10,
             SAI->colorspace);
-
-        /*write inverse depth .pgm*/
-        if (SAI->level < maxh) {
-
-            aux_write16PGMPPM(
-                SAI->path_out_pgm,
-                SAI->nc,
-                SAI->nr,
-                1,
-                SAI->depth);
-        }
 
         if (SAI->color != nullptr) {
             delete[](SAI->color);

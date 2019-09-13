@@ -156,6 +156,8 @@ struct view {
 
   std::vector<spfilter> sparse_filters;
 
+  uint8_t number_of_sp_filters;
+
 };
 
 void initView(view* view);
