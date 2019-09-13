@@ -25,13 +25,13 @@
 */
 
 #include "WaSPConf.hh"
-#include "WaSPEncoder.hh"
+#include "encoder.hh"
 
 int main(int argc, char* argv[]) {
 
     WaSPConfig encoder_settings(argc, argv, "encoder");
 
-    WaSPEncoder wasp_encoder(encoder_settings.WaSP_encoder_setup);
+    encoder wasp_encoder(encoder_settings.WaSP_encoder_setup);
 
     wasp_encoder.encode();
 

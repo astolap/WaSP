@@ -37,7 +37,7 @@
     <ClInclude Include="..\..\source\view.hh" />
     <ClInclude Include="..\..\source\warping.hh" />
     <ClInclude Include="..\..\source\WaSPConf.hh" />
-    <ClInclude Include="..\..\source\WaSPEncoder.hh" />
+    <ClInclude Include="..\..\source\encoder.hh" />
     <ClInclude Include="..\..\source\ycbcr.hh" />
   </ItemGroup>
   <ItemGroup>
@@ -55,7 +55,7 @@
     <ClCompile Include="..\..\source\warping.cpp" />
     <ClCompile Include="..\..\source\wasp-encoder.cpp" />
     <ClCompile Include="..\..\source\WaSPConf.cpp" />
-    <ClCompile Include="..\..\source\WaSPEncoder.cpp" />
+    <ClCompile Include="..\..\source\encoder.cpp" />
     <ClCompile Include="..\..\source\ycbcr.cpp" />
   </ItemGroup>
   <PropertyGroup Label="Globals">

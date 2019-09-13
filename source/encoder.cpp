@@ -27,7 +27,7 @@
 #include <fstream>
 #include <iomanip>
 
-#include "WaSPEncoder.hh"
+#include "encoder.hh"
 #include "ppm.hh"
 #include "fileaux.hh"
 #include "codestream.hh"
@@ -44,7 +44,7 @@
 #include "warping.hh"
 #include "bitdepth.hh"
 
-WaSPEncoder::WaSPEncoder(const WaSPsetup encoder_setup)
+encoder::encoder(const WaSPsetup encoder_setup)
 {
 
     setup = encoder_setup;
@@ -53,18 +53,18 @@ WaSPEncoder::WaSPEncoder(const WaSPsetup encoder_setup)
 
 }
 
-WaSPEncoder::~WaSPEncoder() {
+encoder::~encoder() {
 }
 
-void WaSPEncoder::encode() {
+void encoder::encode() {
 
-    generate_inverse_depth_levelwise();
-    generate_texture_residual_level_wise();
+    generate_normalized_disparity();
+    generate_texture();
     write_bitstream();
 
 }
 
-void WaSPEncoder::write_config(string config_json_file_out) {
+void encoder::write_config(string config_json_file_out) {
 
     nlohmann::json conf_out;
 
@@ -139,7 +139,7 @@ void WaSPEncoder::write_config(string config_json_file_out) {
     file << std::setw(2) << conf_out << std::endl;
 }
 
-void WaSPEncoder::load_config_json(string config_json_file) {
+void encoder::load_config_json(string config_json_file) {
 
     ifstream ifs(config_json_file);
     nlohmann::json conf = nlohmann::json::parse(ifs);
@@ -251,7 +251,7 @@ void WaSPEncoder::load_config_json(string config_json_file) {
     }
 }
 
-void WaSPEncoder::forward_warp_texture_references(
+void encoder::forward_warp_texture_references(
     view *LF,
     view *SAI,
     uint16_t **warped_texture_views,
@@ -315,7 +315,7 @@ void WaSPEncoder::forward_warp_texture_references(
 
 }
 
-void WaSPEncoder::merge_texture_views(
+void encoder::merge_texture_views(
     view *SAI,
     view *LF,
     uint16_t **warped_texture_views,
@@ -417,7 +417,7 @@ void WaSPEncoder::merge_texture_views(
     SAI->bmask = nullptr;
 }
 
-void WaSPEncoder::generate_inverse_depth_levelwise() {
+void encoder::generate_normalized_disparity() {
 
     /*the term inverse depth is used interchangeably with normalized disparity */
 
@@ -599,7 +599,7 @@ void WaSPEncoder::generate_inverse_depth_levelwise() {
     }
 }
 
-void WaSPEncoder::generate_texture_residual_level_wise() {
+void encoder::generate_texture() {
 
     //FILE *tmp;
     //tmp = fopen("C:/Temp/coeffs.data", "wb");
@@ -1182,7 +1182,7 @@ void WaSPEncoder::generate_texture_residual_level_wise() {
 
 }
 
-void WaSPEncoder::write_bitstream() {
+void encoder::write_bitstream() {
 
     printf("Writing header information to codestream\n");
 

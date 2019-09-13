@@ -24,13 +24,13 @@
 *     OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-#include "WaSPDecoder.hh"
+#include "decoder.hh"
 
 int main(int argc, char* argv[]) {
 
     WaSPConfig encoder_settings(argc, argv, "decoder");
 
-    WaSPDecoder wasp_decoder(encoder_settings.WaSP_encoder_setup);
+    decoder wasp_decoder(encoder_settings.WaSP_encoder_setup);
 
     wasp_decoder.decode();
 

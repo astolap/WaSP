@@ -33,8 +33,6 @@
 
 #include <ctime>
 #include <vector>
-
-
 #include <cstdint>
 
 using std::int32_t;

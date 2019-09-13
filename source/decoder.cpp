@@ -29,7 +29,7 @@
 #include <cstring>
 #include <cmath>
 
-#include "WaSPDecoder.hh"
+#include "decoder.hh"
 #include "view.hh"
 #include "minconf.hh"
 #include "codestream.hh"
@@ -46,7 +46,7 @@
 #define SAVE_PARTIAL_WARPED_VIEWS false
 
 
-WaSPDecoder::WaSPDecoder(const WaSPsetup decoder_setup)
+decoder::decoder(const WaSPsetup decoder_setup)
 {
     setup = decoder_setup;
 
@@ -54,19 +54,19 @@ WaSPDecoder::WaSPDecoder(const WaSPsetup decoder_setup)
 
 }
 
-WaSPDecoder::~WaSPDecoder() {
+decoder::~decoder() {
     if (LF != nullptr) {
         dealloc();
     }
     fclose(input_LF);
 }
 
-void WaSPDecoder::decode() {
-    WaSP_decode_header();
-    WaSP_decode_views();
+void decoder::decode() {
+    decode_header();
+    decode_views();
 }
 
-void WaSPDecoder::WaSP_decode_header() {
+void decoder::decode_header() {
 
     n_bytes_prediction += (int32_t)fread(
         &number_of_views,
@@ -117,7 +117,7 @@ void WaSPDecoder::WaSP_decode_header() {
 
 }
 
-void WaSPDecoder::forward_warp_texture_references(
+void decoder::forward_warp_texture_references(
     view *LF,
     view *SAI,
     uint16_t **warped_texture_views,
@@ -201,7 +201,7 @@ void WaSPDecoder::forward_warp_texture_references(
 }
 
 
-void WaSPDecoder::merge_texture_views(
+void decoder::merge_texture_views(
     view *SAI,
     view *LF,
     uint16_t **warped_texture_views,
@@ -279,7 +279,7 @@ void WaSPDecoder::merge_texture_views(
     SAI->bmask = nullptr;
 }
 
-void WaSPDecoder::predict_texture_view(view* SAI) {
+void decoder::predict_texture_view(view* SAI) {
 
     if (SAI->n_references > 0) {
 
@@ -376,7 +376,7 @@ void WaSPDecoder::predict_texture_view(view* SAI) {
     }
 }
 
-void WaSPDecoder::WaSP_decode_views() {
+void decoder::decode_views() {
 
     LF = new view[number_of_views]();
 
@@ -598,10 +598,9 @@ void WaSPDecoder::WaSP_decode_views() {
     }
 }
 
+void decoder::dealloc() {
 
-void WaSPDecoder::dealloc() {
     for (int32_t ii = 0; ii < number_of_views; ii++) {
-        //printf("ii=%d\n", ii);
         view* SAI = LF + ii;
         if (SAI->color != nullptr)
             delete[](SAI->color);
