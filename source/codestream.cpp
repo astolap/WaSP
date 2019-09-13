@@ -133,7 +133,7 @@ void viewHeaderToCodestream(
       }
 
       int32_t Nsp = (SAI->NNt * 2 + 1)* (SAI->NNt * 2 + 1) + 1;
-      int32_t sp_mask_nbytes = (Nsp % 8) ? Nsp / 8 + 1 : Nsp / 8;
+      int32_t sp_mask_nbytes = (Nsp % 8) > 0 ? Nsp / 8 + 1 : Nsp / 8;
 
       uint8_t *sparsemask = new uint8_t[sp_mask_nbytes*SAI->ncomp]();
 
@@ -302,7 +302,7 @@ void codestreamToViewHeader(
 
 
       int32_t Nsp = (SAI->NNt * 2 + 1)* (SAI->NNt * 2 + 1) + 1;
-      int32_t sp_mask_nbytes = (Nsp % 8) ? Nsp / 8 + 1 : Nsp / 8;
+      int32_t sp_mask_nbytes = (Nsp % 8) > 0 ? Nsp / 8 + 1 : Nsp / 8;
 
       uint8_t *sparsemask = new uint8_t[sp_mask_nbytes*SAI->ncomp]();
 

@@ -708,6 +708,13 @@ void WaSPEncoder::generate_texture_residual_level_wise() {
                                 SAI->nc,
                                 SAI->NNt);
 
+                        //aux_write16PGMPPM(
+                        //    "C:/Temp/padded.pgm",
+                        //    SAI->nc + 2 * SAI->NNt,
+                        //    SAI->nr + 2 * SAI->NNt,
+                        //    1,
+                        //    padded_icomp_sai);
+
                         SAI->sparse_filters.push_back(getGlobalSparseFilter(
                             padded_icomp_orig,
                             padded_icomp_sai,
@@ -717,6 +724,16 @@ void WaSPEncoder::generate_texture_residual_level_wise() {
                             SAI->Ms,
                             SPARSE_BIAS_TERM,
                             setup.sparse_subsampling));
+
+                        //SAI->sparse_filters.push_back(getSP_FILTER_EIGEN(
+                        //    padded_icomp_orig,
+                        //    padded_icomp_sai,
+                        //    SAI->nr + 2 * SAI->NNt,
+                        //    SAI->nc + 2 * SAI->NNt,
+                        //    SAI->NNt,
+                        //    SAI->Ms,
+                        //    SPARSE_BIAS_TERM,
+                        //    setup.sparse_subsampling));
 
                         //FILE *tmp;
                         //tmp = fopen("C:/Temp/coeffs.data", "ab");
@@ -813,7 +830,7 @@ void WaSPEncoder::generate_texture_residual_level_wise() {
                         SAI->ncomp,
                         (1 << bpc) - 1);
 
-                    if (psnr_with_sparse > psnr_without_sparse) {
+                    if(1){//psnr_with_sparse > psnr_without_sparse) {
 
                         memcpy(
                             SAI->color,

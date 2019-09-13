@@ -30,6 +30,8 @@
 #include <vector>
 #include <cstdint>
 
+#include "Eigen\Dense"
+
 using std::int32_t;
 using std::uint32_t;
 
@@ -92,5 +94,23 @@ std::vector<double> applyGlobalSparseFilter(
     const int32_t NNt,
     const double bias_term_value,
     const std::vector<double> filter_coeffs);
+
+spfilter getSP_FILTER_EIGEN(
+    const uint16_t *original_image,
+    const uint16_t *input_image,
+    const int32_t nr,
+    const int32_t nc,
+    const int32_t NNt,
+    const int32_t Ms,
+    const double bias_term_value,
+    const int32_t sub_sampling_factor);
+
+bool sortinrev(
+    const std::pair<float, int> &a,
+    const std::pair<float, int> &b);
+
+std::vector<int> get_SP_SUBSET(
+    const Eigen::VectorXf X1,
+    const int Ms);
 
 #endif
