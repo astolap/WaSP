@@ -42,10 +42,10 @@ using std::int8_t;
 using std::uint8_t;
 
 
-#ifndef SOURCE_WASPDECODER_HH_
-#define SOURCE_WASPDECODER_HH_
+#ifndef DECODER_HH
+#define DECODER_HH
 
-class WaSPDecoder {
+class decoder {
 private:
 
     int32_t n_bytes_prediction = 0;
@@ -70,8 +70,8 @@ private:
     void dealloc();
 
 protected:
-    void WaSP_decode_header();
-    void WaSP_decode_views();
+    void decode_header();
+    void decode_views();
 
     void predict_texture_view(view* SAI);
 
@@ -96,8 +96,8 @@ protected:
     }
 
 public:
-    WaSPDecoder(const WaSPsetup decoder_setup);
-    virtual ~WaSPDecoder();
+    decoder(const WaSPsetup decoder_setup);
+    virtual ~decoder();
     void decode();
 };
 

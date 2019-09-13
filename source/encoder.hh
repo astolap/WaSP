@@ -41,8 +41,8 @@ using std::uint16_t;
 using std::int8_t;
 using std::uint8_t;
 
-#ifndef SOURCE_WASPENCODER_HH_
-#define SOURCE_WASPENCODER_HH_
+#ifndef ENCODER_HH
+#define ENCODER_HH
 
 #define USE_difftest_ng false
 
@@ -56,7 +56,7 @@ using std::uint8_t;
 #define FLT_MAX 3.402823466e+38F        // max value
 #endif
 
-class WaSPEncoder {
+class encoder {
  private:
 
   int32_t n_views_total = 0;
@@ -105,16 +105,15 @@ class WaSPEncoder {
       uint16_t **warped_depth_views,
       float **DispTargs);
 
-  void generate_texture_residual_level_wise();
-
-  void generate_inverse_depth_levelwise();
+  void generate_texture();
+  void generate_normalized_disparity();
 
  public:
-  virtual ~WaSPEncoder();
+  virtual ~encoder();
 
-  WaSPEncoder(WaSPsetup encoder_setup);
+  encoder(WaSPsetup encoder_setup);
 
   void encode();
 };
 
-#endif /* SOURCE_WASPENCODER_HH_ */
+#endif
