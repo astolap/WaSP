@@ -385,6 +385,13 @@ void decoder::predict_texture_view(view* SAI) {
 
                 std::vector<std::vector<uint16_t>> padded_regressors;
 
+                padded_regressors.push_back(
+                    padArrayUint16_t_vec(
+                        SAI->color + SAI->nr*SAI->nc*icomp,
+                        SAI->nr,
+                        SAI->nc,
+                        SAI->NNt));
+
                 /* rest of reference views (regressors) */
                 for (int ikr = 0; ikr < SAI->n_references; ikr++) {
 

@@ -299,7 +299,7 @@ void codestreamToViewHeader(
             SAI->sparse_filters.at(ii).NNt = SAI->NNt;
 
             SAI->sparse_filters.at(ii).MT =
-                (SAI->n_references)*(SAI->NNt * 2 + 1) * (SAI->NNt * 2 + 1) + 1;
+                (SAI->n_references+1)*(SAI->NNt * 2 + 1) * (SAI->NNt * 2 + 1) + 1;
 
             SAI->sparse_filters.at(ii).quantized_filter_coefficients.clear();
 
