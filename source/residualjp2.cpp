@@ -329,7 +329,9 @@ int32_t decodeKakadu(
         kdu_expand_s,
         "\"%s\"%s%s%s%s", 
         kdu_expand_path, 
-        " -precise -i ",
+        " -precise"
+        " -num_threads 0"
+        " -i ",
         jp2_input_path, 
         " -o ", 
         ppm_pgm_output_path);
