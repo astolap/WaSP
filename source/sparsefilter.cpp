@@ -33,7 +33,8 @@
 #include "sparsefilter.hh"
 #include "fastols.hh"
 #include "bitdepth.hh"
-#include "Eigen\Dense"
+#include "Eigen\Dense" /*only needed if you plan to use getSP_FILTER_EIGEN()
+                            instead of FastOLS.*/
 
 uint16_t *cropImage(
     const uint16_t *input_image,
