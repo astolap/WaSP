@@ -1,0 +1,2166 @@
+{
+  "colorspace": "RGB",
+  "enable_fixed_weight_parameter_search": 0,
+  "image_height": 512,
+  "image_width": 512,
+  "number_of_views_to_be_encoded": 81,
+  "type": "WaSP",
+  "views": [
+    {
+      "column_index": 4,
+      "cweight_search": false,
+      "fixed_merging_weight_parameter": 0.0,
+      "horizontal_camera_center_position": 0.0,
+      "id": 0,
+      "inverse_depth_reference_indices": [],
+      "level": 1,
+      "minimum_inverse_depth": 3037,
+      "number_of_inverse_depth_references": 0,
+      "number_of_texture_references": 0,
+      "rate_inverse_depth": 0.05000000074505806,
+      "rate_texture": 2.3473799228668213,
+      "row_index": 4,
+      "sparse_filter_neighborhood_size": 0,
+      "sparse_filter_order": 0,
+      "texture_reference_indices": [],
+      "vertical_camera_center_position": 0.0,
+      "view_merging_mode": 0
+    },
+    {
+      "column_index": 0,
+      "cweight_search": false,
+      "fixed_merging_weight_parameter": 0.0,
+      "horizontal_camera_center_position": -40.0,
+      "id": 1,
+      "inverse_depth_reference_indices": [
+        0
+      ],
+      "level": 2,
+      "minimum_inverse_depth": 3037,
+      "number_of_inverse_depth_references": 1,
+      "number_of_texture_references": 1,
+      "rate_inverse_depth": 0.0,
+      "rate_texture": 0.44012999534606934,
+      "row_index": 0,
+      "sparse_filter_neighborhood_size": 0,
+      "sparse_filter_order": 0,
+      "texture_reference_indices": [
+        0
+      ],
+      "vertical_camera_center_position": -40.0,
+      "view_merging_mode": 0
+    },
+    {
+      "column_index": 4,
+      "cweight_search": false,
+      "fixed_merging_weight_parameter": 0.0,
+      "horizontal_camera_center_position": 0.0,
+      "id": 2,
+      "inverse_depth_reference_indices": [
+        0
+      ],
+      "level": 2,
+      "minimum_inverse_depth": 3037,
+      "number_of_inverse_depth_references": 1,
+      "number_of_texture_references": 1,
+      "rate_inverse_depth": 0.0,
+      "rate_texture": 0.44012999534606934,
+      "row_index": 0,
+      "sparse_filter_neighborhood_size": 0,
+      "sparse_filter_order": 0,
+      "texture_reference_indices": [
+        0
+      ],
+      "vertical_camera_center_position": -40.0,
+      "view_merging_mode": 0
+    },
+    {
+      "column_index": 8,
+      "cweight_search": false,
+      "fixed_merging_weight_parameter": 0.0,
+      "horizontal_camera_center_position": 40.0,
+      "id": 3,
+      "inverse_depth_reference_indices": [
+        0
+      ],
+      "level": 2,
+      "minimum_inverse_depth": 3037,
+      "number_of_inverse_depth_references": 1,
+      "number_of_texture_references": 1,
+      "rate_inverse_depth": 0.0,
+      "rate_texture": 0.44012999534606934,
+      "row_index": 0,
+      "sparse_filter_neighborhood_size": 0,
+      "sparse_filter_order": 0,
+      "texture_reference_indices": [
+        0
+      ],
+      "vertical_camera_center_position": -40.0,
+      "view_merging_mode": 0
+    },
+    {
+      "column_index": 0,
+      "cweight_search": false,
+      "fixed_merging_weight_parameter": 0.0,
+      "horizontal_camera_center_position": -40.0,
+      "id": 4,
+      "inverse_depth_reference_indices": [
+        0
+      ],
+      "level": 2,
+      "minimum_inverse_depth": 3037,
+      "number_of_inverse_depth_references": 1,
+      "number_of_texture_references": 1,
+      "rate_inverse_depth": 0.0,
+      "rate_texture": 0.44012999534606934,
+      "row_index": 4,
+      "sparse_filter_neighborhood_size": 0,
+      "sparse_filter_order": 0,
+      "texture_reference_indices": [
+        0
+      ],
+      "vertical_camera_center_position": 0.0,
+      "view_merging_mode": 0
+    },
+    {
+      "column_index": 8,
+      "cweight_search": false,
+      "fixed_merging_weight_parameter": 0.0,
+      "horizontal_camera_center_position": 40.0,
+      "id": 5,
+      "inverse_depth_reference_indices": [
+        0
+      ],
+      "level": 2,
+      "minimum_inverse_depth": 3037,
+      "number_of_inverse_depth_references": 1,
+      "number_of_texture_references": 1,
+      "rate_inverse_depth": 0.0,
+      "rate_texture": 0.44012999534606934,
+      "row_index": 4,
+      "sparse_filter_neighborhood_size": 0,
+      "sparse_filter_order": 0,
+      "texture_reference_indices": [
+        0
+      ],
+      "vertical_camera_center_position": 0.0,
+      "view_merging_mode": 0
+    },
+    {
+      "column_index": 0,
+      "cweight_search": false,
+      "fixed_merging_weight_parameter": 0.0,
+      "horizontal_camera_center_position": -40.0,
+      "id": 6,
+      "inverse_depth_reference_indices": [
+        0
+      ],
+      "level": 2,
+      "minimum_inverse_depth": 3037,
+      "number_of_inverse_depth_references": 1,
+      "number_of_texture_references": 1,
+      "rate_inverse_depth": 0.0,
+      "rate_texture": 0.44012999534606934,
+      "row_index": 8,
+      "sparse_filter_neighborhood_size": 0,
+      "sparse_filter_order": 0,
+      "texture_reference_indices": [
+        0
+      ],
+      "vertical_camera_center_position": 40.0,
+      "view_merging_mode": 0
+    },
+    {
+      "column_index": 4,
+      "cweight_search": false,
+      "fixed_merging_weight_parameter": 0.0,
+      "horizontal_camera_center_position": 0.0,
+      "id": 7,
+      "inverse_depth_reference_indices": [
+        0
+      ],
+      "level": 2,
+      "minimum_inverse_depth": 3037,
+      "number_of_inverse_depth_references": 1,
+      "number_of_texture_references": 1,
+      "rate_inverse_depth": 0.0,
+      "rate_texture": 0.44012999534606934,
+      "row_index": 8,
+      "sparse_filter_neighborhood_size": 0,
+      "sparse_filter_order": 0,
+      "texture_reference_indices": [
+        0
+      ],
+      "vertical_camera_center_position": 40.0,
+      "view_merging_mode": 0
+    },
+    {
+      "column_index": 8,
+      "cweight_search": false,
+      "fixed_merging_weight_parameter": 0.0,
+      "horizontal_camera_center_position": 40.0,
+      "id": 8,
+      "inverse_depth_reference_indices": [
+        0
+      ],
+      "level": 2,
+      "minimum_inverse_depth": 3037,
+      "number_of_inverse_depth_references": 1,
+      "number_of_texture_references": 1,
+      "rate_inverse_depth": 0.0,
+      "rate_texture": 0.44012999534606934,
+      "row_index": 8,
+      "sparse_filter_neighborhood_size": 0,
+      "sparse_filter_order": 0,
+      "texture_reference_indices": [
+        0
+      ],
+      "vertical_camera_center_position": 40.0,
+      "view_merging_mode": 0
+    },
+    {
+      "column_index": 2,
+      "cweight_search": false,
+      "fixed_merging_weight_parameter": 0.0,
+      "horizontal_camera_center_position": -20.0,
+      "id": 9,
+      "inverse_depth_reference_indices": [
+        0
+      ],
+      "level": 3,
+      "minimum_inverse_depth": 3037,
+      "number_of_inverse_depth_references": 1,
+      "number_of_texture_references": 4,
+      "rate_inverse_depth": 0.0,
+      "rate_texture": 0.16301000118255615,
+      "row_index": 2,
+      "sparse_filter_neighborhood_size": 0,
+      "sparse_filter_order": 0,
+      "texture_reference_indices": [
+        1,
+        4,
+        2,
+        0
+      ],
+      "vertical_camera_center_position": -20.0,
+      "view_merging_mode": 0
+    },
+    {
+      "column_index": 6,
+      "cweight_search": false,
+      "fixed_merging_weight_parameter": 0.0,
+      "horizontal_camera_center_position": 20.0,
+      "id": 10,
+      "inverse_depth_reference_indices": [
+        0
+      ],
+      "level": 3,
+      "minimum_inverse_depth": 3037,
+      "number_of_inverse_depth_references": 1,
+      "number_of_texture_references": 4,
+      "rate_inverse_depth": 0.0,
+      "rate_texture": 0.16301000118255615,
+      "row_index": 2,
+      "sparse_filter_neighborhood_size": 0,
+      "sparse_filter_order": 0,
+      "texture_reference_indices": [
+        2,
+        0,
+        3,
+        5
+      ],
+      "vertical_camera_center_position": -20.0,
+      "view_merging_mode": 0
+    },
+    {
+      "column_index": 2,
+      "cweight_search": false,
+      "fixed_merging_weight_parameter": 0.0,
+      "horizontal_camera_center_position": -20.0,
+      "id": 11,
+      "inverse_depth_reference_indices": [
+        0
+      ],
+      "level": 3,
+      "minimum_inverse_depth": 3037,
+      "number_of_inverse_depth_references": 1,
+      "number_of_texture_references": 4,
+      "rate_inverse_depth": 0.0,
+      "rate_texture": 0.16301000118255615,
+      "row_index": 6,
+      "sparse_filter_neighborhood_size": 0,
+      "sparse_filter_order": 0,
+      "texture_reference_indices": [
+        4,
+        6,
+        0,
+        7
+      ],
+      "vertical_camera_center_position": 20.0,
+      "view_merging_mode": 0
+    },
+    {
+      "column_index": 6,
+      "cweight_search": false,
+      "fixed_merging_weight_parameter": 0.0,
+      "horizontal_camera_center_position": 20.0,
+      "id": 12,
+      "inverse_depth_reference_indices": [
+        0
+      ],
+      "level": 3,
+      "minimum_inverse_depth": 3037,
+      "number_of_inverse_depth_references": 1,
+      "number_of_texture_references": 4,
+      "rate_inverse_depth": 0.0,
+      "rate_texture": 0.16301000118255615,
+      "row_index": 6,
+      "sparse_filter_neighborhood_size": 0,
+      "sparse_filter_order": 0,
+      "texture_reference_indices": [
+        0,
+        7,
+        5,
+        8
+      ],
+      "vertical_camera_center_position": 20.0,
+      "view_merging_mode": 0
+    },
+    {
+      "column_index": 2,
+      "cweight_search": false,
+      "fixed_merging_weight_parameter": 0.0,
+      "horizontal_camera_center_position": -20.0,
+      "id": 13,
+      "inverse_depth_reference_indices": [
+        0
+      ],
+      "level": 4,
+      "minimum_inverse_depth": 3037,
+      "number_of_inverse_depth_references": 1,
+      "number_of_texture_references": 4,
+      "rate_inverse_depth": 0.0,
+      "rate_texture": 0.0603800006210804,
+      "row_index": 0,
+      "sparse_filter_neighborhood_size": 0,
+      "sparse_filter_order": 0,
+      "texture_reference_indices": [
+        1,
+        9,
+        2,
+        4
+      ],
+      "vertical_camera_center_position": -40.0,
+      "view_merging_mode": 0
+    },
+    {
+      "column_index": 6,
+      "cweight_search": false,
+      "fixed_merging_weight_parameter": 0.0,
+      "horizontal_camera_center_position": 20.0,
+      "id": 14,
+      "inverse_depth_reference_indices": [
+        0
+      ],
+      "level": 4,
+      "minimum_inverse_depth": 3037,
+      "number_of_inverse_depth_references": 1,
+      "number_of_texture_references": 4,
+      "rate_inverse_depth": 0.0,
+      "rate_texture": 0.0603800006210804,
+      "row_index": 0,
+      "sparse_filter_neighborhood_size": 0,
+      "sparse_filter_order": 0,
+      "texture_reference_indices": [
+        2,
+        10,
+        3,
+        9
+      ],
+      "vertical_camera_center_position": -40.0,
+      "view_merging_mode": 0
+    },
+    {
+      "column_index": 0,
+      "cweight_search": false,
+      "fixed_merging_weight_parameter": 0.0,
+      "horizontal_camera_center_position": -40.0,
+      "id": 15,
+      "inverse_depth_reference_indices": [
+        0
+      ],
+      "level": 4,
+      "minimum_inverse_depth": 3037,
+      "number_of_inverse_depth_references": 1,
+      "number_of_texture_references": 4,
+      "rate_inverse_depth": 0.0,
+      "rate_texture": 0.0603800006210804,
+      "row_index": 2,
+      "sparse_filter_neighborhood_size": 0,
+      "sparse_filter_order": 0,
+      "texture_reference_indices": [
+        1,
+        4,
+        9,
+        11
+      ],
+      "vertical_camera_center_position": -20.0,
+      "view_merging_mode": 0
+    },
+    {
+      "column_index": 4,
+      "cweight_search": false,
+      "fixed_merging_weight_parameter": 0.0,
+      "horizontal_camera_center_position": 0.0,
+      "id": 16,
+      "inverse_depth_reference_indices": [
+        0
+      ],
+      "level": 4,
+      "minimum_inverse_depth": 3037,
+      "number_of_inverse_depth_references": 1,
+      "number_of_texture_references": 4,
+      "rate_inverse_depth": 0.0,
+      "rate_texture": 0.0603800006210804,
+      "row_index": 2,
+      "sparse_filter_neighborhood_size": 0,
+      "sparse_filter_order": 0,
+      "texture_reference_indices": [
+        9,
+        2,
+        0,
+        10
+      ],
+      "vertical_camera_center_position": -20.0,
+      "view_merging_mode": 0
+    },
+    {
+      "column_index": 8,
+      "cweight_search": false,
+      "fixed_merging_weight_parameter": 0.0,
+      "horizontal_camera_center_position": 40.0,
+      "id": 17,
+      "inverse_depth_reference_indices": [
+        0
+      ],
+      "level": 4,
+      "minimum_inverse_depth": 3037,
+      "number_of_inverse_depth_references": 1,
+      "number_of_texture_references": 4,
+      "rate_inverse_depth": 0.0,
+      "rate_texture": 0.0603800006210804,
+      "row_index": 2,
+      "sparse_filter_neighborhood_size": 0,
+      "sparse_filter_order": 0,
+      "texture_reference_indices": [
+        10,
+        3,
+        5,
+        2
+      ],
+      "vertical_camera_center_position": -20.0,
+      "view_merging_mode": 0
+    },
+    {
+      "column_index": 2,
+      "cweight_search": false,
+      "fixed_merging_weight_parameter": 0.0,
+      "horizontal_camera_center_position": -20.0,
+      "id": 18,
+      "inverse_depth_reference_indices": [
+        0
+      ],
+      "level": 4,
+      "minimum_inverse_depth": 3037,
+      "number_of_inverse_depth_references": 1,
+      "number_of_texture_references": 4,
+      "rate_inverse_depth": 0.0,
+      "rate_texture": 0.0603800006210804,
+      "row_index": 4,
+      "sparse_filter_neighborhood_size": 0,
+      "sparse_filter_order": 0,
+      "texture_reference_indices": [
+        4,
+        9,
+        11,
+        0
+      ],
+      "vertical_camera_center_position": 0.0,
+      "view_merging_mode": 0
+    },
+    {
+      "column_index": 6,
+      "cweight_search": false,
+      "fixed_merging_weight_parameter": 0.0,
+      "horizontal_camera_center_position": 20.0,
+      "id": 19,
+      "inverse_depth_reference_indices": [
+        0
+      ],
+      "level": 4,
+      "minimum_inverse_depth": 3037,
+      "number_of_inverse_depth_references": 1,
+      "number_of_texture_references": 4,
+      "rate_inverse_depth": 0.0,
+      "rate_texture": 0.0603800006210804,
+      "row_index": 4,
+      "sparse_filter_neighborhood_size": 0,
+      "sparse_filter_order": 0,
+      "texture_reference_indices": [
+        0,
+        10,
+        12,
+        5
+      ],
+      "vertical_camera_center_position": 0.0,
+      "view_merging_mode": 0
+    },
+    {
+      "column_index": 0,
+      "cweight_search": false,
+      "fixed_merging_weight_parameter": 0.0,
+      "horizontal_camera_center_position": -40.0,
+      "id": 20,
+      "inverse_depth_reference_indices": [
+        0
+      ],
+      "level": 4,
+      "minimum_inverse_depth": 3037,
+      "number_of_inverse_depth_references": 1,
+      "number_of_texture_references": 4,
+      "rate_inverse_depth": 0.0,
+      "rate_texture": 0.0603800006210804,
+      "row_index": 6,
+      "sparse_filter_neighborhood_size": 0,
+      "sparse_filter_order": 0,
+      "texture_reference_indices": [
+        4,
+        6,
+        11,
+        9
+      ],
+      "vertical_camera_center_position": 20.0,
+      "view_merging_mode": 0
+    },
+    {
+      "column_index": 4,
+      "cweight_search": false,
+      "fixed_merging_weight_parameter": 0.0,
+      "horizontal_camera_center_position": 0.0,
+      "id": 21,
+      "inverse_depth_reference_indices": [
+        0
+      ],
+      "level": 4,
+      "minimum_inverse_depth": 3037,
+      "number_of_inverse_depth_references": 1,
+      "number_of_texture_references": 4,
+      "rate_inverse_depth": 0.0,
+      "rate_texture": 0.0603800006210804,
+      "row_index": 6,
+      "sparse_filter_neighborhood_size": 0,
+      "sparse_filter_order": 0,
+      "texture_reference_indices": [
+        11,
+        0,
+        7,
+        12
+      ],
+      "vertical_camera_center_position": 20.0,
+      "view_merging_mode": 0
+    },
+    {
+      "column_index": 8,
+      "cweight_search": false,
+      "fixed_merging_weight_parameter": 0.0,
+      "horizontal_camera_center_position": 40.0,
+      "id": 22,
+      "inverse_depth_reference_indices": [
+        0
+      ],
+      "level": 4,
+      "minimum_inverse_depth": 3037,
+      "number_of_inverse_depth_references": 1,
+      "number_of_texture_references": 4,
+      "rate_inverse_depth": 0.0,
+      "rate_texture": 0.0603800006210804,
+      "row_index": 6,
+      "sparse_filter_neighborhood_size": 0,
+      "sparse_filter_order": 0,
+      "texture_reference_indices": [
+        12,
+        5,
+        8,
+        0
+      ],
+      "vertical_camera_center_position": 20.0,
+      "view_merging_mode": 0
+    },
+    {
+      "column_index": 2,
+      "cweight_search": false,
+      "fixed_merging_weight_parameter": 0.0,
+      "horizontal_camera_center_position": -20.0,
+      "id": 23,
+      "inverse_depth_reference_indices": [
+        0
+      ],
+      "level": 4,
+      "minimum_inverse_depth": 3037,
+      "number_of_inverse_depth_references": 1,
+      "number_of_texture_references": 4,
+      "rate_inverse_depth": 0.0,
+      "rate_texture": 0.0603800006210804,
+      "row_index": 8,
+      "sparse_filter_neighborhood_size": 0,
+      "sparse_filter_order": 0,
+      "texture_reference_indices": [
+        6,
+        11,
+        7,
+        4
+      ],
+      "vertical_camera_center_position": 40.0,
+      "view_merging_mode": 0
+    },
+    {
+      "column_index": 6,
+      "cweight_search": false,
+      "fixed_merging_weight_parameter": 0.0,
+      "horizontal_camera_center_position": 20.0,
+      "id": 24,
+      "inverse_depth_reference_indices": [
+        0
+      ],
+      "level": 4,
+      "minimum_inverse_depth": 3037,
+      "number_of_inverse_depth_references": 1,
+      "number_of_texture_references": 4,
+      "rate_inverse_depth": 0.0,
+      "rate_texture": 0.0603800006210804,
+      "row_index": 8,
+      "sparse_filter_neighborhood_size": 0,
+      "sparse_filter_order": 0,
+      "texture_reference_indices": [
+        7,
+        12,
+        8,
+        11
+      ],
+      "vertical_camera_center_position": 40.0,
+      "view_merging_mode": 0
+    },
+    {
+      "column_index": 1,
+      "cweight_search": false,
+      "fixed_merging_weight_parameter": 0.0,
+      "horizontal_camera_center_position": -30.0,
+      "id": 25,
+      "inverse_depth_reference_indices": [
+        0
+      ],
+      "level": 5,
+      "minimum_inverse_depth": 3037,
+      "number_of_inverse_depth_references": 1,
+      "number_of_texture_references": 4,
+      "rate_inverse_depth": 0.0,
+      "rate_texture": 0.05031000077724457,
+      "row_index": 1,
+      "sparse_filter_neighborhood_size": 0,
+      "sparse_filter_order": 0,
+      "texture_reference_indices": [
+        1,
+        15,
+        13,
+        9
+      ],
+      "vertical_camera_center_position": -30.0,
+      "view_merging_mode": 0
+    },
+    {
+      "column_index": 3,
+      "cweight_search": false,
+      "fixed_merging_weight_parameter": 0.0,
+      "horizontal_camera_center_position": -10.0,
+      "id": 26,
+      "inverse_depth_reference_indices": [
+        0
+      ],
+      "level": 5,
+      "minimum_inverse_depth": 3037,
+      "number_of_inverse_depth_references": 1,
+      "number_of_texture_references": 4,
+      "rate_inverse_depth": 0.0,
+      "rate_texture": 0.05031000077724457,
+      "row_index": 1,
+      "sparse_filter_neighborhood_size": 0,
+      "sparse_filter_order": 0,
+      "texture_reference_indices": [
+        13,
+        9,
+        2,
+        16
+      ],
+      "vertical_camera_center_position": -30.0,
+      "view_merging_mode": 0
+    },
+    {
+      "column_index": 5,
+      "cweight_search": false,
+      "fixed_merging_weight_parameter": 0.0,
+      "horizontal_camera_center_position": 10.0,
+      "id": 27,
+      "inverse_depth_reference_indices": [
+        0
+      ],
+      "level": 5,
+      "minimum_inverse_depth": 3037,
+      "number_of_inverse_depth_references": 1,
+      "number_of_texture_references": 4,
+      "rate_inverse_depth": 0.0,
+      "rate_texture": 0.05031000077724457,
+      "row_index": 1,
+      "sparse_filter_neighborhood_size": 0,
+      "sparse_filter_order": 0,
+      "texture_reference_indices": [
+        2,
+        16,
+        14,
+        10
+      ],
+      "vertical_camera_center_position": -30.0,
+      "view_merging_mode": 0
+    },
+    {
+      "column_index": 7,
+      "cweight_search": false,
+      "fixed_merging_weight_parameter": 0.0,
+      "horizontal_camera_center_position": 30.0,
+      "id": 28,
+      "inverse_depth_reference_indices": [
+        0
+      ],
+      "level": 5,
+      "minimum_inverse_depth": 3037,
+      "number_of_inverse_depth_references": 1,
+      "number_of_texture_references": 4,
+      "rate_inverse_depth": 0.0,
+      "rate_texture": 0.05031000077724457,
+      "row_index": 1,
+      "sparse_filter_neighborhood_size": 0,
+      "sparse_filter_order": 0,
+      "texture_reference_indices": [
+        14,
+        10,
+        3,
+        17
+      ],
+      "vertical_camera_center_position": -30.0,
+      "view_merging_mode": 0
+    },
+    {
+      "column_index": 1,
+      "cweight_search": false,
+      "fixed_merging_weight_parameter": 0.0,
+      "horizontal_camera_center_position": -30.0,
+      "id": 29,
+      "inverse_depth_reference_indices": [
+        0
+      ],
+      "level": 5,
+      "minimum_inverse_depth": 3037,
+      "number_of_inverse_depth_references": 1,
+      "number_of_texture_references": 4,
+      "rate_inverse_depth": 0.0,
+      "rate_texture": 0.05031000077724457,
+      "row_index": 3,
+      "sparse_filter_neighborhood_size": 0,
+      "sparse_filter_order": 0,
+      "texture_reference_indices": [
+        15,
+        4,
+        9,
+        18
+      ],
+      "vertical_camera_center_position": -8.62069034576416,
+      "view_merging_mode": 0
+    },
+    {
+      "column_index": 3,
+      "cweight_search": false,
+      "fixed_merging_weight_parameter": 0.0,
+      "horizontal_camera_center_position": -10.0,
+      "id": 30,
+      "inverse_depth_reference_indices": [
+        0
+      ],
+      "level": 5,
+      "minimum_inverse_depth": 3037,
+      "number_of_inverse_depth_references": 1,
+      "number_of_texture_references": 4,
+      "rate_inverse_depth": 0.0,
+      "rate_texture": 0.05031000077724457,
+      "row_index": 3,
+      "sparse_filter_neighborhood_size": 0,
+      "sparse_filter_order": 0,
+      "texture_reference_indices": [
+        9,
+        18,
+        16,
+        0
+      ],
+      "vertical_camera_center_position": -10.0,
+      "view_merging_mode": 0
+    },
+    {
+      "column_index": 5,
+      "cweight_search": false,
+      "fixed_merging_weight_parameter": 0.0,
+      "horizontal_camera_center_position": 10.0,
+      "id": 31,
+      "inverse_depth_reference_indices": [
+        0
+      ],
+      "level": 5,
+      "minimum_inverse_depth": 3037,
+      "number_of_inverse_depth_references": 1,
+      "number_of_texture_references": 4,
+      "rate_inverse_depth": 0.0,
+      "rate_texture": 0.05031000077724457,
+      "row_index": 3,
+      "sparse_filter_neighborhood_size": 0,
+      "sparse_filter_order": 0,
+      "texture_reference_indices": [
+        16,
+        0,
+        10,
+        19
+      ],
+      "vertical_camera_center_position": -10.0,
+      "view_merging_mode": 0
+    },
+    {
+      "column_index": 7,
+      "cweight_search": false,
+      "fixed_merging_weight_parameter": 0.0,
+      "horizontal_camera_center_position": 30.0,
+      "id": 32,
+      "inverse_depth_reference_indices": [
+        0
+      ],
+      "level": 5,
+      "minimum_inverse_depth": 3037,
+      "number_of_inverse_depth_references": 1,
+      "number_of_texture_references": 4,
+      "rate_inverse_depth": 0.0,
+      "rate_texture": 0.05031000077724457,
+      "row_index": 3,
+      "sparse_filter_neighborhood_size": 0,
+      "sparse_filter_order": 0,
+      "texture_reference_indices": [
+        10,
+        19,
+        17,
+        5
+      ],
+      "vertical_camera_center_position": -8.333330154418945,
+      "view_merging_mode": 0
+    },
+    {
+      "column_index": 1,
+      "cweight_search": false,
+      "fixed_merging_weight_parameter": 0.0,
+      "horizontal_camera_center_position": -30.0,
+      "id": 33,
+      "inverse_depth_reference_indices": [
+        0
+      ],
+      "level": 5,
+      "minimum_inverse_depth": 3037,
+      "number_of_inverse_depth_references": 1,
+      "number_of_texture_references": 4,
+      "rate_inverse_depth": 0.0,
+      "rate_texture": 0.05031000077724457,
+      "row_index": 5,
+      "sparse_filter_neighborhood_size": 0,
+      "sparse_filter_order": 0,
+      "texture_reference_indices": [
+        4,
+        20,
+        18,
+        11
+      ],
+      "vertical_camera_center_position": 8.20464038848877,
+      "view_merging_mode": 0
+    },
+    {
+      "column_index": 3,
+      "cweight_search": false,
+      "fixed_merging_weight_parameter": 0.0,
+      "horizontal_camera_center_position": -10.0,
+      "id": 34,
+      "inverse_depth_reference_indices": [
+        0
+      ],
+      "level": 5,
+      "minimum_inverse_depth": 3037,
+      "number_of_inverse_depth_references": 1,
+      "number_of_texture_references": 4,
+      "rate_inverse_depth": 0.0,
+      "rate_texture": 0.05031000077724457,
+      "row_index": 5,
+      "sparse_filter_neighborhood_size": 0,
+      "sparse_filter_order": 0,
+      "texture_reference_indices": [
+        18,
+        11,
+        0,
+        21
+      ],
+      "vertical_camera_center_position": 10.0,
+      "view_merging_mode": 0
+    },
+    {
+      "column_index": 5,
+      "cweight_search": false,
+      "fixed_merging_weight_parameter": 0.0,
+      "horizontal_camera_center_position": 10.0,
+      "id": 35,
+      "inverse_depth_reference_indices": [
+        0
+      ],
+      "level": 5,
+      "minimum_inverse_depth": 3037,
+      "number_of_inverse_depth_references": 1,
+      "number_of_texture_references": 4,
+      "rate_inverse_depth": 0.0,
+      "rate_texture": 0.05031000077724457,
+      "row_index": 5,
+      "sparse_filter_neighborhood_size": 0,
+      "sparse_filter_order": 0,
+      "texture_reference_indices": [
+        0,
+        21,
+        19,
+        12
+      ],
+      "vertical_camera_center_position": 10.0,
+      "view_merging_mode": 0
+    },
+    {
+      "column_index": 7,
+      "cweight_search": false,
+      "fixed_merging_weight_parameter": 0.0,
+      "horizontal_camera_center_position": 30.0,
+      "id": 36,
+      "inverse_depth_reference_indices": [
+        0
+      ],
+      "level": 5,
+      "minimum_inverse_depth": 3037,
+      "number_of_inverse_depth_references": 1,
+      "number_of_texture_references": 4,
+      "rate_inverse_depth": 0.0,
+      "rate_texture": 0.05031000077724457,
+      "row_index": 5,
+      "sparse_filter_neighborhood_size": 0,
+      "sparse_filter_order": 0,
+      "texture_reference_indices": [
+        19,
+        12,
+        5,
+        22
+      ],
+      "vertical_camera_center_position": 9.009010314941406,
+      "view_merging_mode": 0
+    },
+    {
+      "column_index": 1,
+      "cweight_search": false,
+      "fixed_merging_weight_parameter": 0.0,
+      "horizontal_camera_center_position": -30.0,
+      "id": 37,
+      "inverse_depth_reference_indices": [
+        0
+      ],
+      "level": 5,
+      "minimum_inverse_depth": 3037,
+      "number_of_inverse_depth_references": 1,
+      "number_of_texture_references": 4,
+      "rate_inverse_depth": 0.0,
+      "rate_texture": 0.05031000077724457,
+      "row_index": 7,
+      "sparse_filter_neighborhood_size": 0,
+      "sparse_filter_order": 0,
+      "texture_reference_indices": [
+        20,
+        6,
+        11,
+        23
+      ],
+      "vertical_camera_center_position": 30.0,
+      "view_merging_mode": 0
+    },
+    {
+      "column_index": 3,
+      "cweight_search": false,
+      "fixed_merging_weight_parameter": 0.0,
+      "horizontal_camera_center_position": -10.0,
+      "id": 38,
+      "inverse_depth_reference_indices": [
+        0
+      ],
+      "level": 5,
+      "minimum_inverse_depth": 3037,
+      "number_of_inverse_depth_references": 1,
+      "number_of_texture_references": 4,
+      "rate_inverse_depth": 0.0,
+      "rate_texture": 0.05031000077724457,
+      "row_index": 7,
+      "sparse_filter_neighborhood_size": 0,
+      "sparse_filter_order": 0,
+      "texture_reference_indices": [
+        11,
+        23,
+        21,
+        7
+      ],
+      "vertical_camera_center_position": 30.0,
+      "view_merging_mode": 0
+    },
+    {
+      "column_index": 5,
+      "cweight_search": false,
+      "fixed_merging_weight_parameter": 0.0,
+      "horizontal_camera_center_position": 10.0,
+      "id": 39,
+      "inverse_depth_reference_indices": [
+        0
+      ],
+      "level": 5,
+      "minimum_inverse_depth": 3037,
+      "number_of_inverse_depth_references": 1,
+      "number_of_texture_references": 4,
+      "rate_inverse_depth": 0.0,
+      "rate_texture": 0.05031000077724457,
+      "row_index": 7,
+      "sparse_filter_neighborhood_size": 0,
+      "sparse_filter_order": 0,
+      "texture_reference_indices": [
+        21,
+        7,
+        12,
+        24
+      ],
+      "vertical_camera_center_position": 30.0,
+      "view_merging_mode": 0
+    },
+    {
+      "column_index": 7,
+      "cweight_search": false,
+      "fixed_merging_weight_parameter": 0.0,
+      "horizontal_camera_center_position": 30.0,
+      "id": 40,
+      "inverse_depth_reference_indices": [
+        0
+      ],
+      "level": 5,
+      "minimum_inverse_depth": 3037,
+      "number_of_inverse_depth_references": 1,
+      "number_of_texture_references": 4,
+      "rate_inverse_depth": 0.0,
+      "rate_texture": 0.05031000077724457,
+      "row_index": 7,
+      "sparse_filter_neighborhood_size": 0,
+      "sparse_filter_order": 0,
+      "texture_reference_indices": [
+        12,
+        24,
+        22,
+        8
+      ],
+      "vertical_camera_center_position": 30.0,
+      "view_merging_mode": 0
+    },
+    {
+      "column_index": 1,
+      "cweight_search": false,
+      "fixed_merging_weight_parameter": 0.0,
+      "horizontal_camera_center_position": -30.0,
+      "id": 41,
+      "inverse_depth_reference_indices": [
+        0
+      ],
+      "level": 6,
+      "minimum_inverse_depth": 3037,
+      "number_of_inverse_depth_references": 1,
+      "number_of_texture_references": 4,
+      "rate_inverse_depth": 0.0,
+      "rate_texture": 0.0,
+      "row_index": 0,
+      "sparse_filter_neighborhood_size": 0,
+      "sparse_filter_order": 0,
+      "texture_reference_indices": [
+        1,
+        25,
+        13,
+        15
+      ],
+      "vertical_camera_center_position": -40.0,
+      "view_merging_mode": 0
+    },
+    {
+      "column_index": 3,
+      "cweight_search": false,
+      "fixed_merging_weight_parameter": 0.0,
+      "horizontal_camera_center_position": -10.0,
+      "id": 42,
+      "inverse_depth_reference_indices": [
+        0
+      ],
+      "level": 6,
+      "minimum_inverse_depth": 3037,
+      "number_of_inverse_depth_references": 1,
+      "number_of_texture_references": 4,
+      "rate_inverse_depth": 0.0,
+      "rate_texture": 0.0,
+      "row_index": 0,
+      "sparse_filter_neighborhood_size": 0,
+      "sparse_filter_order": 0,
+      "texture_reference_indices": [
+        13,
+        26,
+        2,
+        25
+      ],
+      "vertical_camera_center_position": -40.0,
+      "view_merging_mode": 0
+    },
+    {
+      "column_index": 5,
+      "cweight_search": false,
+      "fixed_merging_weight_parameter": 0.0,
+      "horizontal_camera_center_position": 10.0,
+      "id": 43,
+      "inverse_depth_reference_indices": [
+        0
+      ],
+      "level": 6,
+      "minimum_inverse_depth": 3037,
+      "number_of_inverse_depth_references": 1,
+      "number_of_texture_references": 4,
+      "rate_inverse_depth": 0.0,
+      "rate_texture": 0.0,
+      "row_index": 0,
+      "sparse_filter_neighborhood_size": 0,
+      "sparse_filter_order": 0,
+      "texture_reference_indices": [
+        2,
+        27,
+        14,
+        26
+      ],
+      "vertical_camera_center_position": -40.0,
+      "view_merging_mode": 0
+    },
+    {
+      "column_index": 7,
+      "cweight_search": false,
+      "fixed_merging_weight_parameter": 0.0,
+      "horizontal_camera_center_position": 30.0,
+      "id": 44,
+      "inverse_depth_reference_indices": [
+        0
+      ],
+      "level": 6,
+      "minimum_inverse_depth": 3037,
+      "number_of_inverse_depth_references": 1,
+      "number_of_texture_references": 4,
+      "rate_inverse_depth": 0.0,
+      "rate_texture": 0.0,
+      "row_index": 0,
+      "sparse_filter_neighborhood_size": 0,
+      "sparse_filter_order": 0,
+      "texture_reference_indices": [
+        14,
+        28,
+        3,
+        27
+      ],
+      "vertical_camera_center_position": -40.0,
+      "view_merging_mode": 0
+    },
+    {
+      "column_index": 0,
+      "cweight_search": false,
+      "fixed_merging_weight_parameter": 0.0,
+      "horizontal_camera_center_position": -40.0,
+      "id": 45,
+      "inverse_depth_reference_indices": [
+        0
+      ],
+      "level": 6,
+      "minimum_inverse_depth": 3037,
+      "number_of_inverse_depth_references": 1,
+      "number_of_texture_references": 4,
+      "rate_inverse_depth": 0.0,
+      "rate_texture": 0.0,
+      "row_index": 1,
+      "sparse_filter_neighborhood_size": 0,
+      "sparse_filter_order": 0,
+      "texture_reference_indices": [
+        1,
+        15,
+        25,
+        29
+      ],
+      "vertical_camera_center_position": -30.0,
+      "view_merging_mode": 0
+    },
+    {
+      "column_index": 2,
+      "cweight_search": false,
+      "fixed_merging_weight_parameter": 0.0,
+      "horizontal_camera_center_position": -20.0,
+      "id": 46,
+      "inverse_depth_reference_indices": [
+        0
+      ],
+      "level": 6,
+      "minimum_inverse_depth": 3037,
+      "number_of_inverse_depth_references": 1,
+      "number_of_texture_references": 4,
+      "rate_inverse_depth": 0.0,
+      "rate_texture": 0.0,
+      "row_index": 1,
+      "sparse_filter_neighborhood_size": 0,
+      "sparse_filter_order": 0,
+      "texture_reference_indices": [
+        25,
+        13,
+        9,
+        26
+      ],
+      "vertical_camera_center_position": -30.0,
+      "view_merging_mode": 0
+    },
+    {
+      "column_index": 4,
+      "cweight_search": false,
+      "fixed_merging_weight_parameter": 0.0,
+      "horizontal_camera_center_position": 0.0,
+      "id": 47,
+      "inverse_depth_reference_indices": [
+        0
+      ],
+      "level": 6,
+      "minimum_inverse_depth": 3037,
+      "number_of_inverse_depth_references": 1,
+      "number_of_texture_references": 4,
+      "rate_inverse_depth": 0.0,
+      "rate_texture": 0.0,
+      "row_index": 1,
+      "sparse_filter_neighborhood_size": 0,
+      "sparse_filter_order": 0,
+      "texture_reference_indices": [
+        26,
+        2,
+        16,
+        27
+      ],
+      "vertical_camera_center_position": -30.0,
+      "view_merging_mode": 0
+    },
+    {
+      "column_index": 6,
+      "cweight_search": false,
+      "fixed_merging_weight_parameter": 0.0,
+      "horizontal_camera_center_position": 20.0,
+      "id": 48,
+      "inverse_depth_reference_indices": [
+        0
+      ],
+      "level": 6,
+      "minimum_inverse_depth": 3037,
+      "number_of_inverse_depth_references": 1,
+      "number_of_texture_references": 4,
+      "rate_inverse_depth": 0.0,
+      "rate_texture": 0.0,
+      "row_index": 1,
+      "sparse_filter_neighborhood_size": 0,
+      "sparse_filter_order": 0,
+      "texture_reference_indices": [
+        27,
+        14,
+        10,
+        28
+      ],
+      "vertical_camera_center_position": -30.0,
+      "view_merging_mode": 0
+    },
+    {
+      "column_index": 8,
+      "cweight_search": false,
+      "fixed_merging_weight_parameter": 0.0,
+      "horizontal_camera_center_position": 40.0,
+      "id": 49,
+      "inverse_depth_reference_indices": [
+        0
+      ],
+      "level": 6,
+      "minimum_inverse_depth": 3037,
+      "number_of_inverse_depth_references": 1,
+      "number_of_texture_references": 4,
+      "rate_inverse_depth": 0.0,
+      "rate_texture": 0.0,
+      "row_index": 1,
+      "sparse_filter_neighborhood_size": 0,
+      "sparse_filter_order": 0,
+      "texture_reference_indices": [
+        28,
+        3,
+        17,
+        14
+      ],
+      "vertical_camera_center_position": -30.0,
+      "view_merging_mode": 0
+    },
+    {
+      "column_index": 1,
+      "cweight_search": false,
+      "fixed_merging_weight_parameter": 0.0,
+      "horizontal_camera_center_position": -30.0,
+      "id": 50,
+      "inverse_depth_reference_indices": [
+        0
+      ],
+      "level": 6,
+      "minimum_inverse_depth": 3037,
+      "number_of_inverse_depth_references": 1,
+      "number_of_texture_references": 4,
+      "rate_inverse_depth": 0.0,
+      "rate_texture": 0.0,
+      "row_index": 2,
+      "sparse_filter_neighborhood_size": 0,
+      "sparse_filter_order": 0,
+      "texture_reference_indices": [
+        15,
+        25,
+        29,
+        9
+      ],
+      "vertical_camera_center_position": -20.0,
+      "view_merging_mode": 0
+    },
+    {
+      "column_index": 3,
+      "cweight_search": false,
+      "fixed_merging_weight_parameter": 0.0,
+      "horizontal_camera_center_position": -10.0,
+      "id": 51,
+      "inverse_depth_reference_indices": [
+        0
+      ],
+      "level": 6,
+      "minimum_inverse_depth": 3037,
+      "number_of_inverse_depth_references": 1,
+      "number_of_texture_references": 4,
+      "rate_inverse_depth": 0.0,
+      "rate_texture": 0.0,
+      "row_index": 2,
+      "sparse_filter_neighborhood_size": 0,
+      "sparse_filter_order": 0,
+      "texture_reference_indices": [
+        9,
+        26,
+        30,
+        16
+      ],
+      "vertical_camera_center_position": -20.0,
+      "view_merging_mode": 0
+    },
+    {
+      "column_index": 5,
+      "cweight_search": false,
+      "fixed_merging_weight_parameter": 0.0,
+      "horizontal_camera_center_position": 10.0,
+      "id": 52,
+      "inverse_depth_reference_indices": [
+        0
+      ],
+      "level": 6,
+      "minimum_inverse_depth": 3037,
+      "number_of_inverse_depth_references": 1,
+      "number_of_texture_references": 4,
+      "rate_inverse_depth": 0.0,
+      "rate_texture": 0.0,
+      "row_index": 2,
+      "sparse_filter_neighborhood_size": 0,
+      "sparse_filter_order": 0,
+      "texture_reference_indices": [
+        16,
+        27,
+        31,
+        10
+      ],
+      "vertical_camera_center_position": -20.0,
+      "view_merging_mode": 0
+    },
+    {
+      "column_index": 7,
+      "cweight_search": false,
+      "fixed_merging_weight_parameter": 0.0,
+      "horizontal_camera_center_position": 30.0,
+      "id": 53,
+      "inverse_depth_reference_indices": [
+        0
+      ],
+      "level": 6,
+      "minimum_inverse_depth": 3037,
+      "number_of_inverse_depth_references": 1,
+      "number_of_texture_references": 4,
+      "rate_inverse_depth": 0.0,
+      "rate_texture": 0.0,
+      "row_index": 2,
+      "sparse_filter_neighborhood_size": 0,
+      "sparse_filter_order": 0,
+      "texture_reference_indices": [
+        10,
+        28,
+        32,
+        17
+      ],
+      "vertical_camera_center_position": -20.0,
+      "view_merging_mode": 0
+    },
+    {
+      "column_index": 0,
+      "cweight_search": false,
+      "fixed_merging_weight_parameter": 0.0,
+      "horizontal_camera_center_position": -40.0,
+      "id": 54,
+      "inverse_depth_reference_indices": [
+        0
+      ],
+      "level": 6,
+      "minimum_inverse_depth": 3037,
+      "number_of_inverse_depth_references": 1,
+      "number_of_texture_references": 4,
+      "rate_inverse_depth": 0.0,
+      "rate_texture": 0.0,
+      "row_index": 3,
+      "sparse_filter_neighborhood_size": 0,
+      "sparse_filter_order": 0,
+      "texture_reference_indices": [
+        15,
+        4,
+        29,
+        25
+      ],
+      "vertical_camera_center_position": -8.618780136108398,
+      "view_merging_mode": 0
+    },
+    {
+      "column_index": 2,
+      "cweight_search": false,
+      "fixed_merging_weight_parameter": 0.0,
+      "horizontal_camera_center_position": -20.0,
+      "id": 55,
+      "inverse_depth_reference_indices": [
+        0
+      ],
+      "level": 6,
+      "minimum_inverse_depth": 3037,
+      "number_of_inverse_depth_references": 1,
+      "number_of_texture_references": 4,
+      "rate_inverse_depth": 0.0,
+      "rate_texture": 0.0,
+      "row_index": 3,
+      "sparse_filter_neighborhood_size": 0,
+      "sparse_filter_order": 0,
+      "texture_reference_indices": [
+        29,
+        9,
+        18,
+        30
+      ],
+      "vertical_camera_center_position": -10.0,
+      "view_merging_mode": 0
+    },
+    {
+      "column_index": 4,
+      "cweight_search": false,
+      "fixed_merging_weight_parameter": 0.0,
+      "horizontal_camera_center_position": 0.0,
+      "id": 56,
+      "inverse_depth_reference_indices": [
+        0
+      ],
+      "level": 6,
+      "minimum_inverse_depth": 3037,
+      "number_of_inverse_depth_references": 1,
+      "number_of_texture_references": 4,
+      "rate_inverse_depth": 0.0,
+      "rate_texture": 0.0,
+      "row_index": 3,
+      "sparse_filter_neighborhood_size": 0,
+      "sparse_filter_order": 0,
+      "texture_reference_indices": [
+        30,
+        16,
+        0,
+        31
+      ],
+      "vertical_camera_center_position": -10.0,
+      "view_merging_mode": 0
+    },
+    {
+      "column_index": 6,
+      "cweight_search": false,
+      "fixed_merging_weight_parameter": 0.0,
+      "horizontal_camera_center_position": 20.0,
+      "id": 57,
+      "inverse_depth_reference_indices": [
+        0
+      ],
+      "level": 6,
+      "minimum_inverse_depth": 3037,
+      "number_of_inverse_depth_references": 1,
+      "number_of_texture_references": 4,
+      "rate_inverse_depth": 0.0,
+      "rate_texture": 0.0,
+      "row_index": 3,
+      "sparse_filter_neighborhood_size": 0,
+      "sparse_filter_order": 0,
+      "texture_reference_indices": [
+        31,
+        10,
+        19,
+        32
+      ],
+      "vertical_camera_center_position": -10.0,
+      "view_merging_mode": 0
+    },
+    {
+      "column_index": 8,
+      "cweight_search": false,
+      "fixed_merging_weight_parameter": 0.0,
+      "horizontal_camera_center_position": 40.0,
+      "id": 58,
+      "inverse_depth_reference_indices": [
+        0
+      ],
+      "level": 6,
+      "minimum_inverse_depth": 3037,
+      "number_of_inverse_depth_references": 1,
+      "number_of_texture_references": 4,
+      "rate_inverse_depth": 0.0,
+      "rate_texture": 0.0,
+      "row_index": 3,
+      "sparse_filter_neighborhood_size": 0,
+      "sparse_filter_order": 0,
+      "texture_reference_indices": [
+        32,
+        17,
+        5,
+        10
+      ],
+      "vertical_camera_center_position": -8.333330154418945,
+      "view_merging_mode": 0
+    },
+    {
+      "column_index": 1,
+      "cweight_search": false,
+      "fixed_merging_weight_parameter": 0.0,
+      "horizontal_camera_center_position": -30.0,
+      "id": 59,
+      "inverse_depth_reference_indices": [
+        0
+      ],
+      "level": 6,
+      "minimum_inverse_depth": 3037,
+      "number_of_inverse_depth_references": 1,
+      "number_of_texture_references": 4,
+      "rate_inverse_depth": 0.0,
+      "rate_texture": 0.0,
+      "row_index": 4,
+      "sparse_filter_neighborhood_size": 0,
+      "sparse_filter_order": 0,
+      "texture_reference_indices": [
+        4,
+        29,
+        33,
+        18
+      ],
+      "vertical_camera_center_position": 0.0,
+      "view_merging_mode": 0
+    },
+    {
+      "column_index": 3,
+      "cweight_search": false,
+      "fixed_merging_weight_parameter": 0.0,
+      "horizontal_camera_center_position": -10.0,
+      "id": 60,
+      "inverse_depth_reference_indices": [
+        0
+      ],
+      "level": 6,
+      "minimum_inverse_depth": 3037,
+      "number_of_inverse_depth_references": 1,
+      "number_of_texture_references": 4,
+      "rate_inverse_depth": 0.0,
+      "rate_texture": 0.0,
+      "row_index": 4,
+      "sparse_filter_neighborhood_size": 0,
+      "sparse_filter_order": 0,
+      "texture_reference_indices": [
+        18,
+        30,
+        34,
+        0
+      ],
+      "vertical_camera_center_position": 0.0,
+      "view_merging_mode": 0
+    },
+    {
+      "column_index": 5,
+      "cweight_search": false,
+      "fixed_merging_weight_parameter": 0.0,
+      "horizontal_camera_center_position": 10.0,
+      "id": 61,
+      "inverse_depth_reference_indices": [
+        0
+      ],
+      "level": 6,
+      "minimum_inverse_depth": 3037,
+      "number_of_inverse_depth_references": 1,
+      "number_of_texture_references": 4,
+      "rate_inverse_depth": 0.0,
+      "rate_texture": 0.0,
+      "row_index": 4,
+      "sparse_filter_neighborhood_size": 0,
+      "sparse_filter_order": 0,
+      "texture_reference_indices": [
+        0,
+        31,
+        35,
+        19
+      ],
+      "vertical_camera_center_position": 0.0,
+      "view_merging_mode": 0
+    },
+    {
+      "column_index": 7,
+      "cweight_search": false,
+      "fixed_merging_weight_parameter": 0.0,
+      "horizontal_camera_center_position": 30.0,
+      "id": 62,
+      "inverse_depth_reference_indices": [
+        0
+      ],
+      "level": 6,
+      "minimum_inverse_depth": 3037,
+      "number_of_inverse_depth_references": 1,
+      "number_of_texture_references": 4,
+      "rate_inverse_depth": 0.0,
+      "rate_texture": 0.0,
+      "row_index": 4,
+      "sparse_filter_neighborhood_size": 0,
+      "sparse_filter_order": 0,
+      "texture_reference_indices": [
+        19,
+        32,
+        36,
+        5
+      ],
+      "vertical_camera_center_position": 0.0,
+      "view_merging_mode": 0
+    },
+    {
+      "column_index": 0,
+      "cweight_search": false,
+      "fixed_merging_weight_parameter": 0.0,
+      "horizontal_camera_center_position": -40.0,
+      "id": 63,
+      "inverse_depth_reference_indices": [
+        0
+      ],
+      "level": 6,
+      "minimum_inverse_depth": 3037,
+      "number_of_inverse_depth_references": 1,
+      "number_of_texture_references": 4,
+      "rate_inverse_depth": 0.0,
+      "rate_texture": 0.0,
+      "row_index": 5,
+      "sparse_filter_neighborhood_size": 0,
+      "sparse_filter_order": 0,
+      "texture_reference_indices": [
+        4,
+        20,
+        33,
+        29
+      ],
+      "vertical_camera_center_position": 8.333330154418945,
+      "view_merging_mode": 0
+    },
+    {
+      "column_index": 2,
+      "cweight_search": false,
+      "fixed_merging_weight_parameter": 0.0,
+      "horizontal_camera_center_position": -20.0,
+      "id": 64,
+      "inverse_depth_reference_indices": [
+        0
+      ],
+      "level": 6,
+      "minimum_inverse_depth": 3037,
+      "number_of_inverse_depth_references": 1,
+      "number_of_texture_references": 4,
+      "rate_inverse_depth": 0.0,
+      "rate_texture": 0.0,
+      "row_index": 5,
+      "sparse_filter_neighborhood_size": 0,
+      "sparse_filter_order": 0,
+      "texture_reference_indices": [
+        33,
+        18,
+        11,
+        34
+      ],
+      "vertical_camera_center_position": 10.0,
+      "view_merging_mode": 0
+    },
+    {
+      "column_index": 4,
+      "cweight_search": false,
+      "fixed_merging_weight_parameter": 0.0,
+      "horizontal_camera_center_position": 0.0,
+      "id": 65,
+      "inverse_depth_reference_indices": [
+        0
+      ],
+      "level": 6,
+      "minimum_inverse_depth": 3037,
+      "number_of_inverse_depth_references": 1,
+      "number_of_texture_references": 4,
+      "rate_inverse_depth": 0.0,
+      "rate_texture": 0.0,
+      "row_index": 5,
+      "sparse_filter_neighborhood_size": 0,
+      "sparse_filter_order": 0,
+      "texture_reference_indices": [
+        34,
+        0,
+        21,
+        35
+      ],
+      "vertical_camera_center_position": 10.0,
+      "view_merging_mode": 0
+    },
+    {
+      "column_index": 6,
+      "cweight_search": false,
+      "fixed_merging_weight_parameter": 0.0,
+      "horizontal_camera_center_position": 20.0,
+      "id": 66,
+      "inverse_depth_reference_indices": [
+        0
+      ],
+      "level": 6,
+      "minimum_inverse_depth": 3037,
+      "number_of_inverse_depth_references": 1,
+      "number_of_texture_references": 4,
+      "rate_inverse_depth": 0.0,
+      "rate_texture": 0.0,
+      "row_index": 5,
+      "sparse_filter_neighborhood_size": 0,
+      "sparse_filter_order": 0,
+      "texture_reference_indices": [
+        35,
+        19,
+        12,
+        36
+      ],
+      "vertical_camera_center_position": 9.879429817199707,
+      "view_merging_mode": 0
+    },
+    {
+      "column_index": 8,
+      "cweight_search": false,
+      "fixed_merging_weight_parameter": 0.0,
+      "horizontal_camera_center_position": 40.0,
+      "id": 67,
+      "inverse_depth_reference_indices": [
+        0
+      ],
+      "level": 6,
+      "minimum_inverse_depth": 3037,
+      "number_of_inverse_depth_references": 1,
+      "number_of_texture_references": 4,
+      "rate_inverse_depth": 0.0,
+      "rate_texture": 0.0,
+      "row_index": 5,
+      "sparse_filter_neighborhood_size": 0,
+      "sparse_filter_order": 0,
+      "texture_reference_indices": [
+        36,
+        5,
+        22,
+        19
+      ],
+      "vertical_camera_center_position": 8.62069034576416,
+      "view_merging_mode": 0
+    },
+    {
+      "column_index": 1,
+      "cweight_search": false,
+      "fixed_merging_weight_parameter": 0.0,
+      "horizontal_camera_center_position": -30.0,
+      "id": 68,
+      "inverse_depth_reference_indices": [
+        0
+      ],
+      "level": 6,
+      "minimum_inverse_depth": 3037,
+      "number_of_inverse_depth_references": 1,
+      "number_of_texture_references": 4,
+      "rate_inverse_depth": 0.0,
+      "rate_texture": 0.0,
+      "row_index": 6,
+      "sparse_filter_neighborhood_size": 0,
+      "sparse_filter_order": 0,
+      "texture_reference_indices": [
+        20,
+        33,
+        37,
+        11
+      ],
+      "vertical_camera_center_position": 20.0,
+      "view_merging_mode": 0
+    },
+    {
+      "column_index": 3,
+      "cweight_search": false,
+      "fixed_merging_weight_parameter": 0.0,
+      "horizontal_camera_center_position": -10.0,
+      "id": 69,
+      "inverse_depth_reference_indices": [
+        0
+      ],
+      "level": 6,
+      "minimum_inverse_depth": 3037,
+      "number_of_inverse_depth_references": 1,
+      "number_of_texture_references": 4,
+      "rate_inverse_depth": 0.0,
+      "rate_texture": 0.0,
+      "row_index": 6,
+      "sparse_filter_neighborhood_size": 0,
+      "sparse_filter_order": 0,
+      "texture_reference_indices": [
+        11,
+        34,
+        38,
+        21
+      ],
+      "vertical_camera_center_position": 20.0,
+      "view_merging_mode": 0
+    },
+    {
+      "column_index": 5,
+      "cweight_search": false,
+      "fixed_merging_weight_parameter": 0.0,
+      "horizontal_camera_center_position": 10.0,
+      "id": 70,
+      "inverse_depth_reference_indices": [
+        0
+      ],
+      "level": 6,
+      "minimum_inverse_depth": 3037,
+      "number_of_inverse_depth_references": 1,
+      "number_of_texture_references": 4,
+      "rate_inverse_depth": 0.0,
+      "rate_texture": 0.0,
+      "row_index": 6,
+      "sparse_filter_neighborhood_size": 0,
+      "sparse_filter_order": 0,
+      "texture_reference_indices": [
+        21,
+        35,
+        39,
+        12
+      ],
+      "vertical_camera_center_position": 20.0,
+      "view_merging_mode": 0
+    },
+    {
+      "column_index": 7,
+      "cweight_search": false,
+      "fixed_merging_weight_parameter": 0.0,
+      "horizontal_camera_center_position": 30.0,
+      "id": 71,
+      "inverse_depth_reference_indices": [
+        0
+      ],
+      "level": 6,
+      "minimum_inverse_depth": 3037,
+      "number_of_inverse_depth_references": 1,
+      "number_of_texture_references": 4,
+      "rate_inverse_depth": 0.0,
+      "rate_texture": 0.0,
+      "row_index": 6,
+      "sparse_filter_neighborhood_size": 0,
+      "sparse_filter_order": 0,
+      "texture_reference_indices": [
+        12,
+        36,
+        40,
+        22
+      ],
+      "vertical_camera_center_position": 20.0,
+      "view_merging_mode": 0
+    },
+    {
+      "column_index": 0,
+      "cweight_search": false,
+      "fixed_merging_weight_parameter": 0.0,
+      "horizontal_camera_center_position": -40.0,
+      "id": 72,
+      "inverse_depth_reference_indices": [
+        0
+      ],
+      "level": 6,
+      "minimum_inverse_depth": 3037,
+      "number_of_inverse_depth_references": 1,
+      "number_of_texture_references": 4,
+      "rate_inverse_depth": 0.0,
+      "rate_texture": 0.0,
+      "row_index": 7,
+      "sparse_filter_neighborhood_size": 0,
+      "sparse_filter_order": 0,
+      "texture_reference_indices": [
+        20,
+        6,
+        37,
+        33
+      ],
+      "vertical_camera_center_position": 30.0,
+      "view_merging_mode": 0
+    },
+    {
+      "column_index": 2,
+      "cweight_search": false,
+      "fixed_merging_weight_parameter": 0.0,
+      "horizontal_camera_center_position": -20.0,
+      "id": 73,
+      "inverse_depth_reference_indices": [
+        0
+      ],
+      "level": 6,
+      "minimum_inverse_depth": 3037,
+      "number_of_inverse_depth_references": 1,
+      "number_of_texture_references": 4,
+      "rate_inverse_depth": 0.0,
+      "rate_texture": 0.0,
+      "row_index": 7,
+      "sparse_filter_neighborhood_size": 0,
+      "sparse_filter_order": 0,
+      "texture_reference_indices": [
+        37,
+        11,
+        23,
+        38
+      ],
+      "vertical_camera_center_position": 30.0,
+      "view_merging_mode": 0
+    },
+    {
+      "column_index": 4,
+      "cweight_search": false,
+      "fixed_merging_weight_parameter": 0.0,
+      "horizontal_camera_center_position": 0.0,
+      "id": 74,
+      "inverse_depth_reference_indices": [
+        0
+      ],
+      "level": 6,
+      "minimum_inverse_depth": 3037,
+      "number_of_inverse_depth_references": 1,
+      "number_of_texture_references": 4,
+      "rate_inverse_depth": 0.0,
+      "rate_texture": 0.0,
+      "row_index": 7,
+      "sparse_filter_neighborhood_size": 0,
+      "sparse_filter_order": 0,
+      "texture_reference_indices": [
+        38,
+        21,
+        7,
+        39
+      ],
+      "vertical_camera_center_position": 30.0,
+      "view_merging_mode": 0
+    },
+    {
+      "column_index": 6,
+      "cweight_search": false,
+      "fixed_merging_weight_parameter": 0.0,
+      "horizontal_camera_center_position": 20.0,
+      "id": 75,
+      "inverse_depth_reference_indices": [
+        0
+      ],
+      "level": 6,
+      "minimum_inverse_depth": 3037,
+      "number_of_inverse_depth_references": 1,
+      "number_of_texture_references": 4,
+      "rate_inverse_depth": 0.0,
+      "rate_texture": 0.0,
+      "row_index": 7,
+      "sparse_filter_neighborhood_size": 0,
+      "sparse_filter_order": 0,
+      "texture_reference_indices": [
+        39,
+        12,
+        24,
+        40
+      ],
+      "vertical_camera_center_position": 30.0,
+      "view_merging_mode": 0
+    },
+    {
+      "column_index": 8,
+      "cweight_search": false,
+      "fixed_merging_weight_parameter": 0.0,
+      "horizontal_camera_center_position": 40.0,
+      "id": 76,
+      "inverse_depth_reference_indices": [
+        0
+      ],
+      "level": 6,
+      "minimum_inverse_depth": 3037,
+      "number_of_inverse_depth_references": 1,
+      "number_of_texture_references": 4,
+      "rate_inverse_depth": 0.0,
+      "rate_texture": 0.0,
+      "row_index": 7,
+      "sparse_filter_neighborhood_size": 0,
+      "sparse_filter_order": 0,
+      "texture_reference_indices": [
+        40,
+        22,
+        8,
+        12
+      ],
+      "vertical_camera_center_position": 30.0,
+      "view_merging_mode": 0
+    },
+    {
+      "column_index": 1,
+      "cweight_search": false,
+      "fixed_merging_weight_parameter": 0.0,
+      "horizontal_camera_center_position": -30.0,
+      "id": 77,
+      "inverse_depth_reference_indices": [
+        0
+      ],
+      "level": 6,
+      "minimum_inverse_depth": 3037,
+      "number_of_inverse_depth_references": 1,
+      "number_of_texture_references": 4,
+      "rate_inverse_depth": 0.0,
+      "rate_texture": 0.0,
+      "row_index": 8,
+      "sparse_filter_neighborhood_size": 0,
+      "sparse_filter_order": 0,
+      "texture_reference_indices": [
+        6,
+        37,
+        23,
+        20
+      ],
+      "vertical_camera_center_position": 40.0,
+      "view_merging_mode": 0
+    },
+    {
+      "column_index": 3,
+      "cweight_search": false,
+      "fixed_merging_weight_parameter": 0.0,
+      "horizontal_camera_center_position": -10.0,
+      "id": 78,
+      "inverse_depth_reference_indices": [
+        0
+      ],
+      "level": 6,
+      "minimum_inverse_depth": 3037,
+      "number_of_inverse_depth_references": 1,
+      "number_of_texture_references": 4,
+      "rate_inverse_depth": 0.0,
+      "rate_texture": 0.0,
+      "row_index": 8,
+      "sparse_filter_neighborhood_size": 0,
+      "sparse_filter_order": 0,
+      "texture_reference_indices": [
+        23,
+        38,
+        7,
+        37
+      ],
+      "vertical_camera_center_position": 40.0,
+      "view_merging_mode": 0
+    },
+    {
+      "column_index": 5,
+      "cweight_search": false,
+      "fixed_merging_weight_parameter": 0.0,
+      "horizontal_camera_center_position": 10.0,
+      "id": 79,
+      "inverse_depth_reference_indices": [
+        0
+      ],
+      "level": 6,
+      "minimum_inverse_depth": 3037,
+      "number_of_inverse_depth_references": 1,
+      "number_of_texture_references": 4,
+      "rate_inverse_depth": 0.0,
+      "rate_texture": 0.0,
+      "row_index": 8,
+      "sparse_filter_neighborhood_size": 0,
+      "sparse_filter_order": 0,
+      "texture_reference_indices": [
+        7,
+        39,
+        24,
+        38
+      ],
+      "vertical_camera_center_position": 40.0,
+      "view_merging_mode": 0
+    },
+    {
+      "column_index": 7,
+      "cweight_search": false,
+      "fixed_merging_weight_parameter": 0.0,
+      "horizontal_camera_center_position": 30.0,
+      "id": 80,
+      "inverse_depth_reference_indices": [
+        0
+      ],
+      "level": 6,
+      "minimum_inverse_depth": 3037,
+      "number_of_inverse_depth_references": 1,
+      "number_of_texture_references": 4,
+      "rate_inverse_depth": 0.0,
+      "rate_texture": 0.0,
+      "row_index": 8,
+      "sparse_filter_neighborhood_size": 0,
+      "sparse_filter_order": 0,
+      "texture_reference_indices": [
+        24,
+        40,
+        8,
+        39
+      ],
+      "vertical_camera_center_position": 40.0,
+      "view_merging_mode": 0
+    }
+  ]
+}
