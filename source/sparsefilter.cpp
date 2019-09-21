@@ -261,10 +261,10 @@ spfilter getGlobalSparseFilter(
         sparse_filter.filter_coefficients.push_back(PredTheta0[ii]);
     }
 
-    for (int iu = 0; iu < MT; iu++) {
+    /*for (int iu = 0; iu < MT; iu++) {
         printf("\n\t%d", sparse_filter.regressor_indexes.at(iu));
         printf("\n\t%f", sparse_filter.filter_coefficients.at(iu));
-    }
+    }*/
 
     sparse_filter.Ms = Ms;
     sparse_filter.NNt = NNt;
