@@ -4,7 +4,7 @@
 *
 * Redistribution and use in source and binary forms, with or without
 * modification, are permitted provided that the following conditions are met :
-* 
+*
 * 1. Redistributions of source code must retain the above copyright notice, this
 * list of conditions and the following disclaimer.
 *
@@ -63,7 +63,7 @@ uint16_t *cropImage(
 }
 
 uint16_t *padArrayUint16_t(
-    const uint16_t *input_image, 
+    const uint16_t *input_image,
     const uint32_t nr,
     const uint32_t nc,
     const uint32_t NNt) {
@@ -161,7 +161,7 @@ spfilter getGlobalSparseFilter(
     //uint32_t Npp = ((nr - NNt * 2) / skipv + 1)*((nc - NNt * 2) / skipv + 1);
 
     int32_t Npp0 = (nr - NNt * 2) * (nc - NNt * 2);
-    int32_t Npp = static_cast<int32_t>( ceil( static_cast<float>( Npp0 / sub_sampling_factor) ));
+    int32_t Npp = static_cast<int32_t>(ceil(static_cast<float>(Npp0 / sub_sampling_factor)));
 
     double *AA0 = new double[Npp0 * MT]();
     double *Yd0 = new double[Npp0]();
@@ -173,7 +173,7 @@ spfilter getGlobalSparseFilter(
 
     int32_t iiu = 0;
 
-    double Q = static_cast<double>( (1 << BIT_DEPTH) - 1);
+    double Q = static_cast<double>((1 << BIT_DEPTH) - 1);
 
     for (uint32_t ir = NNt; ir < nr - NNt; ir++) {
         for (uint32_t ic = NNt; ic < nc - NNt; ic++) {
@@ -186,12 +186,12 @@ spfilter getGlobalSparseFilter(
                     /* get the desired Yd*/
                     if (dy == 0 && dx == 0) {
                         *(Yd0 + iiu) +=
-                            ((double) *(original_image + offset)) / Q;	
+                            ((double) *(original_image + offset)) / Q;
                     }
 
                     /* get the regressors */
-                    *(AA0 + iiu + ai * Npp0) += 
-                        ((double) *(input_image + offset)) / Q;	
+                    *(AA0 + iiu + ai * Npp0) +=
+                        ((double) *(input_image + offset)) / Q;
 
                     ai++;
                 }
@@ -285,7 +285,7 @@ void quantize_and_reorder_spfilter(
         sparsefilter_pair.push_back(tmp_sp);
     }
 
-    /*ascending sort based on regressor index 
+    /*ascending sort based on regressor index
     (e.g., integer between 1 and 50 since we have 50 regressors */
     sort(sparsefilter_pair.begin(),
         sparsefilter_pair.end());
@@ -299,23 +299,14 @@ void quantize_and_reorder_spfilter(
 
         sparse_filter.regressor_indexes.push_back(sparsefilter_pair.at(ii).first);
 
-        //if (sparsefilter_pair.at(ii).first < ((2 * sparse_filter.NNt + 1)*(2 * sparse_filter.NNt + 1)+1)){
 
-            int32_t quantized_coeff = static_cast<int32_t>(floor(sparsefilter_pair.at(ii).second * Q + 0.5));
+        int32_t quantized_coeff = static_cast<int32_t>(floor(sparsefilter_pair.at(ii).second * Q + 0.5));
 
-            quantized_coeff = quantized_coeff > (1 << 15) - 1 ? (1 << 15) - 1 : quantized_coeff;
-            quantized_coeff = quantized_coeff < -(1 << 15) ? -(1 << 15) : quantized_coeff;
+        quantized_coeff = quantized_coeff > (1 << 15) - 1 ? (1 << 15) - 1 : quantized_coeff;
+        quantized_coeff = quantized_coeff < -(1 << 15) ? -(1 << 15) : quantized_coeff;
 
-            sparse_filter.quantized_filter_coefficients.push_back(static_cast<int16_t>(quantized_coeff));
-      /*  }
-        else {
-            int32_t quantized_coeff = static_cast<int32_t>(floor(sparsefilter_pair.at(ii).second + 0.5));
+        sparse_filter.quantized_filter_coefficients.push_back(static_cast<int16_t>(quantized_coeff));
 
-            quantized_coeff = quantized_coeff >(1 << 15) - 1 ? (1 << 15) - 1 : quantized_coeff;
-            quantized_coeff = quantized_coeff < -(1 << 15) ? -(1 << 15) : quantized_coeff;
-
-            sparse_filter.quantized_filter_coefficients.push_back(static_cast<int16_t>(quantized_coeff));
-        }*/
 
     }
 
@@ -339,12 +330,9 @@ void dequantize_and_reorder_spfilter(
         double theta0 =
             static_cast<double>(sparse_filter.quantized_filter_coefficients.at(ii));
 
-        //if (sparse_filter.regressor_indexes.at(ii) < MT) {
-            sparse_filter.filter_coefficients.at(sparse_filter.regressor_indexes.at(ii)) = theta0 / Q;
-        //}
-        //else {
-        //    sparse_filter.filter_coefficients.at(sparse_filter.regressor_indexes.at(ii)) = theta0;
-        //}
+
+        sparse_filter.filter_coefficients.at(sparse_filter.regressor_indexes.at(ii)) = theta0 / Q;
+
 
     }
 }
@@ -410,7 +398,7 @@ spfilter getSP_FILTER_EIGEN(
     const double bias_term_value,
     const int32_t sub_sampling_factor) {
 
-    int32_t MT = (NNt * 2 + 1) * (NNt * 2 + 1) + 1; /* number of regressors */                                      
+    int32_t MT = (NNt * 2 + 1) * (NNt * 2 + 1) + 1; /* number of regressors */
 
     const int32_t skipv = sub_sampling_factor;
     const int32_t skiph = sub_sampling_factor;
@@ -460,7 +448,7 @@ spfilter getSP_FILTER_EIGEN(
 
     /* solve LS for (sparse) subset */
     Eigen::MatrixXf A_sp = Eigen::MatrixXf::Zero(Npp, Ms);
-    for (int jj = 0; jj<Ms; jj++) {
+    for (int jj = 0; jj < Ms; jj++) {
         for (int ii = 0; ii < Npp; ii++) {
             A_sp(ii, jj) = A(ii, sparse_subset.at(jj));
         }
@@ -500,7 +488,7 @@ spfilter getSP_FILTER_EIGEN(
         sparse_filter.filter_coefficients.push_back(X2_sp(0));
 
         int32_t iki = 0;
-        while (iki<Ms - 1) {
+        while (iki < Ms - 1) {
             /* PROBLEM  with zeros, what if sparse_subset.at(sparse_subset_2.at(0))==0*/
             if (iki == sparse_filter.regressor_indexes.back()) {
                 iki++;
