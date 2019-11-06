@@ -25,6 +25,7 @@
 */
 
 #include "ppm.hh"
+#include "fileaux.hh"
 
 #include <cstdio>
 #include <cstring>
@@ -140,6 +141,8 @@ bool aux_write16PGMPPM(
   uint16_t maxi = 0;
 
   FILE *filept;
+
+  aux_ensure_directory(filename);
 
   filept = fopen(filename, "wb");
 

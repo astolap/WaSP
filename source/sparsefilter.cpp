@@ -261,10 +261,10 @@ spfilter getGlobalSparseFilter(
         sparse_filter.filter_coefficients.push_back(PredTheta0[ii]);
     }
 
-    for (int iu = 0; iu < MT; iu++) {
-        printf("\n\t%d", sparse_filter.regressor_indexes.at(iu));
-        printf("\n\t%f", sparse_filter.filter_coefficients.at(iu));
-    }
+    //for (int iu = 0; iu < MT; iu++) {
+    //    printf("\n\t%d", sparse_filter.regressor_indexes.at(iu));
+    //    printf("\n\t%f", sparse_filter.filter_coefficients.at(iu));
+    //}
 
     sparse_filter.Ms = Ms;
     sparse_filter.NNt = NNt;
@@ -299,12 +299,23 @@ void quantize_and_reorder_spfilter(
 
         sparse_filter.regressor_indexes.push_back(sparsefilter_pair.at(ii).first);
 
-        int32_t quantized_coeff = static_cast<int32_t>(floor(sparsefilter_pair.at(ii).second * Q + 0.5));
+        //if (sparsefilter_pair.at(ii).first < ((2 * sparse_filter.NNt + 1)*(2 * sparse_filter.NNt + 1)+1)){
 
-        quantized_coeff = quantized_coeff > (1 << 15)-1 ? (1 << 15)-1 : quantized_coeff;
-        quantized_coeff = quantized_coeff < -(1 << 15) ? -(1 << 15) : quantized_coeff;
+            int32_t quantized_coeff = static_cast<int32_t>(floor(sparsefilter_pair.at(ii).second * Q + 0.5));
 
-        sparse_filter.quantized_filter_coefficients.push_back(static_cast<int16_t>(quantized_coeff));
+            quantized_coeff = quantized_coeff > (1 << 15) - 1 ? (1 << 15) - 1 : quantized_coeff;
+            quantized_coeff = quantized_coeff < -(1 << 15) ? -(1 << 15) : quantized_coeff;
+
+            sparse_filter.quantized_filter_coefficients.push_back(static_cast<int16_t>(quantized_coeff));
+      /*  }
+        else {
+            int32_t quantized_coeff = static_cast<int32_t>(floor(sparsefilter_pair.at(ii).second + 0.5));
+
+            quantized_coeff = quantized_coeff >(1 << 15) - 1 ? (1 << 15) - 1 : quantized_coeff;
+            quantized_coeff = quantized_coeff < -(1 << 15) ? -(1 << 15) : quantized_coeff;
+
+            sparse_filter.quantized_filter_coefficients.push_back(static_cast<int16_t>(quantized_coeff));
+        }*/
 
     }
 
@@ -328,7 +339,12 @@ void dequantize_and_reorder_spfilter(
         double theta0 =
             static_cast<double>(sparse_filter.quantized_filter_coefficients.at(ii));
 
-        sparse_filter.filter_coefficients.at(sparse_filter.regressor_indexes.at(ii)) = theta0 / Q;
+        //if (sparse_filter.regressor_indexes.at(ii) < MT) {
+            sparse_filter.filter_coefficients.at(sparse_filter.regressor_indexes.at(ii)) = theta0 / Q;
+        //}
+        //else {
+        //    sparse_filter.filter_coefficients.at(sparse_filter.regressor_indexes.at(ii)) = theta0;
+        //}
 
     }
 }

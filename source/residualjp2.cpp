@@ -154,6 +154,8 @@ void readResidualFromDisk(
 
   }
 
+  aux_ensure_directory(jp2_residual_path_jp2);
+
   FILE *jp2_res_file;
   jp2_res_file = fopen(jp2_residual_path_jp2, "wb");
   fwrite(jp2_residual, sizeof(uint8_t), n_bytes_JP2, jp2_res_file);
