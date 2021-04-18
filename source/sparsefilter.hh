@@ -30,7 +30,7 @@
 #include <vector>
 #include <cstdint>
 
-#include "Eigen\Dense"
+#include "Eigen/Dense"
 
 using std::int32_t;
 using std::uint32_t;
